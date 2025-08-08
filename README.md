@@ -1,6 +1,6 @@
 # ZapSign MCP Server
 
-A Model Context Protocol (MCP) server that exposes ZapSign API operations as callable tools for LLMs (e.g., Claude Desktop) or any MCP-compatible client.
+A Model Context Protocol (MCP) server that exposes ZapSign API operations as callable tools for LLMs (e.g., Claude Desktop or Cursor) or any MCP-compatible client.
 
 ## 🚦 Getting Started
 
@@ -16,6 +16,35 @@ Note: Tools use the global `fetch` API available in Node v18+. If you must use a
 npm install
 ```
 
+### 📦 Use via npm (published package)
+If you prefer to use the published package `mcp-server-zapsign`:
+
+- Global install (stdio by default):
+```sh
+npm install -g mcp-server-zapsign
+mcp-server-zapsign
+```
+
+- Start in SSE mode (HTTP with Server-Sent Events):
+```sh
+mcp-server-zapsign --sse
+# defaults to port 3001; override with PORT
+PORT=4000 mcp-server-zapsign --sse
+```
+
+- Use without installing globally (via npx):
+```sh
+npx -y mcp-server-zapsign
+npx -y mcp-server-zapsign --sse
+```
+
+- Providing credentials via environment variables (useful for npx/global):
+```sh
+ZAPSIGN_WORKSPACE_API_KEY=your_token_here npx -y mcp-server-zapsign --sse
+```
+
+> Note: When using the global/npx binary, ensure `ZAPSIGN_WORKSPACE_API_KEY` is exported in your environment if a local `.env` is not present.
+
 ### 🔐 Configuration
 Create a `.env` file in the project root with your ZapSign API token:
 ```
@@ -24,9 +53,9 @@ ZAPSIGN_WORKSPACE_API_KEY=your_zapsign_api_token_here
 This value is read by the tools (for example, see files under `tools/zapsign-workspace/api/`) to authenticate requests against `https://api.zapsign.com.br`.
 
 ## ▶️ Running the MCP Server
-You can run the server in STDIO mode (for Claude Desktop and most MCP clients) or in SSE mode (HTTP with Server-Sent Events).
+You can run the server in STDIO mode (for Claude Desktop and Cursor, and most MCP clients) or in SSE mode (HTTP with Server-Sent Events).
 
-### STDIO (typical for Claude Desktop)
+### STDIO (typical for Claude Desktop and Cursor)
 Use absolute paths to ensure the correct Node version is used.
 
 1) Find your Node path and version:
@@ -36,7 +65,7 @@ node --version
 ```
 Ensure it is v18+.
 
-2) In Claude Desktop → Settings → Developers → Edit Config, add:
+2) In Claude Desktop → Settings → Developers → Edit Config, or in Cursor → Settings → Features → MCP Servers, add:
 ```json
 {
   "mcpServers": {
@@ -47,7 +76,22 @@ Ensure it is v18+.
   }
 }
 ```
-Restart Claude Desktop and enable the server. If tools do not appear, verify Node version and the `.env` configuration.
+Restart Claude Desktop or Cursor and enable the server. If tools do not appear, verify Node version and the `.env` configuration.
+
+Cursor (mcp.json alternative):
+```json
+{
+  "mcpServers": {
+    "zapsign-mcp": {
+      "command": "mcp-server-zapsign",
+      "args": []
+    },
+    "zapsign-mcp-sse": {
+      "url": "http://localhost:3001/sse"
+    }
+  }
+}
+```
 
 ### SSE (HTTP via Server-Sent Events)
 ```sh
@@ -61,7 +105,7 @@ A minimal Docker setup is included. Build and run:
 ```sh
 docker build -t zapsign-mcp .
 ```
-Claude Desktop (Edit Config):
+Claude Desktop / Cursor (Edit Config):
 ```json
 {
   "mcpServers": {
@@ -114,7 +158,7 @@ node index.js tools
 - Ensure any required environment variables are read from `.env`.
 
 ## ⚠️ Notes & Tips
-- If Claude Desktop or your MCP client cannot invoke tools, verify:
+- If Claude Desktop, Cursor, or your MCP client cannot invoke tools, verify:
   - Node is v18+ (for native `fetch`).
   - `.env` contains a valid `ZAPSIGN_WORKSPACE_API_KEY`.
   - The absolute paths in the client config are correct.
