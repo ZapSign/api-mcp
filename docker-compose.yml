@@ -29,9 +29,9 @@ services:
       - mcp-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME:-mcp.zapsign.com.br}`)"
-      - "traefik.http.routers.traefik.entrypoints=websecure"
-      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      # Traefik dashboard - only accessible via internal network for security
+      - "traefik.http.routers.traefik.rule=Host(`localhost`)"
+      - "traefik.http.routers.traefik.entrypoints=web"
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
 
   # Production MCP ZapSign Server
