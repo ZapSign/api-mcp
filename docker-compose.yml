@@ -22,7 +22,8 @@ services:
       - "8080:8080"  # Traefik dashboard (remove in production)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/letsencrypt:/letsencrypt
+      - ./traefik/letsencrypt:/letsencrypt:rw
+    user: "0:0"  # Run as root to avoid permission issues
     restart: unless-stopped
     networks:
       - mcp-network
