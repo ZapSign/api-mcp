@@ -8,9 +8,11 @@
  * @param {boolean} args.force_reprocess - Force reprocessing even if already processed (optional).
  * @returns {Promise<Object>} - The result of the reprocessing operation.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ document_token, webhook_tokens, reason, force_reprocess }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
 
   try {
     // Validate input

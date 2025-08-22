@@ -7,9 +7,11 @@
  * @param {string} [args.doc_token] - The token for the document.
  * @returns {Promise<Object>} - The result of the document upload.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ name, url_pdf, doc_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   const documentToken = doc_token || ''; // will be provided by the user
 
   try {

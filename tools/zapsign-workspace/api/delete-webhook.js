@@ -5,9 +5,11 @@
  * @param {string} args.webhook_id - The ID of the webhook to be deleted.
  * @returns {Promise<Object>} - The result of the delete webhook operation.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ webhook_id }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   try {
     // Construct the URL for the delete request
     const url = `${apiUrl}/api/v1/user/company/webhook/delete/`;

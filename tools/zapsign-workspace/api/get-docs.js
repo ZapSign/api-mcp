@@ -3,9 +3,11 @@
  *
  * @returns {Promise<Array>} - The list of documents from the API.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async () => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   try {
     // Set up the URL for the request
     const url = `${apiUrl}/api/v1/docs/`;

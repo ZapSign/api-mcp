@@ -5,9 +5,11 @@
  * @param {string} args.doc_token - The token of the document to be deleted.
  * @returns {Promise<Object>} - The result of the delete operation.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ doc_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   try {
     // Construct the URL for the delete request
     const url = `${apiUrl}/api/v1/docs/${doc_token}/`;

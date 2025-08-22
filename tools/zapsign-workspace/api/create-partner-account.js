@@ -11,9 +11,11 @@
  * @param {string} args.external_id - External identifier for the partner.
  * @returns {Promise<Object>} - The result of the partner account creation.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ name, email, phone, cpf, cnpj, company_name, external_id }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
 
   try {
     // Construct the request body

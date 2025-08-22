@@ -5,9 +5,11 @@
  * @param {number} [args.page=1] - The page number for pagination.
  * @returns {Promise<Array>} - The list of templates.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ page = 1 } = {}) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   try {
     // Construct the URL with query parameters
     const url = new URL(`${apiUrl}/api/v1/templates/`);

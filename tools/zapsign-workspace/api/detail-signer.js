@@ -5,9 +5,11 @@
  * @param {string} args.signer_token - The token of the signer whose details are to be retrieved.
  * @returns {Promise<Object>} - The result of the signer detail request.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ signer_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   try {
     // Construct the URL for the request
     const url = `${apiUrl}/api/v1/signers/${signer_token}/`;

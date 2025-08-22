@@ -9,9 +9,11 @@
  * @param {Array} [args.observers] - An array of observers for the document.
  * @returns {Promise<Object>} - The result of the document creation.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ name, url_pdf, signers, lang = 'pt-br', observers }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   // Note: docToken and signerToken are not used in this implementation
   // but kept for future use if needed
 

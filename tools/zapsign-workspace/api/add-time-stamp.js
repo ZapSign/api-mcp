@@ -5,9 +5,11 @@
  * @param {string} args.url - The URL of the document to be timestamped.
  * @returns {Promise<Object>} - The response from the Zapsign API after adding the time stamp.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ url }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   try {
     // Construct the request body
     const body = JSON.stringify({ url });

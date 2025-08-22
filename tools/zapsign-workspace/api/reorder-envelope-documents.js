@@ -6,9 +6,11 @@
  * @param {Array} args.documents_order - Array of document tokens in the desired order.
  * @returns {Promise<Object>} - The result of the reordering operation.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ envelope_token, documents_order }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
 
   try {
     // Validate input

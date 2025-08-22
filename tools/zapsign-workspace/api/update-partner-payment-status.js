@@ -9,9 +9,11 @@
  * @param {string} args.notes - Additional notes about the payment (optional).
  * @returns {Promise<Object>} - The result of the payment status update.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ partner_token, payment_status, payment_method, transaction_id, notes }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
 
   try {
     // Construct the request body

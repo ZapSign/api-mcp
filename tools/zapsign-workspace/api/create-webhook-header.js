@@ -5,9 +5,11 @@
  * @param {number} args.webhook_id - The ID of the webhook to create the header for.
  * @returns {Promise<Object>} - The result of the webhook header creation.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ webhook_id }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   try {
     // Construct the URL for the API request
     const url = `${apiUrl}/api/v1/user/company/webhook/header/`;

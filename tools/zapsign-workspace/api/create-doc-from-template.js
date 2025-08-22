@@ -10,9 +10,11 @@
  * @param {Array<Object>} args.data - An array of data objects for the document.
  * @returns {Promise<Object>} - The result of the document creation.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ template_id, signer_name, send_automatic_email = false, send_automatic_whatsapp = false, lang = 'pt-br', data }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   try {
     // Construct the request body
     const body = {

@@ -6,9 +6,11 @@
  * @param {Array<Object>} args.data - An array of objects containing the data to be filled in the document.
  * @returns {Promise<Object>} - The result of the document upload operation.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ template_id, data }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   const docToken = ''; // will be provided by the user
 
   try {

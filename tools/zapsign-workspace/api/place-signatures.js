@@ -6,9 +6,11 @@
  * @param {string} args.doc_token - The token of the document to place signatures on.
  * @returns {Promise<Object>} - The result of the signature placement.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ rubricas, doc_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const apiToken = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const apiToken = authService.getApiKey();
   try {
     // Construct the URL for the API request
     const url = `${apiUrl}/api/v1/docs/${doc_token}/place-signatures/`;

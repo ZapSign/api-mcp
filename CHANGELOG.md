@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.1] - 2024-12-28
 
 ### Changed
-- **BREAKING CHANGE**: Merged `ZAPSIGN_API_KEY` and `ZAPSIGN_WORKSPACE_API_KEY` into single `ZAPSIGN_API_KEY` configuration
+- **BREAKING CHANGE**: Simplified authentication configuration to use single `ZAPSIGN_API_KEY`
 - Simplified authentication configuration - now only requires one API key
 - Updated all tools to use centralized authentication service
 - Removed dual API key complexity from configuration and documentation

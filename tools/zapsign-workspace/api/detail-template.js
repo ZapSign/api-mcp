@@ -5,9 +5,11 @@
  * @param {string} args.template_token - The token of the template to retrieve details for.
  * @returns {Promise<Object>} - The result of the template detail request.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ template_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const apiToken = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const apiToken = authService.getApiKey();
   try {
     // Construct the URL for the request
     const url = `${apiUrl}/api/v1/templates/${template_token}`;

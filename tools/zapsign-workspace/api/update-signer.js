@@ -6,9 +6,11 @@
  * @param {string} args.name - The new name for the signer.
  * @returns {Promise<Object>} - The result of the update operation.
  */
+import authService from '../../../lib/services/auth.js';
+
 const executeFunction = async ({ signer_token, name }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   try {
     // Construct the URL for the update request
     const url = `${apiUrl}/api/v1/signers/${signer_token}/`;
