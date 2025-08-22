@@ -116,13 +116,13 @@ chmod +x setup-traefik.sh
 ./setup-traefik.sh
 
 # Start with Traefik (automatic SSL)
-docker-compose -f docker-compose.traefik.yml up -d
+docker-compose up -d
 ```
 
-### Alternative: Basic Docker Compose
+### Alternative: Development Setup
 ```bash
-# Start with basic Docker Compose (no SSL)
-docker-compose up -d
+# Start with development Docker Compose (no SSL)
+docker-compose -f docker-compose.dev.yml up -d
 ```
 
 ### Legacy: Nginx + Certbot Setup
@@ -136,9 +136,8 @@ chmod +x nginx/setup-ssl.sh
 ```
 
 ### Docker Compose Files
-- **`docker-compose.yml`**: Development and testing setup
-- **`docker-compose.traefik.yml`**: **Production with Traefik (automatic SSL)**
-- **`docker-compose.prod.yml`**: Legacy production with Nginx + Certbot
+- **`docker-compose.yml`**: **Production with Traefik (automatic SSL)**
+- **`docker-compose.dev.yml`**: Development and testing setup
 - **`nginx/`**: Nginx configuration for manual HTTPS setup
 - **`nginx/setup-ssl.sh`**: Manual SSL certificate setup script
 
