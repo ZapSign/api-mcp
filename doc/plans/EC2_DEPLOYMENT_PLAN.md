@@ -37,10 +37,9 @@ sudo usermod -aG docker $USER
 # Install Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
-rm get-docker.sh
 
-# Logout and login again for group changes to take effect
-exit
+# Clean up temporary script
+rm get-docker.sh
 # SSH back into your instance
 ```
 
@@ -49,7 +48,7 @@ exit
 ### Clone and Setup
 ```bash
 # Clone your repository
-git clone <your-repo-url>
+git clone https://github.com/ZapSign/api-mcp.git
 cd mcp-api-server
 
 # Copy environment file
