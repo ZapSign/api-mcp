@@ -43,7 +43,7 @@ export function registerToolsCommand (program) {
               console.log(
                 `      Description: ${description || 'No description provided'}`,
               );
-              if (parameters?.properties) {
+              if (parameters && parameters.properties) {
                 console.log('      Parameters:');
                 Object.entries(parameters.properties).forEach(
                   ([name, details]) => {

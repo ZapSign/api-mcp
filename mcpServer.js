@@ -33,7 +33,7 @@ const config = getConfig();
 function transformTools (tools) {
   return tools
     .map((tool) => {
-      const definitionFunction = tool.definition?.function;
+      const definitionFunction = tool.definition && tool.definition.function;
       if (!definitionFunction) {return;}
       return {
         name: definitionFunction.name,
@@ -68,7 +68,7 @@ function setupServerHandlers (server, tools) {
     }
 
     // Validate required parameters
-    const requiredParameters = tool.definition?.function?.parameters?.required || [];
+    const requiredParameters = (tool.definition && tool.definition.function && tool.definition.function.parameters && tool.definition.function.parameters.required) || [];
     const missingParameters = requiredParameters.filter(param => !(param in args));
 
     if (missingParameters.length > 0) {
