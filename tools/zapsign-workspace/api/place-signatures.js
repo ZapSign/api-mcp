@@ -7,6 +7,7 @@
  * @returns {Promise<Object>} - The result of the signature placement.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ rubricas, doc_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -41,7 +42,7 @@ const executeFunction = async ({ rubricas, doc_token }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error placing signatures:', error);
+    logger.error('Error placing signatures:', error);
     return { error: 'An error occurred while placing signatures.' };
   }
 };

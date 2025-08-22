@@ -1,4 +1,5 @@
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 /**
  * Function to create a document from an uploaded PDF using the Zapsign API.
@@ -58,7 +59,7 @@ const executeFunction = async ({ name, url_pdf, signers, lang = 'pt-br', observe
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error creating document:', error);
+    logger.error('Error creating document:', error);
     return { error: 'An error occurred while creating the document.' };
   }
 };

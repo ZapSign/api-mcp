@@ -1,4 +1,5 @@
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 /**
  * Function to create a document from an uploaded DOCX file using the Zapsign API.
@@ -45,7 +46,7 @@ const executeFunction = async ({ name, url_docx, signers, lang = 'pt-br', disabl
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error creating document:', error);
+    logger.error('Error creating document:', error);
     return { error: 'An error occurred while creating the document.' };
   }
 };

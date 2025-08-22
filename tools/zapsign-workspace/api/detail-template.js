@@ -6,6 +6,7 @@
  * @returns {Promise<Object>} - The result of the template detail request.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ template_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -35,7 +36,7 @@ const executeFunction = async ({ template_token }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error retrieving template details:', error);
+    logger.error('Error retrieving template details:', error);
     return { error: 'An error occurred while retrieving template details.' };
   }
 };

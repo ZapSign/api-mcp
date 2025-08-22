@@ -6,6 +6,7 @@
  * @returns {Promise<Object>} - The result of the delete webhook operation.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ webhook_id }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -39,7 +40,7 @@ const executeFunction = async ({ webhook_id }) => {
     // Parse and return the response data
     return await response.json();
   } catch (error) {
-    console.error('Error deleting webhook:', error);
+    logger.error('Error deleting webhook:', error);
     return { error: 'An error occurred while deleting the webhook.' };
   }
 };

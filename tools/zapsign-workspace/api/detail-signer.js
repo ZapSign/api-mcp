@@ -6,6 +6,7 @@
  * @returns {Promise<Object>} - The result of the signer detail request.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ signer_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -35,7 +36,7 @@ const executeFunction = async ({ signer_token }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error retrieving signer details:', error);
+    logger.error('Error retrieving signer details:', error);
     return { error: 'An error occurred while retrieving signer details.' };
   }
 };

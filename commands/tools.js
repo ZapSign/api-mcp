@@ -1,4 +1,5 @@
 import { discoverTools } from '../lib/tools.js';
+import { logger } from '../lib/logger.js';
 
 export function registerToolsCommand (program) {
   program
@@ -7,12 +8,12 @@ export function registerToolsCommand (program) {
     .action(async () => {
       const tools = await discoverTools();
       if (tools.length === 0) {
-        console.log('No tools found. Tools should be organized as:');
-        console.log('tools/workspace/collection/request.js\n');
+        logger.info('No tools found. Tools should be organized as:');
+        logger.info('tools/workspace/collection/request.js\n');
         return;
       }
 
-      console.log('\nAvailable Tools:\n');
+      logger.info('\nAvailable Tools:\n');
 
       // Group tools by workspace/collection
       const groupedTools = tools.reduce((acc, tool) => {
@@ -30,24 +31,24 @@ export function registerToolsCommand (program) {
 
       // Print tools in a hierarchical structure
       for (const [workspace, collections] of Object.entries(groupedTools)) {
-        console.log(`Workspace: ${workspace}`);
+        logger.info(`Workspace: ${workspace}`);
         for (const [collection, tools] of Object.entries(collections)) {
-          console.log(`  Collection: ${collection}`);
+          logger.info(`  Collection: ${collection}`);
           tools.forEach(
             ({
               definition: {
                 function: { name, description, parameters },
               },
             }) => {
-              console.log(`    ${name}`);
-              console.log(
+              logger.info(`    ${name}`);
+              logger.info(
                 `      Description: ${description || 'No description provided'}`,
               );
               if (parameters && parameters.properties) {
-                console.log('      Parameters:');
+                logger.info('      Parameters:');
                 Object.entries(parameters.properties).forEach(
                   ([name, details]) => {
-                    console.log(
+                    logger.info(
                       `        - ${name}: ${
                         details.description || 'No description'
                       }`,
@@ -55,11 +56,11 @@ export function registerToolsCommand (program) {
                   },
                 );
               }
-              console.log('');
+              logger.info('');
             },
           );
         }
-        console.log('');
+        logger.info('');
       }
     });
 }

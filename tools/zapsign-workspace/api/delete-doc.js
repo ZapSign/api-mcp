@@ -6,6 +6,7 @@
  * @returns {Promise<Object>} - The result of the delete operation.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ doc_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -34,7 +35,7 @@ const executeFunction = async ({ doc_token }) => {
     // Return success response
     return { message: 'Document deleted successfully.' };
   } catch (error) {
-    console.error('Error deleting document:', error);
+    logger.error('Error deleting document:', error);
     return { error: 'An error occurred while deleting the document.' };
   }
 };

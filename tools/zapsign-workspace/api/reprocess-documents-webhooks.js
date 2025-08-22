@@ -9,6 +9,7 @@
  * @returns {Promise<Object>} - The result of the reprocessing operation.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ document_token, webhook_tokens, reason, force_reprocess }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -55,7 +56,7 @@ const executeFunction = async ({ document_token, webhook_tokens, reason, force_r
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error reprocessing documents and webhooks:', error);
+    logger.error('Error reprocessing documents and webhooks:', error);
     return { error: 'An error occurred while reprocessing documents and webhooks.' };
   }
 };

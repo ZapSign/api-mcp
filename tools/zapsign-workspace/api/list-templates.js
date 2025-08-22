@@ -6,6 +6,7 @@
  * @returns {Promise<Array>} - The list of templates.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ page = 1 } = {}) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -36,7 +37,7 @@ const executeFunction = async ({ page = 1 } = {}) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error listing templates:', error);
+    logger.error('Error listing templates:', error);
     return { error: 'An error occurred while listing templates.' };
   }
 };

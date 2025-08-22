@@ -10,6 +10,7 @@
  * @returns {Promise<Object>} - The result of the payment status update.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ partner_token, payment_status, payment_method, transaction_id, notes }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -51,7 +52,7 @@ const executeFunction = async ({ partner_token, payment_status, payment_method, 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error updating partner payment status:', error);
+    logger.error('Error updating partner payment status:', error);
     return { error: 'An error occurred while updating the partner payment status.' };
   }
 };

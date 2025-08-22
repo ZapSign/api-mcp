@@ -4,6 +4,7 @@
  * @returns {Promise<Array>} - The list of documents from the API.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async () => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -33,7 +34,7 @@ const executeFunction = async () => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error getting documents:', error);
+    logger.error('Error getting documents:', error);
     return { error: 'An error occurred while getting documents.' };
   }
 };

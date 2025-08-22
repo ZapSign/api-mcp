@@ -1,4 +1,5 @@
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 /**
  * Function to create a webhook in Zapsign.
@@ -42,7 +43,7 @@ const executeFunction = async ({ url, type, headers = [] }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error creating webhook:', error);
+    logger.error('Error creating webhook:', error);
     return { error: 'An error occurred while creating the webhook.' };
   }
 };

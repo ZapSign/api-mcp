@@ -7,6 +7,7 @@
  * @returns {Promise<Object>} - The result of the update operation.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ signer_token, name }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -45,7 +46,7 @@ const executeFunction = async ({ signer_token, name }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error updating signer:', error);
+    logger.error('Error updating signer:', error);
     return { error: 'An error occurred while updating the signer.' };
   }
 };

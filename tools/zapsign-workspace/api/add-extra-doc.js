@@ -8,6 +8,7 @@
  * @returns {Promise<Object>} - The result of the document upload.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ name, url_pdf, doc_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -47,7 +48,7 @@ const executeFunction = async ({ name, url_pdf, doc_token }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error adding extra document:', error);
+    logger.error('Error adding extra document:', error);
     return { error: 'An error occurred while adding the extra document.' };
   }
 };

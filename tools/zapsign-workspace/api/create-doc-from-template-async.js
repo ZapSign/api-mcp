@@ -12,6 +12,7 @@
  * @returns {Promise<Object>} - The result of the document creation request.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ template_id, signer_name, send_automatic_email = false, send_automatic_whatsapp = false, lang = 'pt-br', external_id = null, data }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -49,7 +50,7 @@ const executeFunction = async ({ template_id, signer_name, send_automatic_email 
     const dataResponse = await response.json();
     return dataResponse;
   } catch (error) {
-    console.error('Error creating document:', error);
+    logger.error('Error creating document:', error);
     return { error: 'An error occurred while creating the document.' };
   }
 };

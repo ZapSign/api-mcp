@@ -7,6 +7,7 @@
  * @returns {Promise<Object>} - The result of the reordering operation.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ envelope_token, documents_order }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -43,7 +44,7 @@ const executeFunction = async ({ envelope_token, documents_order }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error reordering envelope documents:', error);
+    logger.error('Error reordering envelope documents:', error);
     return { error: 'An error occurred while reordering the envelope documents.' };
   }
 };

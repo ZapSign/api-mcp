@@ -6,6 +6,7 @@
  * @returns {Promise<Object>} - The result of the delete operation.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ signer_to_remove_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -34,7 +35,7 @@ const executeFunction = async ({ signer_to_remove_token }) => {
     // Return the response data (if any)
     return await response.json();
   } catch (error) {
-    console.error('Error deleting signer:', error);
+    logger.error('Error deleting signer:', error);
     return { error: 'An error occurred while deleting the signer.' };
   }
 };

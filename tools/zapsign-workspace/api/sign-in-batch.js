@@ -1,4 +1,5 @@
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 /**
  * Function to sign in a batch using the Zapsign API.
@@ -44,7 +45,7 @@ const executeFunction = async ({ user_token, signer_tokens }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error signing in batch:', error);
+    logger.error('Error signing in batch:', error);
     return { error: 'An error occurred while signing in batch.' };
   }
 };

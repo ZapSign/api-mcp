@@ -6,6 +6,7 @@
  * @returns {Promise<Object>} - The details of the document.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ doc_token }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -35,7 +36,7 @@ const executeFunction = async ({ doc_token }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error retrieving document details:', error);
+    logger.error('Error retrieving document details:', error);
     return { error: 'An error occurred while retrieving document details.' };
   }
 };

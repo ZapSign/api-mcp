@@ -6,6 +6,7 @@
  * @returns {Promise<Object>} - The response from the Zapsign API after adding the time stamp.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ url }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -37,7 +38,7 @@ const executeFunction = async ({ url }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error adding time stamp:', error);
+    logger.error('Error adding time stamp:', error);
     return { error: 'An error occurred while adding the time stamp.' };
   }
 };

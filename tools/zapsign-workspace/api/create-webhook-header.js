@@ -6,6 +6,7 @@
  * @returns {Promise<Object>} - The result of the webhook header creation.
  */
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 const executeFunction = async ({ webhook_id }) => {
   const apiUrl = 'https://api.zapsign.com.br';
@@ -44,7 +45,7 @@ const executeFunction = async ({ webhook_id }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error creating webhook header:', error);
+    logger.error('Error creating webhook header:', error);
     return { error: 'An error occurred while creating the webhook header.' };
   }
 };

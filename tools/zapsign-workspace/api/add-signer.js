@@ -1,4 +1,5 @@
 import authService from '../../../lib/services/auth.js';
+import { logger } from '../../../lib/logger.js';
 
 /**
  * Function to add a signer to a document in Zapsign.
@@ -42,7 +43,7 @@ const executeFunction = async ({ doc_token, name }) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error adding signer:', error);
+    logger.error('Error adding signer:', error);
     return { error: 'An error occurred while adding the signer.' };
   }
 };
