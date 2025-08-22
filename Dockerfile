@@ -12,17 +12,17 @@ RUN apk add --no-cache \
 # Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies first (including dev dependencies for prepare script)
-RUN npm ci
+# Install ALL dependencies first (including dev dependencies) but skip prepare script
+RUN npm ci --ignore-scripts
 
-# Run the prepare script (linting)
+# Copy source code (needed for linting)
+COPY . .
+
+# Run linting manually after source code is available
 RUN npm run lint
 
 # Remove dev dependencies to keep production image lean
 RUN npm prune --production
-
-# Copy source code
-COPY . .
 
 # Create logs directory
 RUN mkdir -p logs && chmod 755 logs
