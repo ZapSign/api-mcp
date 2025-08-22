@@ -19,6 +19,10 @@ This guide will help you deploy the MCP ZapSign Server on AWS EC2 with HTTPS sup
    - SSH (22) - Your IP only
    - HTTP (80) - 0.0.0.0/0
    - HTTPS (443) - 0.0.0.0/0
+5. Access production EC2
+```bash
+ssh -i doc/mcp-server-zapsign.pem ubuntu@mcp.zapsign.com.br
+```
 
 ### Install Docker and Docker Compose
 ```bash
@@ -33,6 +37,7 @@ sudo usermod -aG docker $USER
 # Install Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
+rm get-docker.sh
 
 # Logout and login again for group changes to take effect
 exit
