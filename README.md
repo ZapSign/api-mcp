@@ -1,167 +1,331 @@
-# ZapSign MCP Server
+# MCP Server ZapSign
 
-A Model Context Protocol (MCP) server that exposes ZapSign API operations as callable tools for LLMs (e.g., Claude Desktop or Cursor) or any MCP-compatible client.
+A Model Context Protocol (MCP) server that provides comprehensive access to the ZapSign API for electronic document signing and management.
 
-## 🚦 Getting Started
+## Features
 
-### ⚙️ Prerequisites
-- Node.js v18+ (v20+ recommended)
-- npm
-- A ZapSign API token
+- **Complete ZapSign API Integration**: All ZapSign API operations available as MCP tools
+- **Document Management**: Create, update, delete, and manage documents
+- **Template Operations**: Work with document templates and forms
+- **Signer Management**: Add, update, and manage document signers
+- **Background Checks**: Perform person and company background checks
+- **Webhook Management**: Create and manage webhooks for real-time notifications
+- **Timestamp Services**: Add timestamps to documents
+- **Authentication**: Support for both main and workspace API keys
+- **Validation**: Comprehensive input validation using Zod schemas
+- **Logging**: Structured logging with Winston
+- **Health Monitoring**: Built-in health checks and monitoring
 
-Note: Tools use the global `fetch` API available in Node v18+. If you must use an older Node version, adapt tools to import `node-fetch` and add it as a dependency.
+## Prerequisites
 
-### 📥 Installation
-```sh
+- Node.js 18+ 
+- ZapSign API account and API keys
+- Access to ZapSign API documentation
+
+## Installation
+
+### From npm (Recommended)
+```bash
+npm install mcp-server-zapsign
+```
+
+### From source
+
+1. Clone the repository:
+```bash
+git clone https://github.com/ZapSign/api-mcp.git
+cd api-mcp
+```
+
+2. Install dependencies:
+```bash
 npm install
 ```
 
-### 📦 Use via npm (published package)
-If you prefer to use the published package `mcp-server-zapsign`:
-
-- Global install (stdio by default):
-```sh
-npm install -g mcp-server-zapsign
-mcp-server-zapsign
+3. Create environment configuration:
+```bash
+cp .env.example .env
 ```
 
-- Start in SSE mode (HTTP with Server-Sent Events):
-```sh
-mcp-server-zapsign --sse
-# defaults to port 3001; override with PORT
-PORT=4000 mcp-server-zapsign --sse
+4. Configure your environment variables in `.env`:
+```env
+# Server Configuration
+PORT=3001
+HOST=localhost
+NODE_ENV=development
+
+# Server Information
+SERVER_NAME=mcp-server-zapsign
+SERVER_VERSION=1.0.0
+
+# ZapSign API Configuration
+ZAPSIGN_API_KEY=your_zapsign_api_key_here
+ZAPSIGN_BASE_URL=https://api.zapsign.com.br
+ZAPSIGN_API_VERSION=v1
+
+# Logging Configuration
+LOG_LEVEL=info
+
+# Features Configuration
+ENABLE_METRICS=false
+ENABLE_RATE_LIMITING=true
+MAX_REQUESTS_PER_MINUTE=100
 ```
 
-- Use without installing globally (via npx):
-```sh
-npx -y mcp-server-zapsign
-npx -y mcp-server-zapsign --sse
+## Usage
+
+### Starting the Server
+
+#### STDIO Mode (Default)
+```bash
+npm start
 ```
 
-- Providing credentials via environment variables (useful for npx/global):
-```sh
-ZAPSIGN_WORKSPACE_API_KEY=your_token_here npx -y mcp-server-zapsign --sse
+#### SSE Mode (HTTP Server)
+```bash
+npm run start:sse
 ```
 
-> Note: When using the global/npx binary, ensure `ZAPSIGN_WORKSPACE_API_KEY` is exported in your environment if a local `.env` is not present.
-
-### 🔐 Configuration
-Create a `.env` file in the project root with your ZapSign API token:
+#### Development Mode
+```bash
+npm run dev
 ```
-ZAPSIGN_WORKSPACE_API_KEY=your_zapsign_api_token_here
+
+### Server Modes
+
+- **STDIO Mode**: Standard MCP server using stdin/stdout for communication
+- **SSE Mode**: HTTP server with Server-Sent Events for web-based MCP clients
+- **Health Check**: Available at `/health` endpoint when running in SSE mode
+
+## Available Tools
+
+### Document Operations
+- `create_document_from_upload` - Create document from uploaded file
+- `create_document_from_template` - Create document from template
+- `get_document_details` - Get document information
+- `list_documents` - List all documents
+- `update_document` - Update document properties
+- `delete_document` - Delete a document
+- `add_extra_document` - Add extra document to envelope
+- `place_signatures` - Position signatures on document
+
+### Template Operations
+- `list_templates` - List available templates
+- `get_template_details` - Get template information
+- `create_template` - Create new template
+- `update_template` - Update template properties
+- `delete_template` - Delete a template
+
+### Signer Operations
+- `add_signer` - Add signer to document
+- `update_signer` - Update signer information
+- `get_signer_details` - Get signer information
+- `delete_signer` - Remove signer from document
+- `sign_in_batch` - Batch signing operations
+
+### Background Check Operations
+- `create_person_background_check` - Check person background
+- `create_company_background_check` - Check company background
+- `get_background_check_status` - Get check status
+
+### Webhook Operations
+- `create_webhook` - Create webhook for notifications
+- `delete_webhook` - Remove webhook
+- `manage_webhook_headers` - Configure webhook headers
+
+### Timestamp Operations
+- `add_timestamp` - Add timestamp to document
+
+## API Documentation
+
+This server implements all ZapSign API endpoints as documented at:
+- [ZapSign API Documentation](https://docs.zapsign.com.br/)
+
+### Key API Features
+- **Authentication**: Bearer token authentication
+- **Rate Limiting**: Configurable request limits
+- **Error Handling**: Comprehensive error responses
+- **Validation**: Input validation using Zod schemas
+- **Logging**: Detailed request/response logging
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `PORT` | Server port | 3001 | No |
+| `HOST` | Server host | localhost | No |
+| `ZAPSIGN_API_KEY` | Main ZapSign API key | - | Yes |
+
+| `ZAPSIGN_BASE_URL` | ZapSign API base URL | https://api.zapsign.com.br | No |
+| `LOG_LEVEL` | Logging level | info | No |
+| `ENABLE_RATE_LIMITING` | Enable rate limiting | true | No |
+
+### Logging Levels
+- `error`: Only error messages
+- `warn`: Warning and error messages
+- `info`: Information, warning, and error messages
+- `debug`: All messages including debug information
+
+## Development
+
+### Project Structure
 ```
-This value is read by the tools (for example, see files under `tools/zapsign-workspace/api/`) to authenticate requests against `https://api.zapsign.com.br`.
-
-## ▶️ Running the MCP Server
-You can run the server in STDIO mode (for Claude Desktop and Cursor, and most MCP clients) or in SSE mode (HTTP with Server-Sent Events).
-
-### STDIO (typical for Claude Desktop and Cursor)
-Use absolute paths to ensure the correct Node version is used.
-
-1) Find your Node path and version:
-```sh
-which node
-node --version
+mcp-zapsign-server/
+├── lib/
+│   ├── config.js           # Configuration management
+│   ├── logger.js           # Logging infrastructure
+│   ├── tools.js            # Tool discovery
+│   └── services/
+│       ├── zapsignApi.js   # ZapSign API client
+│       ├── auth.js         # Authentication service
+│       └── validation.js   # Input validation
+├── tools/
+│   └── zapsign-workspace/
+│       └── api/            # Individual tool implementations
+├── mcpServer.js            # Main server file
+├── package.json
+└── README.md
 ```
-Ensure it is v18+.
 
-2) In Claude Desktop → Settings → Developers → Edit Config, or in Cursor → Settings → Features → MCP Servers, add:
-```json
-{
-  "mcpServers": {
-    "zapsign-mcp": {
-      "command": "/absolute/path/to/node",
-      "args": ["/absolute/path/to/mcpServer.js"]
+### Adding New Tools
+
+1. Create a new tool file in `tools/zapsign-workspace/api/`
+2. Follow the existing tool structure:
+```javascript
+const executeFunction = async (args) => {
+  // Tool implementation
+};
+
+const apiTool = {
+  function: executeFunction,
+  definition: {
+    type: 'function',
+    function: {
+      name: 'tool_name',
+      description: 'Tool description',
+      parameters: {
+        // Parameter schema
+      }
     }
   }
-}
-```
-Restart Claude Desktop or Cursor and enable the server. If tools do not appear, verify Node version and the `.env` configuration.
+};
 
-Cursor (mcp.json alternative):
-```json
-{
-  "mcpServers": {
-    "zapsign-mcp": {
-      "command": "mcp-server-zapsign",
-      "args": []
-    },
-    "zapsign-mcp-sse": {
-      "url": "http://localhost:3001/sse"
-    }
-  }
-}
+export { apiTool };
 ```
 
-### SSE (HTTP via Server-Sent Events)
-```sh
-node mcpServer.js --sse
-```
-- Defaults to port `3001` (override with `PORT`).
-- Endpoint: `GET /sse` to open an SSE session; `POST /messages?sessionId=...` for messages.
+3. Add the tool to `tools/paths.js`
 
-### 🐳 Docker
-A minimal Docker setup is included. Build and run:
-```sh
-docker build -t zapsign-mcp .
-```
-Claude Desktop / Cursor (Edit Config):
-```json
-{
-  "mcpServers": {
-    "zapsign-mcp": {
-      "command": "docker",
-      "args": ["run", "-i", "--rm", "--env-file=.env", "zapsign-mcp"]
-    }
-  }
-}
-```
-Put your variables in `.env` (e.g., `ZAPSIGN_WORKSPACE_API_KEY`).
+### Testing
 
-## 🧰 Available Tools (ZapSign)
-These tools are discovered from `tools/paths.js` and exposed to MCP clients:
+```bash
+# Run tests
+npm test
 
-- list_templates: List templates from the ZapSign API.
-- get_docs: Get documents from the ZapSign API.
-- delete_doc: Delete a document using the ZapSign API.
-- detail_doc: Retrieve details of a document from the ZapSign API.
-- delete_signer: Delete a signer from the API.
-- detail_template: Retrieve details of a specific template from ZapSign.
-- delete_webhook_header: Delete a webhook header.
-- add_time_stamp: Add a time stamp to a document using the ZapSign API.
-- create_webhook_header: Create a webhook header in the ZapSign API.
-- detail_siner: Retrieve details of a signer from the API.
-- add_signer: Add a signer to a document in ZapSign.
-- sign_in_batch: Sign in a batch using the ZapSign API.
-- delete_webhook: Delete a webhook from the ZapSign API.
-- place_signatures: Place signatures on a document using the ZapSign API.
-- update_siner: Update a signer in the ZapSign API.
-- add_extra_doc: Add an extra document to ZapSign.
-- add_extra_doc_from_template: Add an extra document from a template in ZapSign.
-- create_webhook: Create a webhook in ZapSign.
-- create_doc_from_upload_async: Create a document from an uploaded PDF asynchronously.
-- create_doc_from_template: Create a document from a template using the ZapSign API.
-- create_doc_from_upload: Create a document from an uploaded DOCX file.
-- create_doc_from_template_async: Create a document from a template asynchronously using the ZapSign API.
-- create_doc_from_upload_pdf: Create a document from an uploaded PDF.
+# Run with coverage
+npm run test:coverage
 
-You can also list tool names and schemas locally:
-```sh
-npm run list-tools
-# or
-node index.js tools
+# Run specific test file
+npm test -- --testNamePattern="Tool Name"
 ```
 
-## ➕ Adding or Updating Tools
-- Add a new tool module under `tools/zapsign-workspace/api/` following the existing pattern (`apiTool` export with a `function` and a `definition`).
-- Register the new file in `tools/paths.js` so it’s discovered by the server.
-- Ensure any required environment variables are read from `.env`.
+## Error Handling
 
-## ⚠️ Notes & Tips
-- If Claude Desktop, Cursor, or your MCP client cannot invoke tools, verify:
-  - Node is v18+ (for native `fetch`).
-  - `.env` contains a valid `ZAPSIGN_WORKSPACE_API_KEY`.
-  - The absolute paths in the client config are correct.
+The server provides comprehensive error handling:
 
-## 📄 License
-MIT
+- **Validation Errors**: Input validation failures with detailed messages
+- **API Errors**: ZapSign API errors with context information
+- **Authentication Errors**: Invalid or expired API keys
+- **Network Errors**: Connection and timeout issues
+- **Internal Errors**: Server-side processing errors
+
+## Monitoring and Health Checks
+
+### Health Endpoint
+When running in SSE mode, the server provides a health check endpoint:
+
+```bash
+curl http://localhost:3001/health
+```
+
+Response includes:
+- Server status
+- Authentication status
+- API health
+- Tool count
+- Timestamp
+
+### Logging
+All operations are logged with structured data:
+- Request/response logging
+- Error tracking
+- Performance metrics
+- Authentication events
+
+## Security Considerations
+
+- API keys are stored in environment variables
+- Input validation prevents malicious data
+- Rate limiting prevents abuse
+- Comprehensive error logging for security monitoring
+- No sensitive data in logs
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Authentication Failed**
+   - Verify API keys are correct
+   - Check API key permissions
+   - Ensure keys are not expired
+
+2. **Tool Not Found**
+   - Verify tool is properly exported
+   - Check tool is listed in `tools/paths.js`
+   - Restart server after adding new tools
+
+3. **API Errors**
+   - Check ZapSign API status
+   - Verify request parameters
+   - Check rate limits
+
+4. **Server Won't Start**
+   - Verify environment variables
+   - Check port availability
+   - Review error logs
+
+### Debug Mode
+
+Enable debug logging:
+```bash
+LOG_LEVEL=debug npm start
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Implement your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Support
+
+- **Documentation**: [ZapSign API Docs](https://docs.zapsign.com.br/)
+- **Issues**: [GitHub Issues](https://github.com/ZapSign/api-mcp/issues)
+- **Contact**: [ZapSign Support](mailto:support@zapsign.com.br)
+
+## Changelog
+
+### Version 1.0.0
+- Initial release
+- Complete ZapSign API integration
+- MCP protocol support
+- Comprehensive tool set
+- Authentication and validation
+- Logging and monitoring

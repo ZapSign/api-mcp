@@ -1,3 +1,5 @@
+import authService from '../../../lib/services/auth.js';
+
 /**
  * Function to add a signer to a document in Zapsign.
  *
@@ -8,7 +10,7 @@
  */
 const executeFunction = async ({ doc_token, name }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
 
   try {
     // Construct the URL for the API request
@@ -17,7 +19,7 @@ const executeFunction = async ({ doc_token, name }) => {
     // Set up headers for the request
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     };
 
     // Prepare the body of the request
@@ -27,7 +29,7 @@ const executeFunction = async ({ doc_token, name }) => {
     const response = await fetch(url, {
       method: 'POST',
       headers,
-      body
+      body,
     });
 
     // Check if the response was successful
@@ -61,17 +63,17 @@ const apiTool = {
         properties: {
           doc_token: {
             type: 'string',
-            description: 'The token of the document to which the signer will be added.'
+            description: 'The token of the document to which the signer will be added.',
           },
           name: {
             type: 'string',
-            description: 'The name of the signer to be added.'
-          }
+            description: 'The name of the signer to be added.',
+          },
         },
-        required: ['doc_token', 'name']
-      }
-    }
-  }
+        required: ['doc_token', 'name'],
+      },
+    },
+  },
 };
 
 export { apiTool };

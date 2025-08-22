@@ -19,20 +19,20 @@ const executeFunction = async ({ name, url_pdf, doc_token }) => {
     // Set up headers for the request
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     };
 
     // Prepare the body of the request
     const body = JSON.stringify({
       name,
-      url_pdf
+      url_pdf,
     });
 
     // Perform the fetch request
     const response = await fetch(url, {
       method: 'POST',
       headers,
-      body
+      body,
     });
 
     // Check if the response was successful
@@ -66,21 +66,21 @@ const apiTool = {
         properties: {
           name: {
             type: 'string',
-            description: 'The name of the extra document.'
+            description: 'The name of the extra document.',
           },
           url_pdf: {
             type: 'string',
-            description: 'The URL of the PDF document to upload.'
+            description: 'The URL of the PDF document to upload.',
           },
           doc_token: {
             type: 'string',
-            description: 'The token for the document.'
-          }
+            description: 'The token for the document.',
+          },
         },
-        required: ['name', 'url_pdf']
-      }
-    }
-  }
+        required: ['name', 'url_pdf'],
+      },
+    },
+  },
 };
 
 export { apiTool };

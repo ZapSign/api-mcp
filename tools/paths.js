@@ -21,5 +21,9 @@ export const toolPaths = [
   'zapsign-workspace/api/create-doc-from-template.js',
   'zapsign-workspace/api/create-doc-from-upload-docx.js',
   'zapsign-workspace/api/create-doc-from-template-async.js',
-  'zapsign-workspace/api/create-doc-from-upload-pdf.js'
+  'zapsign-workspace/api/create-doc-from-upload-pdf.js',
+  'zapsign-workspace/api/create-partner-account.js',
+  'zapsign-workspace/api/update-partner-payment-status.js',
+  'zapsign-workspace/api/reorder-envelope-documents.js',
+  'zapsign-workspace/api/reprocess-documents-webhooks.js',
 ];

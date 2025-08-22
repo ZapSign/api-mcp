@@ -1,3 +1,5 @@
+import authService from '../../../lib/services/auth.js';
+
 /**
  * Function to sign in a batch using the Zapsign API.
  *
@@ -8,7 +10,7 @@
  */
 const executeFunction = async ({ user_token, signer_tokens }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const apiToken = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const apiToken = authService.getApiKey();
   try {
     // Construct the URL for the sign-in request
     const url = `${apiUrl}/api/v1/sign/`;
@@ -16,20 +18,20 @@ const executeFunction = async ({ user_token, signer_tokens }) => {
     // Set up the request body
     const body = JSON.stringify({
       user_token,
-      signer_tokens
+      signer_tokens,
     });
 
     // Set up headers for the request
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiToken}`
+      'Authorization': `Bearer ${apiToken}`,
     };
 
     // Perform the fetch request
     const response = await fetch(url, {
       method: 'POST',
       headers,
-      body
+      body,
     });
 
     // Check if the response was successful
@@ -63,20 +65,20 @@ const apiTool = {
         properties: {
           user_token: {
             type: 'string',
-            description: 'The user token for authentication.'
+            description: 'The user token for authentication.',
           },
           signer_tokens: {
             type: 'array',
             items: {
-              type: 'string'
+              type: 'string',
             },
-            description: 'An array of signer tokens.'
-          }
+            description: 'An array of signer tokens.',
+          },
         },
-        required: ['user_token', 'signer_tokens']
-      }
-    }
-  }
+        required: ['user_token', 'signer_tokens'],
+      },
+    },
+  },
 };
 
 export { apiTool };

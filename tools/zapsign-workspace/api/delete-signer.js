@@ -14,13 +14,13 @@ const executeFunction = async ({ signer_to_remove_token }) => {
 
     // Set up headers for the request
     const headers = {
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     };
 
     // Perform the fetch request
     const response = await fetch(url, {
       method: 'DELETE',
-      headers
+      headers,
     });
 
     // Check if the response was successful
@@ -53,13 +53,13 @@ const apiTool = {
         properties: {
           signer_to_remove_token: {
             type: 'string',
-            description: 'The token of the signer to be removed.'
-          }
+            description: 'The token of the signer to be removed.',
+          },
         },
-        required: ['signer_to_remove_token']
-      }
-    }
-  }
+        required: ['signer_to_remove_token'],
+      },
+    },
+  },
 };
 
 export { apiTool };

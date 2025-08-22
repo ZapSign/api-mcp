@@ -12,13 +12,13 @@ const executeFunction = async () => {
 
     // Set up headers for the request
     const headers = {
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     };
 
     // Perform the fetch request
     const response = await fetch(url, {
       method: 'GET',
-      headers
+      headers,
     });
 
     // Check if the response was successful
@@ -50,10 +50,10 @@ const apiTool = {
       parameters: {
         type: 'object',
         properties: {},
-        required: []
-      }
-    }
-  }
+        required: [],
+      },
+    },
+  },
 };
 
 export { apiTool };

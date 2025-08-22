@@ -14,13 +14,13 @@ const executeFunction = async ({ signer_token }) => {
 
     // Set up headers for the request
     const headers = {
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     };
 
     // Perform the fetch request
     const response = await fetch(url, {
       method: 'GET',
-      headers
+      headers,
     });
 
     // Check if the response was successful
@@ -54,13 +54,13 @@ const apiTool = {
         properties: {
           signer_token: {
             type: 'string',
-            description: 'The token of the signer whose details are to be retrieved.'
-          }
+            description: 'The token of the signer whose details are to be retrieved.',
+          },
         },
-        required: ['signer_token']
-      }
-    }
-  }
+        required: ['signer_token'],
+      },
+    },
+  },
 };
 
 export { apiTool };

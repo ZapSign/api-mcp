@@ -15,14 +15,14 @@ const executeFunction = async ({ url }) => {
     // Set up headers for the request
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     };
 
     // Perform the fetch request
     const response = await fetch(`${apiUrl}/api/v1/timestamp/`, {
       method: 'POST',
       headers,
-      body
+      body,
     });
 
     // Check if the response was successful
@@ -56,13 +56,13 @@ const apiTool = {
         properties: {
           url: {
             type: 'string',
-            description: 'The URL of the document to be timestamped.'
-          }
+            description: 'The URL of the document to be timestamped.',
+          },
         },
-        required: ['url']
-      }
-    }
-  }
+        required: ['url'],
+      },
+    },
+  },
 };
 
 export { apiTool };

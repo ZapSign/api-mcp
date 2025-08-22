@@ -16,7 +16,7 @@ const executeFunction = async ({ rubricas, doc_token }) => {
     // Set up headers for the request
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiToken}`
+      'Authorization': `Bearer ${apiToken}`,
     };
 
     // Prepare the body of the request
@@ -26,7 +26,7 @@ const executeFunction = async ({ rubricas, doc_token }) => {
     const response = await fetch(url, {
       method: 'POST',
       headers,
-      body
+      body,
     });
 
     // Check if the response was successful
@@ -60,17 +60,17 @@ const apiTool = {
         properties: {
           rubricas: {
             type: 'array',
-            description: 'An array of signature definitions.'
+            description: 'An array of signature definitions.',
           },
           doc_token: {
             type: 'string',
-            description: 'The token of the document to place signatures on.'
-          }
+            description: 'The token of the document to place signatures on.',
+          },
         },
-        required: ['rubricas', 'doc_token']
-      }
-    }
-  }
+        required: ['rubricas', 'doc_token'],
+      },
+    },
+  },
 };
 
 export { apiTool };

@@ -1,3 +1,5 @@
+import authService from '../../../lib/services/auth.js';
+
 /**
  * Function to create a document from an uploaded PDF using the Zapsign API.
  *
@@ -11,9 +13,9 @@
  */
 const executeFunction = async ({ name, url_pdf, signers, lang = 'pt-br', observers = [] }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
-  const docToken = ''; // will be provided by the user
-  const signerToken = ''; // will be provided by the user
+  const token = authService.getApiKey();
+  // Note: docToken and signerToken are not used in this implementation
+  // but kept for future use if needed
 
   try {
     // Construct the request body
@@ -33,7 +35,7 @@ const executeFunction = async ({ name, url_pdf, signers, lang = 'pt-br', observe
       signature_order_active: false,
       reminder_every_n_days: 0,
       allow_refuse_signature: false,
-      disable_signers_get_original_file: false
+      disable_signers_get_original_file: false,
     };
 
     // Perform the fetch request
@@ -41,9 +43,9 @@ const executeFunction = async ({ name, url_pdf, signers, lang = 'pt-br', observe
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     // Check if the response was successful
@@ -77,11 +79,11 @@ const apiTool = {
         properties: {
           name: {
             type: 'string',
-            description: 'The name of the document.'
+            description: 'The name of the document.',
           },
           url_pdf: {
             type: 'string',
-            description: 'The URL of the PDF to upload.'
+            description: 'The URL of the PDF to upload.',
           },
           signers: {
             type: 'array',
@@ -90,58 +92,58 @@ const apiTool = {
               properties: {
                 name: {
                   type: 'string',
-                  description: 'The name of the signer.'
+                  description: 'The name of the signer.',
                 },
                 email: {
                   type: 'string',
-                  description: 'The email of the signer.'
+                  description: 'The email of the signer.',
                 },
                 auth_mode: {
                   type: 'string',
-                  description: 'The authentication mode for the signer.'
+                  description: 'The authentication mode for the signer.',
                 },
                 send_automatic_email: {
                   type: 'boolean',
-                  description: 'Whether to send an automatic email to the signer.'
+                  description: 'Whether to send an automatic email to the signer.',
                 },
                 phone_country: {
                   type: 'string',
-                  description: 'The country code for the signers phone number.'
+                  description: 'The country code for the signers phone number.',
                 },
                 phone_number: {
                   type: 'string',
-                  description: 'The phone number of the signer.'
+                  description: 'The phone number of the signer.',
                 },
                 require_selfie_photo: {
                   type: 'boolean',
-                  description: 'Whether a selfie photo is required.'
+                  description: 'Whether a selfie photo is required.',
                 },
                 require_document_photo: {
                   type: 'boolean',
-                  description: 'Whether a document photo is required.'
-                }
+                  description: 'Whether a document photo is required.',
+                },
               },
-              required: ['name']
+              required: ['name'],
             },
-            description: 'An array of signers for the document.'
+            description: 'An array of signers for the document.',
           },
           lang: {
             type: 'string',
-            description: 'The language for the document.'
+            description: 'The language for the document.',
           },
           observers: {
             type: 'array',
             items: {
               type: 'string',
-              description: 'An array of observer emails.'
+              description: 'An array of observer emails.',
             },
-            description: 'An array of observer emails.'
-          }
+            description: 'An array of observer emails.',
+          },
         },
-        required: ['name', 'url_pdf', 'signers']
-      }
-    }
-  }
+        required: ['name', 'url_pdf', 'signers'],
+      },
+    },
+  },
 };
 
 export { apiTool };

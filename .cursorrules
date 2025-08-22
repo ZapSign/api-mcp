@@ -1,0 +1,38 @@
+# Cursor Rules for MCP ZapSign Server Project
+
+## Terminal Command Execution
+- ALWAYS use WSL MCP executor for running terminal commands to avoid IDE hanging
+- Use `mcp_mcp-wsl-exec_execute_command` for shell commands instead of `run_terminal_cmd`
+- This prevents the IDE from hanging during long-running or complex commands
+
+## Project Structure
+- This is an MCP (Model Context Protocol) server project for ZapSign API integration
+- Uses ES modules (`"type": "module"` in package.json)
+- Node.js 18+ required
+- Jest testing framework with ES module support
+
+## Code Quality
+- Follow ESLint rules strictly
+- Use single quotes for strings
+- Add trailing commas where appropriate
+- Keep functions under 50 lines when possible
+- Add JSDoc comments for public functions
+
+## File Naming
+- Use exact names referenced in prompts
+- Respect folder structure when creating files
+- Create .sh scripts to create folders when needed
+
+## Testing
+- Run tests in background mode to avoid hanging
+- Use WSL MCP for npm commands and testing
+- Jest configuration is in `jest.config.cjs` for ES module compatibility
+
+## Docker
+- Use docker-compose-build.yml for local development
+- Run containerized commands via WSL MCP when possible
+
+## MCP Server
+- Supports both STDIO and SSE modes
+- All ZapSign API tools are implemented and operational
+- Health monitoring available at `/health` endpoint

@@ -1,3 +1,5 @@
+import authService from '../../../lib/services/auth.js';
+
 /**
  * Function to create a document from an uploaded DOCX file using the Zapsign API.
  *
@@ -12,14 +14,14 @@
  */
 const executeFunction = async ({ name, url_docx, signers, lang = 'pt-br', disable_signer_emails = false, observers = [] }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const token = authService.getApiKey();
   const payload = {
     name,
     url_docx,
     signers,
     lang,
     disable_signer_emails,
-    observers
+    observers,
   };
 
   try {
@@ -28,9 +30,9 @@ const executeFunction = async ({ name, url_docx, signers, lang = 'pt-br', disabl
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     // Check if the response was successful
@@ -64,11 +66,11 @@ const apiTool = {
         properties: {
           name: {
             type: 'string',
-            description: 'The name of the document.'
+            description: 'The name of the document.',
           },
           url_docx: {
             type: 'string',
-            description: 'The URL of the DOCX file to be uploaded.'
+            description: 'The URL of the DOCX file to be uploaded.',
           },
           signers: {
             type: 'array',
@@ -77,54 +79,54 @@ const apiTool = {
               properties: {
                 name: {
                   type: 'string',
-                  description: 'The name of the signer.'
+                  description: 'The name of the signer.',
                 },
                 email: {
                   type: 'string',
-                  description: 'The email of the signer.'
+                  description: 'The email of the signer.',
                 },
                 auth_mode: {
                   type: 'string',
-                  description: 'The authentication mode for the signer.'
+                  description: 'The authentication mode for the signer.',
                 },
                 send_automatic_email: {
                   type: 'boolean',
-                  description: 'Whether to send automatic email to the signer.'
+                  description: 'Whether to send automatic email to the signer.',
                 },
                 phone_country: {
                   type: 'string',
-                  description: 'The country prefix for the signers phone number.'
+                  description: 'The country prefix for the signers phone number.',
                 },
                 phone_number: {
                   type: 'string',
-                  description: 'The phone number of the signer.'
-                }
+                  description: 'The phone number of the signer.',
+                },
               },
-              required: ['name']
+              required: ['name'],
             },
-            description: 'An array of signers for the document.'
+            description: 'An array of signers for the document.',
           },
           lang: {
             type: 'string',
-            description: 'The language for the document.'
+            description: 'The language for the document.',
           },
           disable_signer_emails: {
             type: 'boolean',
-            description: 'Whether to disable emails for signers.'
+            description: 'Whether to disable emails for signers.',
           },
           observers: {
             type: 'array',
             items: {
               type: 'string',
-              description: 'An array of observer emails.'
+              description: 'An array of observer emails.',
             },
-            description: 'An array of observer emails.'
-          }
+            description: 'An array of observer emails.',
+          },
         },
-        required: ['name', 'url_docx', 'signers']
-      }
-    }
-  }
+        required: ['name', 'url_docx', 'signers'],
+      },
+    },
+  },
 };
 
 export { apiTool };

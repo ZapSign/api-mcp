@@ -14,13 +14,13 @@ const executeFunction = async ({ doc_token }) => {
 
     // Set up headers for the request
     const headers = {
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     };
 
     // Perform the fetch request
     const response = await fetch(url, {
       method: 'GET',
-      headers
+      headers,
     });
 
     // Check if the response was successful
@@ -54,13 +54,13 @@ const apiTool = {
         properties: {
           doc_token: {
             type: 'string',
-            description: 'The token of the document to retrieve.'
-          }
+            description: 'The token of the document to retrieve.',
+          },
         },
-        required: ['doc_token']
-      }
-    }
-  }
+        required: ['doc_token'],
+      },
+    },
+  },
 };
 
 export { apiTool };

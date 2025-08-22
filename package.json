@@ -1,37 +1,76 @@
 {
-  "name": "@andrechaves/postman-mcp-generator-mcp",
-  "version": "1.0.0",
-  "description": "A simple MCP server with packaged tools",
-  "main": "index.js",
+  "name": "mcp-server-zapsign",
+  "version": "1.0.0-beta.1",
+  "description": "MCP Server for ZapSign API Integration - Complete electronic signature solution",
+  "main": "mcpServer.js",
+  "bin": {
+    "mcp-server-zapsign": "./mcpServer.js"
+  },
   "type": "module",
   "scripts": {
-    "list-tools": "node index.js tools"
+    "start": "node mcpServer.js",
+    "start:sse": "node mcpServer.js --sse",
+    "dev": "nodemon mcpServer.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "build": "npm run lint",
+    "build:full": "npm run lint && npm run test",
+    "prepare": "npm run lint",
+    "prepublishOnly": "npm run lint"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.9.0",
-    "commander": "^13.1.0",
+    "axios": "^1.6.0",
     "dotenv": "^16.4.7",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "zod": "^3.22.4",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "jest": "^29.7.0",
+    "ts-node": "^10.9.1",
+    "nodemon": "^3.0.2"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
-  "author": "Postman, Inc.",
+  "author": "ZapSign",
   "license": "MIT",
-  "directories": {
-    "lib": "lib"
-  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "zapsign",
+    "api",
+    "electronic-signature",
+    "documents",
+    "esignature",
+    "digital-signature",
+    "pdf-signature",
+    "document-management",
+    "ai-tools"
+  ],
+  "files": [
+    "mcpServer.js",
+    "lib/",
+    "tools/",
+    "README.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ZapSign/api-mcp.git"
   },
-  "keywords": [
-    "mcp",
-    "zapsign",
-    "sign"
-  ],
   "bugs": {
     "url": "https://github.com/ZapSign/api-mcp/issues"
   },
-  "homepage": "https://github.com/ZapSign/api-mcp#readme"
+  "homepage": "https://github.com/ZapSign/api-mcp#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -14,13 +14,13 @@ const executeFunction = async ({ template_token }) => {
 
     // Set up headers for the request
     const headers = {
-      'Authorization': `Bearer ${apiToken}`
+      'Authorization': `Bearer ${apiToken}`,
     };
 
     // Perform the fetch request
     const response = await fetch(url, {
       method: 'GET',
-      headers
+      headers,
     });
 
     // Check if the response was successful
@@ -54,13 +54,13 @@ const apiTool = {
         properties: {
           template_token: {
             type: 'string',
-            description: 'The token of the template to retrieve details for.'
-          }
+            description: 'The token of the template to retrieve details for.',
+          },
         },
-        required: ['template_token']
-      }
-    }
-  }
+        required: ['template_token'],
+      },
+    },
+  },
 };
 
 export { apiTool };

@@ -1,3 +1,5 @@
+import authService from '../../../lib/services/auth.js';
+
 /**
  * Function to create a webhook in Zapsign.
  *
@@ -9,25 +11,25 @@
  */
 const executeFunction = async ({ url, type, headers = [] }) => {
   const apiUrl = 'https://api.zapsign.com.br';
-  const apiToken = process.env.ZAPSIGN_WORKSPACE_API_KEY;
+  const apiToken = authService.getApiKey();
   const requestBody = {
     url,
     type,
-    headers
+    headers,
   };
 
   try {
     // Set up headers for the request
     const fetchHeaders = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiToken}`
+      'Authorization': `Bearer ${apiToken}`,
     };
 
     // Perform the fetch request
     const response = await fetch(`${apiUrl}/api/v1/user/company/webhook/`, {
       method: 'POST',
       headers: fetchHeaders,
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     // Check if the response was successful
@@ -61,11 +63,11 @@ const apiTool = {
         properties: {
           url: {
             type: 'string',
-            description: 'The URL to which the webhook will send notifications.'
+            description: 'The URL to which the webhook will send notifications.',
           },
           type: {
             type: 'string',
-            description: 'The type of event that triggers the webhook.'
+            description: 'The type of event that triggers the webhook.',
           },
           headers: {
             type: 'array',
@@ -74,22 +76,22 @@ const apiTool = {
               properties: {
                 name: {
                   type: 'string',
-                  description: 'The name of the header.'
+                  description: 'The name of the header.',
                 },
                 value: {
                   type: 'string',
-                  description: 'The value of the header.'
-                }
+                  description: 'The value of the header.',
+                },
               },
-              required: ['name', 'value']
+              required: ['name', 'value'],
             },
-            description: 'Optional headers to include in the webhook request.'
-          }
+            description: 'Optional headers to include in the webhook request.',
+          },
         },
-        required: ['url', 'type']
-      }
-    }
-  }
+        required: ['url', 'type'],
+      },
+    },
+  },
 };
 
 export { apiTool };

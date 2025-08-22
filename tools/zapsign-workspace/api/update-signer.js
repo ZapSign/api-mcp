@@ -20,7 +20,7 @@ const executeFunction = async ({ signer_token, name }) => {
 
     // If a token is provided, add it to the Authorization header
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers.Authorization = `Bearer ${token}`;
     }
 
     // Prepare the body of the request
@@ -64,17 +64,17 @@ const apiTool = {
         properties: {
           signer_token: {
             type: 'string',
-            description: 'The token of the signer to be updated.'
+            description: 'The token of the signer to be updated.',
           },
           name: {
             type: 'string',
-            description: 'The new name for the signer.'
-          }
+            description: 'The new name for the signer.',
+          },
         },
-        required: ['signer_token', 'name']
-      }
-    }
-  }
+        required: ['signer_token', 'name'],
+      },
+    },
+  },
 };
 
 export { apiTool };

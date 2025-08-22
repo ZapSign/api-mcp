@@ -15,13 +15,13 @@ const executeFunction = async ({ page = 1 } = {}) => {
 
     // Set up headers for the request
     const headers = {
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     };
 
     // Perform the fetch request
     const response = await fetch(url.toString(), {
       method: 'GET',
-      headers
+      headers,
     });
 
     // Check if the response was successful
@@ -55,13 +55,13 @@ const apiTool = {
         properties: {
           page: {
             type: 'integer',
-            description: 'The page number for pagination.'
-          }
+            description: 'The page number for pagination.',
+          },
         },
-        required: []
-      }
-    }
-  }
+        required: [],
+      },
+    },
+  },
 };
 
 export { apiTool };

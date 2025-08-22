@@ -15,7 +15,7 @@ const executeFunction = async ({ webhook_id }) => {
     // Set up headers for the request
     const headers = {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
 
     // Prepare the body for the request
@@ -25,7 +25,7 @@ const executeFunction = async ({ webhook_id }) => {
     const response = await fetch(url, {
       method: 'DELETE',
       headers,
-      body
+      body,
     });
 
     // Check if the response was successful
@@ -58,13 +58,13 @@ const apiTool = {
         properties: {
           webhook_id: {
             type: 'string',
-            description: 'The ID of the webhook to be deleted.'
-          }
+            description: 'The ID of the webhook to be deleted.',
+          },
         },
-        required: ['webhook_id']
-      }
-    }
-  }
+        required: ['webhook_id'],
+      },
+    },
+  },
 };
 
 export { apiTool };

@@ -18,18 +18,18 @@ const executeFunction = async ({ webhook_id }) => {
       headers: [
         {
           name: 'Authorization',
-          value: `Bearer ${token}`
-        }
-      ]
+          value: `Bearer ${token}`,
+        },
+      ],
     });
 
     // Perform the fetch request
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body
+      body,
     });
 
     // Check if the response was successful
@@ -63,13 +63,13 @@ const apiTool = {
         properties: {
           webhook_id: {
             type: 'number',
-            description: 'The ID of the webhook to create the header for.'
-          }
+            description: 'The ID of the webhook to create the header for.',
+          },
         },
-        required: ['webhook_id']
-      }
-    }
-  }
+        required: ['webhook_id'],
+      },
+    },
+  },
 };
 
 export { apiTool };

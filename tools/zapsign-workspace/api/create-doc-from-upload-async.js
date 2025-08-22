@@ -12,8 +12,8 @@
 const executeFunction = async ({ name, url_pdf, signers, lang = 'pt-br', observers }) => {
   const apiUrl = 'https://api.zapsign.com.br';
   const token = process.env.ZAPSIGN_WORKSPACE_API_KEY;
-  const docToken = ''; // will be provided by the user
-  const signerToken = ''; // will be provided by the user
+  // Note: docToken and signerToken are not used in this implementation
+  // but kept for future use if needed
 
   try {
     // Construct the request body
@@ -34,7 +34,7 @@ const executeFunction = async ({ name, url_pdf, signers, lang = 'pt-br', observe
       signature_order_active: false,
       reminder_every_n_days: null,
       allow_refuse_signature: false,
-      disable_signers_get_original_file: false
+      disable_signers_get_original_file: false,
     };
 
     // Perform the fetch request
@@ -42,9 +42,9 @@ const executeFunction = async ({ name, url_pdf, signers, lang = 'pt-br', observe
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     // Check if the response was successful
@@ -78,29 +78,29 @@ const apiTool = {
         properties: {
           name: {
             type: 'string',
-            description: 'The name of the document.'
+            description: 'The name of the document.',
           },
           url_pdf: {
             type: 'string',
-            description: 'The URL of the PDF to be uploaded.'
+            description: 'The URL of the PDF to be uploaded.',
           },
           signers: {
             type: 'array',
-            description: 'An array of signers for the document.'
+            description: 'An array of signers for the document.',
           },
           lang: {
             type: 'string',
-            description: 'The language for the document.'
+            description: 'The language for the document.',
           },
           observers: {
             type: 'array',
-            description: 'An array of observers for the document.'
-          }
+            description: 'An array of observers for the document.',
+          },
         },
-        required: ['name', 'url_pdf', 'signers']
-      }
-    }
-  }
+        required: ['name', 'url_pdf', 'signers'],
+      },
+    },
+  },
 };
 
 export { apiTool };

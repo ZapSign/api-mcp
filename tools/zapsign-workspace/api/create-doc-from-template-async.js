@@ -24,7 +24,7 @@ const executeFunction = async ({ template_id, signer_name, send_automatic_email 
       send_automatic_whatsapp,
       lang,
       external_id,
-      data
+      data,
     };
 
     // Perform the fetch request
@@ -32,9 +32,9 @@ const executeFunction = async ({ template_id, signer_name, send_automatic_email 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     // Check if the response was successful
@@ -68,27 +68,27 @@ const apiTool = {
         properties: {
           template_id: {
             type: 'string',
-            description: 'The ID of the template to use for the document.'
+            description: 'The ID of the template to use for the document.',
           },
           signer_name: {
             type: 'string',
-            description: 'The name of the signer.'
+            description: 'The name of the signer.',
           },
           send_automatic_email: {
             type: 'boolean',
-            description: 'Whether to send an automatic email.'
+            description: 'Whether to send an automatic email.',
           },
           send_automatic_whatsapp: {
             type: 'boolean',
-            description: 'Whether to send an automatic WhatsApp message.'
+            description: 'Whether to send an automatic WhatsApp message.',
           },
           lang: {
             type: 'string',
-            description: 'The language for the document.'
+            description: 'The language for the document.',
           },
           external_id: {
             type: 'string',
-            description: 'An optional external ID for tracking.'
+            description: 'An optional external ID for tracking.',
           },
           data: {
             type: 'array',
@@ -97,22 +97,22 @@ const apiTool = {
               properties: {
                 de: {
                   type: 'string',
-                  description: 'The field name in the template.'
+                  description: 'The field name in the template.',
                 },
                 para: {
                   type: 'string',
-                  description: 'The value to fill in the template.'
-                }
+                  description: 'The value to fill in the template.',
+                },
               },
-              required: ['de', 'para']
+              required: ['de', 'para'],
             },
-            description: 'An array of objects containing data to fill in the template.'
-          }
+            description: 'An array of objects containing data to fill in the template.',
+          },
         },
-        required: ['template_id', 'signer_name', 'data']
-      }
-    }
-  }
+        required: ['template_id', 'signer_name', 'data'],
+      },
+    },
+  },
 };
 
 export { apiTool };

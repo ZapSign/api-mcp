@@ -18,20 +18,20 @@ const executeFunction = async ({ template_id, data }) => {
     // Set up headers for the request
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
     };
 
     // Prepare the body of the request
     const body = JSON.stringify({
       template_id,
-      data
+      data,
     });
 
     // Perform the fetch request
     const response = await fetch(url, {
       method: 'POST',
       headers,
-      body
+      body,
     });
 
     // Check if the response was successful
@@ -65,7 +65,7 @@ const apiTool = {
         properties: {
           template_id: {
             type: 'string',
-            description: 'The ID of the template to use.'
+            description: 'The ID of the template to use.',
           },
           data: {
             type: 'array',
@@ -74,22 +74,22 @@ const apiTool = {
               properties: {
                 de: {
                   type: 'string',
-                  description: 'The value to fill in the document.'
+                  description: 'The value to fill in the document.',
                 },
                 para: {
                   type: 'string',
-                  description: 'The field name in the document.'
-                }
+                  description: 'The field name in the document.',
+                },
               },
-              required: ['de', 'para']
+              required: ['de', 'para'],
             },
-            description: 'An array of objects containing the data to be filled in the document.'
-          }
+            description: 'An array of objects containing the data to be filled in the document.',
+          },
         },
-        required: ['template_id', 'data']
-      }
-    }
-  }
+        required: ['template_id', 'data'],
+      },
+    },
+  },
 };
 
 export { apiTool };
