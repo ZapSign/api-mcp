@@ -6,3 +6,7 @@ node_modules/
 
 # SSL certificates and sensitive data
 traefik/letsencrypt/
+
+# Log files
+logs/
+*.log
