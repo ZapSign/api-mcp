@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2024-12-28
+
+### Changed
+- **BREAKING CHANGE**: Merged `ZAPSIGN_API_KEY` and `ZAPSIGN_WORKSPACE_API_KEY` into single `ZAPSIGN_API_KEY` configuration
+- Simplified authentication configuration - now only requires one API key
+- Updated all tools to use centralized authentication service
+- Removed dual API key complexity from configuration and documentation
+
+### Technical Improvements
+- Centralized authentication logic in `authService`
+- Simplified configuration schema
+- Updated all tool files to use `authService.getApiKey()` instead of direct environment variable access
+- Improved code maintainability and consistency
+
 ## [1.0.0-beta.1] - 2024-12-28
 
 ### Added
