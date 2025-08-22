@@ -52,6 +52,10 @@ ZAPSIGN_API_KEY=your_zapsign_api_key_here
 ZAPSIGN_BASE_URL=https://api.zapsign.com.br
 ZAPSIGN_API_VERSION=v1
 
+# Domain Configuration (for Traefik SSL)
+DOMAIN_NAME=your-domain.com
+CERTBOT_EMAIL=admin@your-domain.com
+
 # Logging Configuration
 LOG_LEVEL=info
 

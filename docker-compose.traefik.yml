@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # Traefik Reverse Proxy with Automatic SSL
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - "--api.insecure=true"  # Dashboard on port 8080 (for debugging)
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=${CERTBOT_EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--log.level=INFO"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard (remove in production)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/letsencrypt:/letsencrypt
+    restart: unless-stopped
+    networks:
+      - mcp-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME:-localhost}`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+
+  # Production MCP ZapSign Server
+  mcp-zapsign-server:
+    build: .
+    container_name: mcp-zapsign-server
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - HOST=0.0.0.0
+      - LOG_LEVEL=info
+      - ENABLE_RATE_LIMITING=true
+      - MAX_REQUESTS_PER_MINUTE=100
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - mcp-network
+    # Production optimizations
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    # Traefik labels for automatic routing and SSL
+    labels:
+      - "traefik.enable=true"
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.mcp-http.rule=Host(`${DOMAIN_NAME:-localhost}`)"
+      - "traefik.http.routers.mcp-http.entrypoints=web"
+      - "traefik.http.routers.mcp-http.middlewares=redirect-to-https"
+      # HTTPS with SSL
+      - "traefik.http.routers.mcp-https.rule=Host(`${DOMAIN_NAME:-localhost}`)"
+      - "traefik.http.routers.mcp-https.entrypoints=websecure"
+      - "traefik.http.routers.mcp-https.tls.certresolver=letsencrypt"
+      # Service configuration
+      - "traefik.http.services.mcp.loadbalancer.server.port=3001"
+      # Middleware for HTTPS redirect
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
+
+networks:
+  mcp-network:
+    driver: bridge
+    # Production network settings
+    driver_opts:
+      com.docker.network.bridge.name: mcp-bridge

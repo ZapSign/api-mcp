@@ -8,8 +8,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/conf.d/simple.conf:/etc/nginx/conf.d/default.conf:ro
       - ./logs/nginx:/var/log/nginx
     restart: unless-stopped
     depends_on:
@@ -65,35 +64,20 @@ services:
           memory: 512M
           cpus: '0.5'
 
-  # Let's Encrypt SSL Certificate Manager
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./nginx/ssl:/etc/letsencrypt
-      - ./nginx/webroot:/var/www/html
-    command: certonly --webroot --webroot-path=/var/www/html --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${DOMAIN_NAME}
-    depends_on:
-      - nginx-proxy
-    networks:
-      - mcp-network
-    # Run only when needed
-    restart: "no"
-
-  # SSL certificate renewal cron job
-  certbot-renew:
-    image: certbot/certbot
-    container_name: certbot-renew
-    volumes:
-      - ./nginx/ssl:/etc/letsencrypt
-    command: renew --quiet
-    depends_on:
-      - nginx-proxy
-    networks:
-      - mcp-network
-    # Run daily at 2:30 AM
-    restart: "no"
-    # This would be better handled by a cron job on the host
+  # SSL services commented out for initial testing
+  # Uncomment after basic setup is working
+  # certbot:
+  #   image: certbot/certbot
+  #   container_name: certbot
+  #   volumes:
+  #     - ./nginx/ssl:/etc/letsencrypt
+  #     - ./nginx/webroot:/var/www/html
+  #   command: certonly --webroot --webroot-path=/var/www/html --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${DOMAIN_NAME}
+  #   depends_on:
+  #     - nginx-proxy
+  #   networks:
+  #     - mcp-network
+  #   restart: "no"
 
 networks:
   mcp-network:

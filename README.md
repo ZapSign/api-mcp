@@ -99,7 +99,7 @@ npm run dev
 
 ## 🐳 Docker Deployment
 
-### Quick Start with Docker Compose
+### Quick Start with Traefik (Recommended)
 ```bash
 # Clone the repository
 git clone https://github.com/ZapSign/api-mcp.git
@@ -108,35 +108,48 @@ cd api-mcp
 # Copy environment file
 cp .env.example .env
 
-# Edit environment variables
+# Edit environment variables (set DOMAIN_NAME and CERTBOT_EMAIL)
 nano .env
 
-# Start services
+# Set up Traefik directories
+chmod +x setup-traefik.sh
+./setup-traefik.sh
+
+# Start with Traefik (automatic SSL)
+docker-compose -f docker-compose.traefik.yml up -d
+```
+
+### Alternative: Basic Docker Compose
+```bash
+# Start with basic Docker Compose (no SSL)
 docker-compose up -d
 ```
 
-### Production Deployment with HTTPS
+### Legacy: Nginx + Certbot Setup
 ```bash
-# Use production compose file
+# Use production compose file with Nginx
 docker-compose -f docker-compose.prod.yml up -d
 
-# Setup SSL certificates
+# Setup SSL certificates manually
 chmod +x nginx/setup-ssl.sh
 ./nginx/setup-ssl.sh
 ```
 
 ### Docker Compose Files
 - **`docker-compose.yml`**: Development and testing setup
-- **`docker-compose.prod.yml`**: Production deployment with HTTPS proxy
-- **`nginx/`**: Nginx configuration for HTTPS reverse proxy
-- **`nginx/setup-ssl.sh`**: SSL certificate setup script
+- **`docker-compose.traefik.yml`**: **Production with Traefik (automatic SSL)**
+- **`docker-compose.prod.yml`**: Legacy production with Nginx + Certbot
+- **`nginx/`**: Nginx configuration for manual HTTPS setup
+- **`nginx/setup-ssl.sh`**: Manual SSL certificate setup script
 
 ### HTTPS Features
-- **Nginx Reverse Proxy**: Handles SSL termination and load balancing
-- **Let's Encrypt Support**: Automatic SSL certificate management
+- **Traefik Reverse Proxy**: **Automatic SSL management with Docker labels**
+- **Let's Encrypt Support**: **Zero-config SSL certificate management**
+- **Nginx Alternative**: Manual SSL setup option for advanced users
 - **Security Headers**: XSS protection, content security policy
 - **Rate Limiting**: Configurable request limits per IP
 - **Gzip Compression**: Optimized content delivery
+- **Automatic Renewal**: **SSL certificates auto-renew without downtime**
 
 For detailed EC2 deployment instructions, see [EC2 Deployment Guide](docs/deployment/EC2_DEPLOYMENT.md).
 
