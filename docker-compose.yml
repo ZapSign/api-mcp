@@ -14,6 +14,7 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.email=${CERTBOT_EMAIL:-admin@example.com}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--log.level=INFO"
     ports:
       - "8081:80"    # HTTP on port 8081 (avoiding conflict with n8n)
