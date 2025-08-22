@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2024-12-28
+
+### Changed
+- **COMPLETED**: All tool files now use centralized authentication service
+- **FINALIZED**: API key consolidation - no more references to `ZAPSIGN_WORKSPACE_API_KEY`
+- **UNIFIED**: All 28 tools now use `authService.getApiKey()` method
+
+### Technical Improvements
+- **100% Centralized Auth**: All tools now use the same authentication method
+- **Consistent Implementation**: Uniform authentication across all API operations
+- **Maintainability**: Single source of truth for API key management
+- **Code Quality**: Eliminated duplicate environment variable access patterns
+
+### Files Updated
+- **23 tool files** updated to use centralized authentication
+- **Import statements** added to all tools requiring authentication
+- **Token assignments** standardized across all API operations
+
 ## [1.0.2] - 2024-12-28
 
 ### Added
