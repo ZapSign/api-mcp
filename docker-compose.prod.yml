@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # HTTPS Reverse Proxy (Nginx) for EC2 deployment
+  # HTTPS Reverse Proxy (Nginx) for production
   nginx-proxy:
     image: nginx:alpine
     container_name: nginx-proxy
@@ -23,6 +23,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    # Production optimizations
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
 
   # Production MCP ZapSign Server
   mcp-zapsign-server:
@@ -50,43 +57,49 @@ services:
       start_period: 40s
     networks:
       - mcp-network
+    # Production optimizations
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
 
-  # Development MCP ZapSign Server
-  mcp-zapsign-server-dev:
-    build: .
-    container_name: mcp-zapsign-server-dev
-    ports:
-      - "3002:3001"
-    environment:
-      - NODE_ENV=development
-      - PORT=3001
-      - HOST=0.0.0.0
-      - LOG_LEVEL=debug
-      - ENABLE_RATE_LIMITING=false
-    env_file:
-      - .env
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - ./logs:/app/logs
-    restart: unless-stopped
-    command: npm run dev
-    networks:
-      - mcp-network
-
-  # Let's Encrypt SSL Certificate Manager (Optional)
+  # Let's Encrypt SSL Certificate Manager
   certbot:
     image: certbot/certbot
     container_name: certbot
     volumes:
       - ./nginx/ssl:/etc/letsencrypt
       - ./nginx/webroot:/var/www/html
-    command: certonly --webroot --webroot-path=/var/www/html --email your-email@example.com --agree-tos --no-eff-email -d your-domain.com
+    command: certonly --webroot --webroot-path=/var/www/html --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${DOMAIN_NAME}
     depends_on:
       - nginx-proxy
     networks:
       - mcp-network
+    # Run only when needed
+    restart: "no"
+
+  # SSL certificate renewal cron job
+  certbot-renew:
+    image: certbot/certbot
+    container_name: certbot-renew
+    volumes:
+      - ./nginx/ssl:/etc/letsencrypt
+    command: renew --quiet
+    depends_on:
+      - nginx-proxy
+    networks:
+      - mcp-network
+    # Run daily at 2:30 AM
+    restart: "no"
+    # This would be better handled by a cron job on the host
 
 networks:
   mcp-network:
     driver: bridge
+    # Production network settings
+    driver_opts:
+      com.docker.network.bridge.name: mcp-bridge

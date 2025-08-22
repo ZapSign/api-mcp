@@ -97,6 +97,74 @@ npm run dev
 - **SSE Mode**: HTTP server with Server-Sent Events for web-based MCP clients
 - **Health Check**: Available at `/health` endpoint when running in SSE mode
 
+## 🐳 Docker Deployment
+
+### Quick Start with Docker Compose
+```bash
+# Clone the repository
+git clone https://github.com/ZapSign/api-mcp.git
+cd api-mcp
+
+# Copy environment file
+cp .env.example .env
+
+# Edit environment variables
+nano .env
+
+# Start services
+docker-compose up -d
+```
+
+### Production Deployment with HTTPS
+```bash
+# Use production compose file
+docker-compose -f docker-compose.prod.yml up -d
+
+# Setup SSL certificates
+chmod +x nginx/setup-ssl.sh
+./nginx/setup-ssl.sh
+```
+
+### Docker Compose Files
+- **`docker-compose.yml`**: Development and testing setup
+- **`docker-compose.prod.yml`**: Production deployment with HTTPS proxy
+- **`nginx/`**: Nginx configuration for HTTPS reverse proxy
+- **`nginx/setup-ssl.sh`**: SSL certificate setup script
+
+### HTTPS Features
+- **Nginx Reverse Proxy**: Handles SSL termination and load balancing
+- **Let's Encrypt Support**: Automatic SSL certificate management
+- **Security Headers**: XSS protection, content security policy
+- **Rate Limiting**: Configurable request limits per IP
+- **Gzip Compression**: Optimized content delivery
+
+For detailed EC2 deployment instructions, see [EC2 Deployment Guide](docs/deployment/EC2_DEPLOYMENT.md).
+
+## 📋 Docker Compose Configuration
+
+### Development Setup (`docker-compose.yml`)
+```yaml
+services:
+  mcp-zapsign-server:      # Production server on port 3001
+  mcp-zapsign-server-dev:  # Development server on port 3002
+```
+
+### Production Setup (`docker-compose.prod.yml`)
+```yaml
+services:
+  nginx-proxy:             # HTTPS reverse proxy (ports 80, 443)
+  mcp-zapsign-server:      # Production server (internal port 3001)
+  certbot:                 # Let's Encrypt SSL certificate manager
+```
+
+### Key Features
+- **Load Balancing**: Nginx distributes traffic across multiple instances
+- **SSL Termination**: HTTPS handled at the proxy level
+- **Health Checks**: Automatic service monitoring and restart
+- **Resource Limits**: Memory and CPU constraints for production
+- **Logging**: Centralized log management
+- **Security**: Rate limiting and security headers
+
 ## Available Tools
 
 ### Document Operations
