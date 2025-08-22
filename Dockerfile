@@ -12,8 +12,14 @@ RUN apk add --no-cache \
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install ALL dependencies first (including dev dependencies for prepare script)
+RUN npm ci
+
+# Run the prepare script (linting)
+RUN npm run lint
+
+# Remove dev dependencies to keep production image lean
+RUN npm prune --production
 
 # Copy source code
 COPY . .
