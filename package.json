@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-zapsign",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0",
   "description": "MCP Server for ZapSign API Integration - Complete electronic signature solution",
   "main": "mcpServer.js",
   "bin": {
