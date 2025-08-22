@@ -136,8 +136,8 @@ async function initializeServer () {
     const authStatus = await authService.getAuthenticationStatus();
     logger.info('Authentication status', authStatus);
 
-    if (!authStatus.main.isValid && !authStatus.workspace.isValid) {
-      logger.warn('No valid API keys found. Some tools may not work correctly.');
+    if (!authStatus.isValid) {
+      logger.warn('No valid API key found. Some tools may not work correctly.');
     }
 
     // Check ZapSign API health
