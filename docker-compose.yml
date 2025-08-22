@@ -1,4 +1,4 @@
-version: '3.8'
+# Docker Compose configuration for MCP ZapSign Server
 
 services:
   # Traefik Reverse Proxy with Automatic SSL
@@ -11,18 +11,13 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencrypt.acme.email=${CERTBOT_EMAIL:-admin@example.com}"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--log.level=INFO"
     ports:
-      - "8081:80"    # HTTP on port 8081 (avoiding conflict with n8n)
-      - "8443:443"   # HTTPS on port 8443 (avoiding conflict with n8n)
+      - "80:80"      # HTTP on standard port 80
+      - "443:443"    # HTTPS on standard port 443
       - "8080:8080"  # Traefik dashboard (remove in production)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/letsencrypt:/letsencrypt:rw
     user: "0:0"  # Run as root to avoid permission issues
     restart: unless-stopped
     networks:
@@ -69,22 +64,14 @@ services:
         reservations:
           memory: 512M
           cpus: '0.5'
-    # Traefik labels for automatic routing and SSL
+    # Traefik labels for HTTP routing (SSL disabled for now)
     labels:
       - "traefik.enable=true"
-      # HTTP to HTTPS redirect
+      # HTTP routing only
       - "traefik.http.routers.mcp-http.rule=Host(`${DOMAIN_NAME:-localhost}`)"
       - "traefik.http.routers.mcp-http.entrypoints=web"
-      - "traefik.http.routers.mcp-http.middlewares=redirect-to-https"
-      # HTTPS with SSL
-      - "traefik.http.routers.mcp-https.rule=Host(`${DOMAIN_NAME:-localhost}`)"
-      - "traefik.http.routers.mcp-https.entrypoints=websecure"
-      - "traefik.http.routers.mcp-https.tls.certresolver=letsencrypt"
       # Service configuration
       - "traefik.http.services.mcp.loadbalancer.server.port=3001"
-      # Middleware for HTTPS redirect
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
 
 networks:
   mcp-network:
