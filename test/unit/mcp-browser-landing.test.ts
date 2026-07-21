@@ -43,18 +43,54 @@ describe('browser GET /mcp', () => {
             'Sec-Fetch-Dest': 'document',
           },
         }),
-        { OAUTH_KV: { get: vi.fn() } },
+        {
+          OAUTH_KV: { get: vi.fn() },
+          GA4_MEASUREMENT_ID: '',
+          CLARITY_PROJECT_ID: '',
+        },
         {},
       );
 
       expect(response.status).toBe(200);
       expect(response.headers.get('Content-Type')).toContain('text/html');
       expect(response.headers.get('Content-Language')).toBe('en');
+      expect(response.headers.get('Content-Security-Policy')).toContain('googletagmanager.com');
+      expect(response.headers.get('Content-Security-Policy')).not.toContain("script-src 'none'");
       const html = await response.text();
       expect(html).toContain('mcp.zapsign.com.br/mcp');
       expect(html).toContain('Connect to ZapSign');
       expect(html).toContain('lang="en"');
+      expect(html).toContain('politica-de-privacidade');
+      expect(html).not.toContain('<script');
       expect(testState.oauthProviderFetch).not.toHaveBeenCalled();
+    },
+    15_000,
+  );
+
+  it(
+    'injects consent analytics on the landing page when measurement IDs are set',
+    async () => {
+      const worker = (await import('../../src/index.js')).default as WorkerHandler;
+
+      const response = await worker.fetch(
+        new Request('https://mcp.zapsign.com.br/mcp', {
+          headers: {
+            Accept: 'text/html',
+            'Sec-Fetch-Dest': 'document',
+          },
+        }),
+        {
+          OAUTH_KV: { get: vi.fn() },
+          GA4_MEASUREMENT_ID: 'G-LANDING1',
+          CLARITY_PROJECT_ID: 'landingclarity',
+        },
+        {},
+      );
+
+      const html = await response.text();
+      expect(html).toContain('zs-consent');
+      expect(html).toContain('G-LANDING1');
+      expect(html).toContain('landingclarity');
     },
     15_000,
   );

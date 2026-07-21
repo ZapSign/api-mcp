@@ -27,6 +27,7 @@ This policy applies specifically to the Connector. For broader data practices, p
 - The authorization flow when you connect the Connector to Claude
 - Data processed by the Connector's infrastructure (Cloudflare Workers)
 - Security measures implemented in the Connector
+- Optional marketing analytics on public documentation pages (`/docs` and the browser landing page for `/mcp`) after you give consent
 
 **This policy does NOT cover:**
 
@@ -115,8 +116,21 @@ The Connector explicitly does **not** collect, store, cache, or log:
 - **Signatures** — Electronic signatures, signature images, or signing certificates
 - **User credentials** — ZapSign account passwords or email addresses
 - **Conversation content** — What you say to Claude or what Claude responds
-- **Analytics or tracking data** — No cookies, fingerprinting, pixel trackers, or behavioral analytics
+- **Analytics or tracking data on authorization pages** — The OAuth `/authorize` flow does not load cookies, fingerprinting, pixel trackers, session replay, or behavioral analytics scripts
 - **API request/response bodies** — Document content and signer data pass through in transit but are never written to storage or logs
+
+### 4.5 Marketing Analytics (Documentation Pages Only)
+
+Public marketing pages (`/docs` and the human-readable `/mcp` browser landing) may load **Google Analytics 4** and **Microsoft Clarity** only after you accept a consent banner. Until you accept, Consent Mode defaults keep analytics storage denied and Clarity is not loaded. Rejecting consent keeps analytics off. Authorization pages never include these scripts.
+
+| Attribute | Detail |
+|-----------|--------|
+| **What** | Aggregated page analytics (GA4) and masked session insights (Clarity) on marketing HTML only |
+| **Why** | Improve documentation and connector onboarding experiences |
+| **Storage** | Browser storage for your consent choice; vendor cookies/identifiers only after accept |
+| **Retention** | Per Google Analytics and Microsoft Clarity retention settings |
+| **Legal Basis (LGPD)** | Art. 7, I — Consent |
+| **Legal Basis (GDPR)** | Art. 6(1)(a) — Consent |
 
 ---
 
@@ -176,6 +190,7 @@ The Connector explicitly does **not** collect, store, cache, or log:
 | Prevent CSRF attacks during authorization | CSRF tokens | (IX) Legitimate interest | (f) Legitimate interest |
 | Identify sessions without exposing credentials | Session ID (hash) | (IX) Legitimate interest | (f) Legitimate interest |
 | Relay requests between Claude and ZapSign | In-transit data (not stored) | (V) Contract performance | (b) Contract performance |
+| Improve marketing documentation (after consent) | GA4 / Clarity events on `/docs` and `/mcp` landing | (I) Consent | (a) Consent |
 
 ---
 
@@ -199,7 +214,8 @@ All persistent data is stored in **Cloudflare Workers KV**, an encrypted key-val
 | **OAuth 2.1 with PKCE** | Authorization Code flow with S256 code challenge; plain PKCE explicitly disabled |
 | **CSRF Protection** | UUID tokens with 5-minute TTL, single-use validation, stored in KV |
 | **HMAC-SHA256 Integrity** | Form submissions signed with HMAC to prevent parameter tampering |
-| **Content Security Policy** | `script-src 'none'` — no JavaScript execution in authorization pages |
+| **Content Security Policy (authorize)** | `script-src 'none'` — no JavaScript execution on authorization or security error pages |
+| **Content Security Policy (marketing)** | Allows Google Tag Manager / Analytics and Microsoft Clarity only on `/docs` and the `/mcp` browser landing |
 | **Clickjacking Protection** | `X-Frame-Options: DENY` on all responses |
 | **MIME Sniffing Prevention** | `X-Content-Type-Options: nosniff` on all responses |
 | **Per-Request Isolation** | New MCP server instance created per request (mitigates CVE GHSA-345p-7cg4-v4c7) |
@@ -211,8 +227,9 @@ All persistent data is stored in **Cloudflare Workers KV**, an encrypted key-val
 ### 8.3 What We Do NOT Do
 
 - We do **not** log API tokens, request bodies, or response bodies
-- We do **not** use cookies or browser-based tracking
+- We do **not** run analytics, cookies, or session replay on authorization pages
 - We do **not** execute client-side JavaScript on authorization pages
+- We do **not** load GA4 or Clarity until you accept consent on marketing pages
 - We do **not** cache or persist ZapSign API responses
 
 ---
@@ -253,8 +270,10 @@ The Connector relies on the following third-party services:
 | **ZapSign** (zapsign.com.br) | Electronic signature platform | API requests made on your behalf using your token | [Privacy Policy](https://zapsign.com.br/politica-de-privacidade) |
 | **Cloudflare** (cloudflare.com) | Infrastructure provider | Encrypted tokens and OAuth metadata stored in KV | [Privacy Policy](https://www.cloudflare.com/privacypolicy/) |
 | **Anthropic** (anthropic.com) | AI platform (Claude) | Conversation context including tool results | [Privacy Policy](https://www.anthropic.com/privacy) |
+| **Google Analytics 4** (marketing pages only, after consent) | Product analytics for `/docs` and `/mcp` landing | Page views and related engagement events | [Google Privacy Policy](https://policies.google.com/privacy) |
+| **Microsoft Clarity** (marketing pages only, after consent) | Masked session insights for documentation UX | Interaction data with sensitive input masking enabled | [Microsoft Privacy Statement](https://privacy.microsoft.com/privacystatement) |
 
-**We do not sell, rent, or share your data with any other third parties.** Data is shared with the services above solely to provide the Connector's functionality.
+**We do not sell, rent, or share your data with any other third parties.** Connector auth data is shared only as needed to provide the Connector. Marketing analytics vendors receive data only from consented marketing pages, never from `/authorize`.
 
 ---
 
@@ -440,7 +459,8 @@ For data subjects in the European Economic Area, this policy is additionally sub
 | Template content | No | No | N/A | N/A | N/A |
 | Signatures | No | No | N/A | N/A | N/A |
 | Conversation content | No | No | N/A | N/A | N/A |
-| Cookies / Analytics | No | No | N/A | N/A | N/A |
+| Cookies / Analytics on `/authorize` | No | No | N/A | N/A | N/A |
+| GA4 / Clarity on marketing pages | Only after consent | Vendor + local consent flag | Per vendor + until cleared | Google / Microsoft | Consent / Consent |
 
 ---
 

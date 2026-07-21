@@ -140,7 +140,7 @@ const oauthProvider = new OAuthProvider<Env>({
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     if (isBrowserMcpNavigation(request)) {
-      return handleMcpBrowserLanding(request);
+      return handleMcpBrowserLanding(request, env);
     }
 
     const audienceError = await rejectRootAudience(request, env);

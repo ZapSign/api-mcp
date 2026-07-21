@@ -1,5 +1,7 @@
+import type { Env } from '../types/env.js';
 import {
   COLORS,
+  CspProfile,
   ZAPSIGN_ICON_SVG,
   detectLanguage,
   escapeAttr,
@@ -9,7 +11,10 @@ import {
   withSecurityHeaders,
   type SupportedLanguage,
 } from '../utils/html.js';
+import { readMeasurementIds, renderMeasurementSnippets } from '../utils/measurement.js';
+
 const CLAUDE_TUTORIAL_URL = 'https://agents.zapsign.com.br/tutoriais/claude.html';
+const PRIVACY_POLICY_URL = 'https://zapsign.co/politica-de-privacidade';
 const MCP_URL_PLACEHOLDER = '{mcpUrl}';
 
 type LandingCopy = {
@@ -23,6 +28,7 @@ type LandingCopy = {
   ctaClaude: string;
   ctaDocs: string;
   urlLabel: string;
+  privacy: string;
 };
 
 const COPY: Record<SupportedLanguage, LandingCopy> = {
@@ -37,6 +43,7 @@ const COPY: Record<SupportedLanguage, LandingCopy> = {
     ctaClaude: 'Ver tutorial do Claude',
     ctaDocs: 'Documentação do conector',
     urlLabel: 'URL do conector MCP',
+    privacy: 'Política de Privacidade',
   },
   en: {
     title: 'Connect to ZapSign',
@@ -49,6 +56,7 @@ const COPY: Record<SupportedLanguage, LandingCopy> = {
     ctaClaude: 'Open Claude tutorial',
     ctaDocs: 'Connector documentation',
     urlLabel: 'MCP connector URL',
+    privacy: 'Privacy Policy',
   },
   es: {
     title: 'Conectar a ZapSign',
@@ -61,6 +69,7 @@ const COPY: Record<SupportedLanguage, LandingCopy> = {
     ctaClaude: 'Ver tutorial de Claude',
     ctaDocs: 'Documentación del conector',
     urlLabel: 'URL del conector MCP',
+    privacy: 'Política de Privacidad',
   },
 };
 
@@ -93,7 +102,12 @@ export function isBrowserMcpNavigation(request: Request): boolean {
   return request.headers.get('Sec-Fetch-Dest') === 'document';
 }
 
-function renderLanding(lang: SupportedLanguage, mcpUrl: string, docsUrl: string): string {
+function renderLanding(
+  lang: SupportedLanguage,
+  mcpUrl: string,
+  docsUrl: string,
+  measurementHtml: string,
+): string {
   const t = resolveUiCopy(COPY, lang);
   const title = escapeHtml(t.title);
   const lead = escapeHtml(t.lead);
@@ -104,7 +118,9 @@ function renderLanding(lang: SupportedLanguage, mcpUrl: string, docsUrl: string)
   const urlLabel = escapeHtml(t.urlLabel);
   const ctaClaude = escapeHtml(t.ctaClaude);
   const ctaDocs = escapeHtml(t.ctaDocs);
+  const privacy = escapeHtml(t.privacy);
   const escapedMcpUrl = escapeHtml(mcpUrl);
+  const measurement = measurementHtml ? `\n${measurementHtml}` : '';
 
   return `<!DOCTYPE html>
 <html lang="${escapeAttr(lang)}">
@@ -127,6 +143,8 @@ function renderLanding(lang: SupportedLanguage, mcpUrl: string, docsUrl: string)
     a.btn{display:block;text-align:center;text-decoration:none;border-radius:8px;padding:12px 16px;font-weight:600;}
     a.primary{background:${COLORS.brand500};color:#fff;}
     a.secondary{background:${COLORS.neutral0};color:${COLORS.neutral950};border:1px solid ${COLORS.neutral200};}
+    .privacy{margin-top:16px;text-align:center;font-size:13px;}
+    .privacy a{color:${COLORS.neutral600};}
   </style>
 </head>
 <body>
@@ -143,8 +161,9 @@ function renderLanding(lang: SupportedLanguage, mcpUrl: string, docsUrl: string)
         <a class="btn primary" href="${escapeAttr(CLAUDE_TUTORIAL_URL)}">${ctaClaude}</a>
         <a class="btn secondary" href="${escapeAttr(docsUrl)}">${ctaDocs}</a>
       </div>
+      <p class="privacy"><a href="${escapeAttr(PRIVACY_POLICY_URL)}" target="_blank" rel="noopener noreferrer">${privacy}</a></p>
     </div>
-  </div>
+  </div>${measurement}
 </body>
 </html>`;
 }
@@ -153,12 +172,15 @@ function renderLanding(lang: SupportedLanguage, mcpUrl: string, docsUrl: string)
  * Serves a human-readable connect page for browser visits to /mcp.
  *
  * @param request - Incoming browser request
- * @returns HTML response with security headers
+ * @param env - Worker env (measurement IDs)
+ * @returns HTML response with marketing security headers
  */
-export function handleMcpBrowserLanding(request: Request): Response {
+export function handleMcpBrowserLanding(request: Request, env: Env): Response {
   const lang = detectLanguage(request);
   const origin = new URL(request.url).origin;
   const mcpUrl = `${origin}/mcp`;
   const docsUrl = `${origin}/docs`;
-  return withSecurityHeaders(htmlResponse(renderLanding(lang, mcpUrl, docsUrl), 200, { lang }));
+  const measurementHtml = renderMeasurementSnippets(readMeasurementIds(env), lang);
+  const html = renderLanding(lang, mcpUrl, docsUrl, measurementHtml);
+  return withSecurityHeaders(htmlResponse(html, 200, { lang }), CspProfile.Marketing);
 }
