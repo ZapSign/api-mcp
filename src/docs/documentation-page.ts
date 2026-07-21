@@ -4,7 +4,13 @@
  */
 
 import type { SupportedLanguage } from '../utils/html.js';
-import { COLORS, ZAPSIGN_ICON_SVG, escapeAttr, escapeHtml } from '../utils/html.js';
+import {
+  COLORS,
+  ZAPSIGN_ICON_SVG,
+  escapeAttr,
+  escapeHtml,
+  resolveUiCopy,
+} from '../utils/html.js';
 
 const TRANSLATIONS: Record<SupportedLanguage, Record<string, string>> = {
   en: {
@@ -332,7 +338,7 @@ function buildToolsTable(t: Record<string, string>): string {
  * @returns Complete HTML document string
  */
 export function renderDocumentationPage(lang: SupportedLanguage): string {
-  const t = escapeTranslations(TRANSLATIONS[lang]);
+  const t = escapeTranslations(resolveUiCopy(TRANSLATIONS, lang));
   const urls = escapeUrls(URLS);
   const escapedLang = escapeAttr(lang);
 

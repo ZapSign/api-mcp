@@ -142,6 +142,8 @@ describe('handleDocs', () => {
     const response = await handleDocs(request);
     const html = await response.text();
 
+    expect(response.headers.get('Content-Language')).toBe('en');
+    expect(response.headers.get('Vary')).toBe('Accept-Language');
     expect(html).toContain('What is this');
     expect(html).toContain('How to Connect');
   });
@@ -153,6 +155,7 @@ describe('handleDocs', () => {
     const response = await handleDocs(request);
     const html = await response.text();
 
+    expect(response.headers.get('Content-Language')).toBe('pt-BR');
     expect(html).toContain('O que é isso');
     expect(html).toContain('Como conectar');
   });
@@ -164,6 +167,7 @@ describe('handleDocs', () => {
     const response = await handleDocs(request);
     const html = await response.text();
 
+    expect(response.headers.get('Content-Language')).toBe('es');
     expect(html).toContain('Qué es esto');
     expect(html).toContain('Cómo conectar');
   });
@@ -182,12 +186,12 @@ describe('detectLanguage', () => {
     expect(result).toBe('en');
   });
 
-  it('should use pt-BR as default when no defaultLang provided', () => {
+  it('should use en as default when no defaultLang provided', () => {
     const request = makeRequest('GET', '/docs', {
       headers: { 'Accept-Language': 'ja' },
     });
     const result = detectLanguage(request);
-    expect(result).toBe('pt-BR');
+    expect(result).toBe('en');
   });
 
   it('should still detect language from header regardless of defaultLang', () => {
@@ -196,5 +200,19 @@ describe('detectLanguage', () => {
     });
     const result = detectLanguage(request, 'en');
     expect(result).toBe('es');
+  });
+
+  it('should honor Accept-Language quality values', () => {
+    const request = makeRequest('GET', '/docs', {
+      headers: { 'Accept-Language': 'en;q=0.8,pt-BR;q=0.9' },
+    });
+    expect(detectLanguage(request)).toBe('pt-BR');
+  });
+
+  it('should honor ?lang= query over Accept-Language', () => {
+    const request = makeRequest('GET', '/docs?lang=es', {
+      headers: { 'Accept-Language': 'en-US,en;q=0.9' },
+    });
+    expect(detectLanguage(request)).toBe('es');
   });
 });

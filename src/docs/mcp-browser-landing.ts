@@ -5,6 +5,7 @@ import {
   escapeAttr,
   escapeHtml,
   htmlResponse,
+  resolveUiCopy,
   withSecurityHeaders,
   type SupportedLanguage,
 } from '../utils/html.js';
@@ -13,7 +14,20 @@ import { CANONICAL_MCP_RESOURCE } from '../auth/types.js';
 const CLAUDE_TUTORIAL_URL = 'https://agents.zapsign.com.br/tutoriais/claude.html';
 const DOCS_URL = 'https://mcp.zapsign.com.br/docs';
 
-const COPY: Record<SupportedLanguage, Record<string, string>> = {
+type LandingCopy = {
+  title: string;
+  lead: string;
+  howTitle: string;
+  step1: string;
+  step2: string;
+  step3: string;
+  step4: string;
+  ctaClaude: string;
+  ctaDocs: string;
+  urlLabel: string;
+};
+
+const COPY: Record<SupportedLanguage, LandingCopy> = {
   'pt-BR': {
     title: 'Conectar ao ZapSign',
     lead: 'Esta URL é o endpoint MCP. A tela de autorização com o Token API abre quando você adiciona o conector no Claude (ou outro cliente MCP).',
@@ -82,16 +96,16 @@ export function isBrowserMcpNavigation(request: Request): boolean {
 }
 
 function renderLanding(lang: SupportedLanguage): string {
-  const t = COPY[lang];
-  const title = escapeHtml(t['title'] ?? '');
-  const lead = escapeHtml(t['lead'] ?? '');
-  const howTitle = escapeHtml(t['howTitle'] ?? '');
-  const steps = [t['step1'], t['step2'], t['step3'], t['step4']]
-    .map((step) => `<li>${escapeHtml(step ?? '')}</li>`)
+  const t = resolveUiCopy(COPY, lang);
+  const title = escapeHtml(t.title);
+  const lead = escapeHtml(t.lead);
+  const howTitle = escapeHtml(t.howTitle);
+  const steps = [t.step1, t.step2, t.step3, t.step4]
+    .map((step) => `<li>${escapeHtml(step)}</li>`)
     .join('');
-  const urlLabel = escapeHtml(t['urlLabel'] ?? '');
-  const ctaClaude = escapeHtml(t['ctaClaude'] ?? '');
-  const ctaDocs = escapeHtml(t['ctaDocs'] ?? '');
+  const urlLabel = escapeHtml(t.urlLabel);
+  const ctaClaude = escapeHtml(t.ctaClaude);
+  const ctaDocs = escapeHtml(t.ctaDocs);
   const mcpUrl = escapeAttr(CANONICAL_MCP_RESOURCE);
 
   return `<!DOCTYPE html>
@@ -144,6 +158,6 @@ function renderLanding(lang: SupportedLanguage): string {
  * @returns HTML response with security headers
  */
 export function handleMcpBrowserLanding(request: Request): Response {
-  const lang = detectLanguage(request, 'pt-BR');
-  return withSecurityHeaders(htmlResponse(renderLanding(lang), 200));
+  const lang = detectLanguage(request);
+  return withSecurityHeaders(htmlResponse(renderLanding(lang), 200, { lang }));
 }

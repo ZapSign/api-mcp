@@ -8,7 +8,19 @@ import { handleDocs } from '../docs/index.js';
 import type { AuthRequest, ClientInfo } from '@cloudflare/workers-oauth-provider';
 import { ZapSignClient } from '../api/client.js';
 import { log, logError } from '../utils/logger.js';
-import { COLORS, SUPPORTED_LANGUAGES, type SupportedLanguage, ZAPSIGN_ICON_SVG, detectLanguage, escapeAttr, escapeHtml, withSecurityHeaders, htmlResponse } from '../utils/html.js';
+import {
+  COLORS,
+  DEFAULT_UI_LANGUAGE,
+  type SupportedLanguage,
+  ZAPSIGN_ICON_SVG,
+  detectLanguage,
+  escapeAttr,
+  escapeHtml,
+  isSupportedLanguage,
+  resolveUiCopy,
+  withSecurityHeaders,
+  htmlResponse,
+} from '../utils/html.js';
 
 const CSRF_TTL_SECONDS = 300;
 const CSRF_KEY_PREFIX = 'csrf:';
@@ -287,7 +299,7 @@ function renderSecurityErrorPage(
   errorKey: string,
   status: number,
 ): Response {
-  const t = escapeTranslations(TRANSLATIONS[lang]);
+  const t = escapeTranslations(resolveUiCopy(TRANSLATIONS, lang));
   const banner = renderErrorBanner(t, errorKey);
   const html = `<!DOCTYPE html>
 <html lang="${escapeAttr(lang)}">
@@ -298,7 +310,7 @@ function renderSecurityErrorPage(
   </main>
 </body>
 </html>`;
-  return htmlResponse(html, status);
+  return htmlResponse(html, status, { lang });
 }
 
 interface ConsentDetails {
@@ -341,7 +353,7 @@ function renderTokenPage(
   consent: ConsentDetails,
   errorKey?: string,
 ): string {
-  const t = escapeTranslations(TRANSLATIONS[lang]);
+  const t = escapeTranslations(resolveUiCopy(TRANSLATIONS, lang));
   const attributes = buildTokenPageAttributes(lang, oauthReqInfoB64, csrfToken, hmacSignature, dashboardUrl);
   const errorHtml = renderErrorBanner(t, errorKey);
   const consentHtml = renderConsentDetails(t, consent);
@@ -637,7 +649,7 @@ async function handleAuthorize(request: Request, env: Env): Promise<Response> {
     const dashboardUrl = resolveDashboardUrl(env);
     const consent = buildConsentDetails(oauthReqInfo, clientInfo);
     const html = renderTokenPage(lang, oauthReqInfoB64, csrfToken, hmacSignature, dashboardUrl, consent);
-    return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    return htmlResponse(html, 200, { lang });
   } catch (error) {
     logError('authorize_request_failed', {
       error_class: error instanceof Error ? error.constructor.name : 'UnknownError',
@@ -655,8 +667,10 @@ interface TokenFormData {
 }
 
 function parseTokenForm(params: URLSearchParams): TokenFormData {
-  const rawLang = (params.get('lang') ?? 'pt-BR') as SupportedLanguage;
-  const lang: SupportedLanguage = SUPPORTED_LANGUAGES.includes(rawLang) ? rawLang : 'pt-BR';
+  const rawLang = params.get('lang') ?? DEFAULT_UI_LANGUAGE;
+  const lang: SupportedLanguage = isSupportedLanguage(rawLang)
+    ? rawLang
+    : DEFAULT_UI_LANGUAGE;
   return {
     apiToken: params.get('apiToken') ?? '',
     oauthReqInfoB64: params.get('oauthReqInfo') ?? '',
@@ -679,7 +693,7 @@ async function renderValidatedTokenError(
   const oauthRequest: AuthRequest = JSON.parse(atob(oauthReqInfoB64));
   const consent = buildConsentDetails(oauthRequest);
   const html = renderTokenPage(lang, oauthReqInfoB64, newCsrf, newHmac, dashboardUrl, consent, errorKey);
-  return htmlResponse(html, status);
+  return htmlResponse(html, status, { lang });
 }
 
 async function validateSecurityTokens(
