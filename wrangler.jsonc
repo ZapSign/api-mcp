@@ -6,7 +6,7 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "routes": [
     {
-      "pattern": "mcp.zapsign.com.br/*",
+      "pattern": "mcp.zapsign.com.br",
       "custom_domain": true
     }
   ],
