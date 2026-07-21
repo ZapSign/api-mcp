@@ -10,6 +10,10 @@ import {
   CANONICAL_OAUTH_ORIGIN,
   DEFAULT_OAUTH_SCOPES,
 } from './auth/types.js';
+import {
+  handleMcpBrowserLanding,
+  isBrowserMcpNavigation,
+} from './docs/mcp-browser-landing.js';
 
 const REFRESH_TOKEN_TTL_SECONDS = 2592000; // 30 days — forces periodic reconnection even though the API token does not expire
 
@@ -132,6 +136,10 @@ const oauthProvider = new OAuthProvider<Env>({
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    if (isBrowserMcpNavigation(request)) {
+      return handleMcpBrowserLanding(request);
+    }
+
     const audienceError = await rejectRootAudience(request, env);
     if (audienceError) {
       return audienceError;
