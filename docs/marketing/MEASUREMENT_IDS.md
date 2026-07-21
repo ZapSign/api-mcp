@@ -6,7 +6,7 @@ Shared GA4 + Clarity for marketing surfaces only (`agents.zapsign.com.br`, `mcp.
 |--------|----|--------|
 | GA4 Measurement ID | `G-GNJFSQFD50` | Created 2026-07-21 |
 | Microsoft Clarity Project ID | `xq06022ata` | Created 2026-07-21 |
-| Google Search Console | _in progress_ | URL-prefix properties for agents + mcp hosts |
+| Google Search Console | partial | Agents verified + sitemap Success; MCP hosts pending |
 
 ## GA4
 
@@ -37,11 +37,15 @@ Shared GA4 + Clarity for marketing surfaces only (`agents.zapsign.com.br`, `mcp.
 
 ## Google Search Console
 
-URL-prefix properties (or domain DNS verify if easier):
+| Property | Status | Notes |
+|----------|--------|-------|
+| `https://agents.zapsign.com.br/` | Verified (HTML file) | Sitemap `sitemap.xml` submitted 2026-07-21 — Status Success, 8 pages |
+| `https://mcp.zapsign.com.br/` | Pending | Needs HTML file route on Worker, meta tag, or DNS TXT |
+| `https://mcp.zapsign.co/` | Pending | Same as `.com.br` (same Worker) |
 
-- `https://agents.zapsign.com.br` — submit sitemap `https://agents.zapsign.com.br/sitemap.xml`
-- `https://mcp.zapsign.com.br`
-- `https://mcp.zapsign.co`
+Agents verification file (keep deployed): `googlef22ed0de1a97f69e.html`
+
+GA4 cross-domain hosts still need a one-time Admin pass (GTM lite iframe): Configure tag settings → Configure your domains.
 
 ## Wiring
 
