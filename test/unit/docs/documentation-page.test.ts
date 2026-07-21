@@ -2,10 +2,24 @@ import { describe, it, expect } from 'vitest';
 import { renderDocumentationPage } from '../../../src/docs/documentation-page.js';
 import { handleDocs } from '../../../src/docs/index.js';
 import { detectLanguage } from '../../../src/utils/html.js';
+import type { Env } from '../../../src/types/env.js';
 
 function makeRequest(method: string, path: string, options?: { headers?: Record<string, string> }): Request {
   const url = `https://mcp.example.com${path}`;
   return new Request(url, { method, headers: options?.headers ?? {} });
+}
+
+function makeEnv(overrides?: Partial<Pick<Env, 'GA4_MEASUREMENT_ID' | 'CLARITY_PROJECT_ID'>>): Env {
+  return {
+    OAUTH_KV: {} as Env['OAUTH_KV'],
+    ZAPSIGN_API_URL: 'https://sandbox.api.zapsign.com.br',
+    COOKIE_ENCRYPTION_KEY: 'test',
+    ENVIRONMENT: 'sandbox',
+    OAUTH_PROVIDER: {} as Env['OAUTH_PROVIDER'],
+    GA4_MEASUREMENT_ID: '',
+    CLARITY_PROJECT_ID: '',
+    ...overrides,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -109,9 +123,14 @@ describe('renderDocumentationPage', () => {
     expect(html).toContain('<summary>');
   });
 
-  it('should NOT contain script tags', () => {
+  it('should NOT contain script tags without measurement HTML', () => {
     const html = renderDocumentationPage('en');
     expect(html).not.toContain('<script');
+  });
+
+  it('should include measurement HTML when provided', () => {
+    const html = renderDocumentationPage('en', '<script>window.__zs=1</script>');
+    expect(html).toContain('<script>window.__zs=1</script>');
   });
 });
 
@@ -122,24 +141,47 @@ describe('renderDocumentationPage', () => {
 describe('handleDocs', () => {
   it('should return 200 with text/html content type', async () => {
     const request = makeRequest('GET', '/docs');
-    const response = await handleDocs(request);
+    const response = await handleDocs(request, makeEnv());
 
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Type')).toContain('text/html');
   });
 
-  it('should include security headers', async () => {
+  it('should include marketing security headers', async () => {
     const request = makeRequest('GET', '/docs');
-    const response = await handleDocs(request);
+    const response = await handleDocs(request, makeEnv());
 
     expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff');
     expect(response.headers.get('X-Frame-Options')).toBe('DENY');
-    expect(response.headers.get('Content-Security-Policy')).toContain("script-src 'none'");
+    expect(response.headers.get('Content-Security-Policy')).toContain('googletagmanager.com');
+    expect(response.headers.get('Content-Security-Policy')).not.toContain("script-src 'none'");
+  });
+
+  it('should omit analytics scripts when measurement IDs are unset', async () => {
+    const request = makeRequest('GET', '/docs');
+    const response = await handleDocs(request, makeEnv());
+    const html = await response.text();
+
+    expect(html).not.toContain('<script');
+    expect(html).not.toContain('zs-consent');
+  });
+
+  it('should inject consent analytics when measurement IDs are set', async () => {
+    const request = makeRequest('GET', '/docs');
+    const response = await handleDocs(request, makeEnv({
+      GA4_MEASUREMENT_ID: 'G-DOCS123',
+      CLARITY_PROJECT_ID: 'docsclarity',
+    }));
+    const html = await response.text();
+
+    expect(html).toContain('zs-consent');
+    expect(html).toContain('G-DOCS123');
+    expect(html).toContain('docsclarity');
   });
 
   it('should default to English when Accept-Language is missing', async () => {
     const request = makeRequest('GET', '/docs');
-    const response = await handleDocs(request);
+    const response = await handleDocs(request, makeEnv());
     const html = await response.text();
 
     expect(response.headers.get('Content-Language')).toBe('en');
@@ -152,7 +194,7 @@ describe('handleDocs', () => {
     const request = makeRequest('GET', '/docs', {
       headers: { 'Accept-Language': 'pt-BR' },
     });
-    const response = await handleDocs(request);
+    const response = await handleDocs(request, makeEnv());
     const html = await response.text();
 
     expect(response.headers.get('Content-Language')).toBe('pt-BR');
@@ -164,7 +206,7 @@ describe('handleDocs', () => {
     const request = makeRequest('GET', '/docs', {
       headers: { 'Accept-Language': 'es-ES,es;q=0.9' },
     });
-    const response = await handleDocs(request);
+    const response = await handleDocs(request, makeEnv());
     const html = await response.text();
 
     expect(response.headers.get('Content-Language')).toBe('es');

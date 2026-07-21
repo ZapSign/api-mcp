@@ -20,6 +20,7 @@ Then follow [`.cursor/skills/mcp-growth-metrics/SKILL.md`](../../.cursor/skills/
 |------|---------|
 | `snapshots/YYYY-MM-DD.json` | Point-in-time metrics |
 | `STATUS.md` | Human-readable deltas over time |
+| `SEO_CADENCE.md` | GA4 / Clarity / GSC baseline + 30-day organic review ritual |
 | `../../scripts/marketing/take-snapshot.mjs` | npm + scaffold writer |
 
 ## Official surfaces

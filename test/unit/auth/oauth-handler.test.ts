@@ -88,6 +88,8 @@ function createMockEnv(overrides?: { oauthProvider?: ReturnType<typeof createMoc
     COOKIE_ENCRYPTION_KEY: 'test-secret-key-for-hmac-signing',
     ZAPSIGN_API_URL: 'https://sandbox.api.zapsign.com.br',
     ENVIRONMENT: 'sandbox',
+    GA4_MEASUREMENT_ID: '',
+    CLARITY_PROJECT_ID: '',
   };
 }
 

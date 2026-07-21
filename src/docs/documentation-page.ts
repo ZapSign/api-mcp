@@ -335,12 +335,17 @@ function buildToolsTable(t: Record<string, string>): string {
  * Renders the complete documentation page HTML for the given language.
  *
  * @param lang - Preferred language (en, pt-BR, es)
+ * @param measurementHtml - Optional consent + analytics snippet (marketing pages only)
  * @returns Complete HTML document string
  */
-export function renderDocumentationPage(lang: SupportedLanguage): string {
+export function renderDocumentationPage(
+  lang: SupportedLanguage,
+  measurementHtml = '',
+): string {
   const t = escapeTranslations(resolveUiCopy(TRANSLATIONS, lang));
   const urls = escapeUrls(URLS);
   const escapedLang = escapeAttr(lang);
+  const measurement = measurementHtml ? `\n${measurementHtml}` : '';
 
   return `<!DOCTYPE html>
 <html lang="${escapedLang}">
@@ -548,7 +553,7 @@ export function renderDocumentationPage(lang: SupportedLanguage): string {
         <p class="footer-support">${t['footerContactLabel']} <a href="${urls.support}">support@zapsign.com.br</a></p>
       </div>
     </footer>
-  </div>
+  </div>${measurement}
 </body>
 </html>`;
 }

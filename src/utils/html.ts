@@ -139,15 +139,50 @@ export function resolveUiCopy<T extends Record<string, string>>(
   return catalog[lang] ?? catalog.en;
 }
 
+export const CspProfile = {
+  Auth: 'auth',
+  Marketing: 'marketing',
+} as const;
+
+export type CspProfileName = (typeof CspProfile)[keyof typeof CspProfile];
+
+const AUTH_CSP =
+  "default-src 'self'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'none'; img-src 'self' data:";
+
+// Marketing pages load GA4 + Clarity only after consent; authorize pages never use this profile.
+const MARKETING_CSP = [
+  "default-src 'self'",
+  "style-src 'unsafe-inline' https://fonts.googleapis.com",
+  'font-src https://fonts.gstatic.com',
+  "script-src 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.clarity.ms https://scripts.clarity.ms",
+  "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.clarity.ms https://c.bing.com",
+  "img-src 'self' data: https://www.google-analytics.com https://*.google-analytics.com https://*.clarity.ms https://c.bing.com",
+].join('; ');
+
+const CSP_BY_PROFILE: Record<CspProfileName, string> = {
+  [CspProfile.Auth]: AUTH_CSP,
+  [CspProfile.Marketing]: MARKETING_CSP,
+};
+
 /**
  * Adds security headers to an HTML response (CSP, X-Content-Type-Options, X-Frame-Options).
+ *
+ * @param response - HTML or text response to harden
+ * @param profile - `auth` keeps script-src none; `marketing` allows GA4/Clarity after consent
  */
-export function withSecurityHeaders(response: Response): Response {
+export function withSecurityHeaders(
+  response: Response,
+  profile: CspProfileName = CspProfile.Auth,
+): Response {
   const headers = new Headers(response.headers);
-  headers.set('Content-Security-Policy', "default-src 'self'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'none'; img-src 'self' data:");
+  headers.set('Content-Security-Policy', CSP_BY_PROFILE[profile]);
   headers.set('X-Content-Type-Options', 'nosniff');
   headers.set('X-Frame-Options', 'DENY');
-  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 }
 
 /**

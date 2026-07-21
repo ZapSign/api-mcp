@@ -18,8 +18,10 @@ import {
   escapeHtml,
   isSupportedLanguage,
   resolveUiCopy,
+  CspProfile,
   withSecurityHeaders,
   htmlResponse,
+  type CspProfileName,
 } from '../utils/html.js';
 
 const CSRF_TTL_SECONDS = 300;
@@ -795,13 +797,21 @@ type RouteHandler = (request: Request, env: Env) => Promise<Response>;
 const routeHandlers: Record<string, RouteHandler> = {
   'GET /health': handleHealth,
   'GET /authorize': handleAuthorize,
-  'GET /docs': (request) => handleDocs(request),
+  'GET /docs': handleDocs,
   'POST /authorize/login': handleTokenSubmit,
+};
+
+const ROUTE_CSP_PROFILES: Record<string, CspProfileName> = {
+  'GET /docs': CspProfile.Marketing,
 };
 
 function buildRouteKey(request: Request): string {
   const url = new URL(request.url);
   return `${request.method} ${url.pathname}`;
+}
+
+function resolveCspProfile(routeKey: string): CspProfileName {
+  return ROUTE_CSP_PROFILES[routeKey] ?? CspProfile.Auth;
 }
 
 export const AuthHandler: ExportedHandler<Env> = {
@@ -810,10 +820,10 @@ export const AuthHandler: ExportedHandler<Env> = {
     const handler = routeHandlers[routeKey];
 
     if (!handler) {
-      return withSecurityHeaders(new Response('Not Found', { status: 404 }));
+      return withSecurityHeaders(new Response('Not Found', { status: 404 }), CspProfile.Auth);
     }
 
     const response = await handler(request, env);
-    return withSecurityHeaders(response);
+    return withSecurityHeaders(response, resolveCspProfile(routeKey));
   },
 };
