@@ -13,7 +13,7 @@ import {
 } from '../utils/html.js';
 import { readMeasurementIds, renderMeasurementSnippets } from '../utils/measurement.js';
 
-const CLAUDE_TUTORIAL_URL = 'https://agents.zapsign.com.br/tutoriais/claude.html';
+const CHATGPT_TUTORIAL_URL = 'https://agents.zapsign.com.br/tutoriais/chatgpt.html';
 const PRIVACY_POLICY_URL = 'https://zapsign.co/politica-de-privacidade';
 const MCP_URL_PLACEHOLDER = '{mcpUrl}';
 
@@ -25,7 +25,7 @@ type LandingCopy = {
   step2: string;
   step3: string;
   step4: string;
-  ctaClaude: string;
+  ctaChatgpt: string;
   ctaDocs: string;
   urlLabel: string;
   privacy: string;
@@ -34,39 +34,39 @@ type LandingCopy = {
 const COPY: Record<SupportedLanguage, LandingCopy> = {
   'pt-BR': {
     title: 'Conectar ao ZapSign',
-    lead: 'Esta URL é o endpoint MCP. A tela de autorização com o Token API abre quando você adiciona o conector no Claude (ou outro cliente MCP).',
-    howTitle: 'Como conectar no Claude',
-    step1: 'Abra Claude → Configurações → Conectores → Adicionar conector personalizado',
-    step2: `Nome: ZapSign · URL: ${MCP_URL_PLACEHOLDER}`,
-    step3: 'Deixe Client ID / Client Secret vazios e clique em Adicionar',
+    lead: 'Esta URL é o endpoint MCP. A tela de autorização com o Token API abre quando você adiciona o conector no ChatGPT (ou outro cliente MCP, como o Claude).',
+    howTitle: 'Como conectar no ChatGPT',
+    step1: 'Abra o ChatGPT → Settings → Apps & Connectors → Advanced → ative Developer mode',
+    step2: 'Em Connectors → Create, informe Nome: ZapSign',
+    step3: `URL do servidor MCP: ${MCP_URL_PLACEHOLDER}`,
     step4: 'Ao conectar, a ZapSign abre a página de autorização para você colar o Token API',
-    ctaClaude: 'Ver tutorial do Claude',
+    ctaChatgpt: 'Ver tutorial do ChatGPT',
     ctaDocs: 'Documentação do conector',
     urlLabel: 'URL do conector MCP',
     privacy: 'Política de Privacidade',
   },
   en: {
     title: 'Connect to ZapSign',
-    lead: 'This URL is the MCP endpoint. The API Token authorization page opens when you add the connector in Claude (or another MCP client).',
-    howTitle: 'How to connect in Claude',
-    step1: 'Open Claude → Settings → Connectors → Add custom connector',
-    step2: `Name: ZapSign · URL: ${MCP_URL_PLACEHOLDER}`,
-    step3: 'Leave OAuth Client ID / Secret empty and click Add',
+    lead: 'This URL is the MCP endpoint. The API Token authorization page opens when you add the connector in ChatGPT (or another MCP client, such as Claude).',
+    howTitle: 'How to connect in ChatGPT',
+    step1: 'Open ChatGPT → Settings → Apps & Connectors → Advanced → enable Developer mode',
+    step2: 'In Connectors → Create, enter Name: ZapSign',
+    step3: `MCP server URL: ${MCP_URL_PLACEHOLDER}`,
     step4: 'When you connect, ZapSign opens the authorization page to paste your API Token',
-    ctaClaude: 'Open Claude tutorial',
+    ctaChatgpt: 'Open ChatGPT tutorial',
     ctaDocs: 'Connector documentation',
     urlLabel: 'MCP connector URL',
     privacy: 'Privacy Policy',
   },
   es: {
     title: 'Conectar a ZapSign',
-    lead: 'Esta URL es el endpoint MCP. La página de autorización con Token API se abre al agregar el conector en Claude (u otro cliente MCP).',
-    howTitle: 'Cómo conectar en Claude',
-    step1: 'Abre Claude → Configuración → Conectores → Agregar conector personalizado',
-    step2: `Nombre: ZapSign · URL: ${MCP_URL_PLACEHOLDER}`,
-    step3: 'Deja Client ID / Client Secret vacíos y haz clic en Agregar',
+    lead: 'Esta URL es el endpoint MCP. La página de autorización con Token API se abre al agregar el conector en ChatGPT (u otro cliente MCP, como Claude).',
+    howTitle: 'Cómo conectar en ChatGPT',
+    step1: 'Abre ChatGPT → Settings → Apps & Connectors → Advanced → activa Developer mode',
+    step2: 'En Connectors → Create, indica Nombre: ZapSign',
+    step3: `URL del servidor MCP: ${MCP_URL_PLACEHOLDER}`,
     step4: 'Al conectar, ZapSign abre la página de autorización para pegar tu Token API',
-    ctaClaude: 'Ver tutorial de Claude',
+    ctaChatgpt: 'Ver tutorial de ChatGPT',
     ctaDocs: 'Documentación del conector',
     urlLabel: 'URL del conector MCP',
     privacy: 'Política de Privacidad',
@@ -116,7 +116,7 @@ function renderLanding(
     .map((step) => `<li>${escapeHtml(step.replaceAll(MCP_URL_PLACEHOLDER, mcpUrl))}</li>`)
     .join('');
   const urlLabel = escapeHtml(t.urlLabel);
-  const ctaClaude = escapeHtml(t.ctaClaude);
+  const ctaChatgpt = escapeHtml(t.ctaChatgpt);
   const ctaDocs = escapeHtml(t.ctaDocs);
   const privacy = escapeHtml(t.privacy);
   const escapedMcpUrl = escapeHtml(mcpUrl);
@@ -158,7 +158,7 @@ function renderLanding(
       <h2 style="font-size:1rem;margin:0 0 10px;">${howTitle}</h2>
       <ol>${steps}</ol>
       <div class="actions">
-        <a class="btn primary" href="${escapeAttr(CLAUDE_TUTORIAL_URL)}">${ctaClaude}</a>
+        <a class="btn primary" href="${escapeAttr(CHATGPT_TUTORIAL_URL)}">${ctaChatgpt}</a>
         <a class="btn secondary" href="${escapeAttr(docsUrl)}">${ctaDocs}</a>
       </div>
       <p class="privacy"><a href="${escapeAttr(PRIVACY_POLICY_URL)}" target="_blank" rel="noopener noreferrer">${privacy}</a></p>

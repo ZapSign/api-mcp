@@ -59,8 +59,15 @@ describe('browser GET /mcp', () => {
       const html = await response.text();
       expect(html).toContain('mcp.zapsign.com.br/mcp');
       expect(html).toContain('Connect to ZapSign');
+      expect(html).toContain('How to connect in ChatGPT');
+      expect(html).toContain('Open ChatGPT tutorial');
+      expect(html).toContain('https://agents.zapsign.com.br/tutoriais/chatgpt.html');
+      expect(html).toContain('Connector documentation');
+      expect(html).toContain('ChatGPT (or another MCP client, such as Claude)');
+      expect(html).toContain('Apps &amp; Connectors');
       expect(html).toContain('lang="en"');
       expect(html).toContain('politica-de-privacidade');
+      expect(html).not.toContain('tutoriais/claude.html');
       expect(html).not.toContain('<script');
       expect(testState.oauthProviderFetch).not.toHaveBeenCalled();
     },
