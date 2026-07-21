@@ -19,6 +19,8 @@ description: >-
   Packages: `mcp-server-zapsign` (official), `@marcelocorrea/mcp-zapsign` (benchmark).
 - Snapshot store: `docs/marketing/snapshots/YYYY-MM-DD.json`
 - Status log: `docs/marketing/STATUS.md`
+- Official agent hub (always list under presence):  
+  https://agents.zapsign.com.br · https://agents.zapsign.com.br/llms.txt
 
 ## Take a snapshot
 

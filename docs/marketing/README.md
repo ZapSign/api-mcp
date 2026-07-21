@@ -22,9 +22,14 @@ Then follow [`.cursor/skills/mcp-growth-metrics/SKILL.md`](../../.cursor/skills/
 | `STATUS.md` | Human-readable deltas over time |
 | `../../scripts/marketing/take-snapshot.mjs` | npm + scaffold writer |
 
-## Packages
+## Official surfaces
 
-| Package | Role |
+| Surface | Role |
 |---------|------|
-| [`mcp-server-zapsign`](https://www.npmjs.com/package/mcp-server-zapsign) | Official |
-| [`@marcelocorrea/mcp-zapsign`](https://www.npmjs.com/package/@marcelocorrea/mcp-zapsign) | Community benchmark |
+| [mcp.zapsign.com.br/mcp](https://mcp.zapsign.com.br/mcp) | Remote MCP + OAuth |
+| [agents.zapsign.com.br](https://agents.zapsign.com.br) | Tutorials hub (Claude/ChatGPT/Cursor/Codex/Gemini/API) |
+| [agents.zapsign.com.br/llms.txt](https://agents.zapsign.com.br/llms.txt) | Agent-readable index of the hub |
+| [`mcp-server-zapsign`](https://www.npmjs.com/package/mcp-server-zapsign) | Official npm package |
+| [`@marcelocorrea/mcp-zapsign`](https://www.npmjs.com/package/@marcelocorrea/mcp-zapsign) | Community npm benchmark |
+
+When refreshing presence, confirm the agents hub still points at this repo and the remote MCP URL.

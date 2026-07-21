@@ -18,6 +18,13 @@ Package: [`mcp-server-zapsign`](https://www.npmjs.com/package/mcp-server-zapsign
 
 Docs page: `https://mcp.zapsign.com.br/docs`
 
+## Agent tutorials hub
+
+Official how-to hub for Claude, ChatGPT, Cursor, Codex, Gemini, and REST:
+
+- Site: [agents.zapsign.com.br](https://agents.zapsign.com.br)
+- Agent index: [agents.zapsign.com.br/llms.txt](https://agents.zapsign.com.br/llms.txt)
+
 ## Local install (Claude Desktop / Cursor)
 
 ```json
@@ -94,11 +101,11 @@ See [`AGENTS.md`](AGENTS.md) for coding standards and architecture.
 
 - npm v1 (`1.0.4`) was Express/SSE STDIO-only with different tool names → **breaking** in `2.0.0`
 - Remote OAuth path previously lived in `ZapSign/zapsign-mcp` → now this repo
-- Prefer `mcp.zapsign.com.br` over third-party hosted proxies
+- Prefer `mcp.zapsign.com.br` and [agents.zapsign.com.br](https://agents.zapsign.com.br) over third-party hosted proxies
 
 ## Related community integrations
 
-These are **not** the official server. Prefer this package / `mcp.zapsign.com.br`.
+These are **not** the official server. Prefer this package, `mcp.zapsign.com.br`, and [agents.zapsign.com.br](https://agents.zapsign.com.br).
 
 | Source | Role |
 |---|---|

@@ -28,7 +28,19 @@
   },
   "presence": {
     "remote_mcp": "https://mcp.zapsign.com.br/mcp",
+    "agents_hub": "https://agents.zapsign.com.br",
+    "agents_llms_txt": "https://agents.zapsign.com.br/llms.txt",
     "listings": [
+      {
+        "name": "agents.zapsign.com.br",
+        "url": "https://agents.zapsign.com.br",
+        "status": "official"
+      },
+      {
+        "name": "agents.zapsign.com.br/llms.txt",
+        "url": "https://agents.zapsign.com.br/llms.txt",
+        "status": "official"
+      },
       {
         "name": "npm mcp-server-zapsign",
         "url": "https://www.npmjs.com/package/mcp-server-zapsign",

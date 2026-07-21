@@ -9,7 +9,16 @@
 
 ## Follow-up PRs (separate repos)
 
-### `ZapSign/agents`
+### `ZapSign/agents` → public site [agents.zapsign.com.br](https://agents.zapsign.com.br)
+
+Canonical hub for agent tutorials. Keep in sync with this repo:
+
+| Surface | URL |
+|---|---|
+| Hub | https://agents.zapsign.com.br |
+| Agent index | https://agents.zapsign.com.br/llms.txt |
+| Remote MCP | https://mcp.zapsign.com.br/mcp |
+| npm | `mcp-server-zapsign` / https://github.com/ZapSign/api-mcp |
 
 Search/replace targets:
 
@@ -20,7 +29,7 @@ Search/replace targets:
 | npm package docs pointing at Express/SSE only | Dual-mode: remote `https://mcp.zapsign.com.br/mcp` + `npx -y mcp-server-zapsign` |
 | Tool tables listing only old api-mcp names | Link to api-mcp README / TOOL_UNION |
 
-Likely files (confirm with repo search): `llms.txt`, `tutoriais/servidor-mcp.html`, Codex/Cursor/ChatGPT/Gemini tutorials.
+Likely files (confirm with repo search): `llms.txt`, `index.html`, `tutoriais/servidor-mcp.html`, Codex/Cursor/ChatGPT/Gemini tutorials.
 
 ### `ZapSign/zapsign-builder-docs` / `zapsign-builder-kits`
 
