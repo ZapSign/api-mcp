@@ -1,12 +1,13 @@
 # Phase 4 — publish / deploy / retire (human credentials required)
 
-## Blockers observed (2026-07-21)
+## Status (2026-07-21)
 
-| Action | Status | Why |
+| Action | Status | Notes |
 |---|---|---|
-| `wrangler deploy` | Blocked | `wrangler whoami` → not authenticated. Run `wrangler login` (account that owns `mcp.zapsign.com.br` + OAuth KV). |
-| `npm publish` | Blocked | `npm whoami` → ENEEDAUTH. Run `npm login` with access to publish `mcp-server-zapsign`. |
-| Archive `zapsign-mcp` | Prepared locally only | Do **after** Workers deploy from `api-mcp` succeeds and npm `2.0.0` is live. |
+| `wrangler deploy` | Done | Worker `zapsign-mcp` on `mcp.zapsign.com.br` (`/docs` → 200) |
+| `npm publish` | Done | [`mcp-server-zapsign@2.0.0`](https://www.npmjs.com/package/mcp-server-zapsign) as `zapsign-private` via WSL |
+| Merge PR #13 | Done | Merged to `api-mcp` main |
+| Archive `zapsign-mcp` | Done | README redirect + GitHub archive |
 
 ## Commands (after credentials)
 
