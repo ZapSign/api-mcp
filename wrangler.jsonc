@@ -8,6 +8,10 @@
     {
       "pattern": "mcp.zapsign.com.br",
       "custom_domain": true
+    },
+    {
+      "pattern": "mcp.zapsign.co",
+      "custom_domain": true
     }
   ],
   "kv_namespaces": [

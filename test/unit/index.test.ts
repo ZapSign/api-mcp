@@ -107,10 +107,10 @@ describe('MCP CORS configuration', () => {
 
       const options = testState.oauthProviderOptions as OAuthProviderOptions;
 
-      expect(options.apiRoute).toBe('https://mcp.zapsign.com.br/mcp');
-      expect(options.authorizeEndpoint).toBe('https://mcp.zapsign.com.br/authorize');
-      expect(options.tokenEndpoint).toBe('https://mcp.zapsign.com.br/token');
-      expect(options.clientRegistrationEndpoint).toBe('https://mcp.zapsign.com.br/register');
+      expect(options.apiRoute).toBe('/mcp');
+      expect(options.authorizeEndpoint).toBe('/authorize');
+      expect(options.tokenEndpoint).toBe('/token');
+      expect(options.clientRegistrationEndpoint).toBe('/register');
       expect(options.allowPlainPKCE).toBe(false);
       expect(options.scopesSupported).toEqual([
         'documents:read',
@@ -125,7 +125,10 @@ describe('MCP CORS configuration', () => {
       ]);
       expect(options.resourceMetadata).toEqual({
         resource: 'https://mcp.zapsign.com.br/mcp',
-        authorization_servers: ['https://mcp.zapsign.com.br'],
+        authorization_servers: [
+          'https://mcp.zapsign.com.br',
+          'https://mcp.zapsign.co',
+        ],
         scopes_supported: options.scopesSupported,
       });
     },
