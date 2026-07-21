@@ -110,6 +110,14 @@ These are **not** the official server. Prefer this package / `mcp.zapsign.com.br
 
 Also scan Smithery, Glama, PulseMCP, mcpservers.org, and the Anthropic Connectors Directory after cutover.
 
+## Growth metrics
+
+Track BR search intent (Google Trends) and npm downloads over time:
+
+- Docs: [`docs/marketing/README.md`](docs/marketing/README.md)
+- Snapshot: `node scripts/marketing/take-snapshot.mjs`
+- Cursor skill: `mcp-growth-metrics` · agent: `mcp-marketing`
+
 ## License
 
 MIT © ZapSign

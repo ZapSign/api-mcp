@@ -1,0 +1,54 @@
+{
+  "date": "2026-07-21",
+  "geo": "BR",
+  "trends": {
+    "source_url": "https://trends.google.com/trends/explore?geo=BR&q=zapsign%20api,zapsign%20mcp,zapsign%20chatgpt,zapsign%20claude",
+    "timeframe": "past_12_months",
+    "terms": {
+      "zapsign api": 0,
+      "zapsign mcp": 2,
+      "zapsign chatgpt": 1,
+      "zapsign claude": 0
+    },
+    "notes": "Averages from Interest over time (Brazil, Past 12 months). Ranking: mcp (2) > chatgpt (1) > api/claude (0). Single spike: zapsign mcp reached 100 week of 2025-12-21; otherwise near zero. Several Interest by subregion widgets showed 'not enough data'."
+  },
+  "npm": {
+    "mcp-server-zapsign": {
+      "last_day": 12,
+      "last_week": 101,
+      "last_month": 246,
+      "version": "1.0.4"
+    },
+    "@marcelocorrea/mcp-zapsign": {
+      "last_day": 4,
+      "last_week": 21,
+      "last_month": 74,
+      "version": "2.0.0"
+    }
+  },
+  "presence": {
+    "remote_mcp": "https://mcp.zapsign.com.br/mcp",
+    "listings": [
+      {
+        "name": "npm mcp-server-zapsign",
+        "url": "https://www.npmjs.com/package/mcp-server-zapsign",
+        "status": "listed"
+      },
+      {
+        "name": "mcp.ai/zapsign",
+        "url": "https://mcp.ai/zapsign",
+        "status": "third_party"
+      },
+      {
+        "name": "mcpbundles zapsign",
+        "url": "https://www.mcpbundles.com/skills/zapsign",
+        "status": "third_party"
+      },
+      {
+        "name": "mcpmarket zapsign-signature-manager",
+        "url": "https://mcpmarket.com/tools/skills/zapsign-signature-manager",
+        "status": "unknown"
+      }
+    ]
+  }
+}
