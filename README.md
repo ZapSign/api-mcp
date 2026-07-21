@@ -1,411 +1,115 @@
-# MCP Server ZapSign
+# mcp-server-zapsign
 
-A Model Context Protocol (MCP) server that provides comprehensive access to the ZapSign API for electronic document signing and management.
+Official ZapSign [Model Context Protocol](https://modelcontextprotocol.io) server.
 
-## Features
+Dual-mode:
 
-- **Complete ZapSign API Integration**: All ZapSign API operations available as MCP tools
-- **Document Management**: Create, update, delete, and manage documents
-- **Template Operations**: Work with document templates and forms
-- **Signer Management**: Add, update, and manage document signers
-- **Background Checks**: Perform person and company background checks
-- **Webhook Management**: Create and manage webhooks for real-time notifications
-- **Timestamp Services**: Add timestamps to documents
-- **Authentication**: Support for both main and workspace API keys
-- **Validation**: Comprehensive input validation using Zod schemas
-- **Logging**: Structured logging with Winston
-- **Health Monitoring**: Built-in health checks and monitoring
+1. **Remote (recommended)** — Cloudflare Workers + OAuth 2.1 at `https://mcp.zapsign.com.br/mcp`
+2. **Local STDIO** — `npx -y mcp-server-zapsign` with `ZAPSIGN_API_KEY`
 
-## Prerequisites
+Package: [`mcp-server-zapsign`](https://www.npmjs.com/package/mcp-server-zapsign) · Repo: [`ZapSign/api-mcp`](https://github.com/ZapSign/api-mcp)
 
-- Node.js 18+ 
-- ZapSign API account and API keys
-- Access to ZapSign API documentation
+## Remote install (Claude Connectors)
 
-## Installation
+1. Open Claude → Settings → Connectors → Add custom connector
+2. URL: `https://mcp.zapsign.com.br/mcp`
+3. Complete OAuth and paste your ZapSign API token on the authorization page (never put the token in the URL)
+4. Approve scopes and finish
 
-### From npm (Recommended)
-```bash
-npm install mcp-server-zapsign
-```
+Docs page: `https://mcp.zapsign.com.br/docs`
 
-### From source
+## Local install (Claude Desktop / Cursor)
 
-1. Clone the repository:
-```bash
-git clone https://github.com/ZapSign/api-mcp.git
-cd api-mcp
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Create environment configuration:
-```bash
-cp .env.example .env
-```
-
-4. Configure your environment variables in `.env`:
-```env
-# Server Configuration
-PORT=3001
-HOST=localhost
-NODE_ENV=development
-
-# Server Information
-SERVER_NAME=mcp-server-zapsign
-SERVER_VERSION=1.0.0
-
-# ZapSign API Configuration
-ZAPSIGN_API_KEY=your_zapsign_api_key_here
-ZAPSIGN_BASE_URL=https://api.zapsign.com.br
-ZAPSIGN_API_VERSION=v1
-
-# Logging Configuration
-LOG_LEVEL=info
-
-# Features Configuration
-ENABLE_METRICS=false
-ENABLE_RATE_LIMITING=true
-MAX_REQUESTS_PER_MINUTE=100
-```
-
-## Usage
-
-### Starting the Server
-
-#### STDIO Mode (Default)
-```bash
-npm start
-```
-
-#### SSE Mode (HTTP Server)
-```bash
-npm run start:sse
-```
-
-#### Development Mode
-```bash
-npm run dev
-```
-
-### Server Modes
-
-- **STDIO Mode**: Standard MCP server using stdin/stdout for communication
-- **SSE Mode**: HTTP server with Server-Sent Events for web-based MCP clients
-- **Health Check**: Available at `/health` endpoint when running in SSE mode
-
-## 🐳 Docker Deployment
-
-### Quick Start with Traefik (Recommended)
-```bash
-# Clone the repository
-git clone https://github.com/ZapSign/api-mcp.git
-cd api-mcp
-
-# Copy environment file
-cp .env.example .env
-
-# Edit environment variables (set DOMAIN_NAME and CERTBOT_EMAIL)
-nano .env
-
-# Set up Traefik directories
-chmod +x setup-traefik.sh
-./setup-traefik.sh
-
-# Start with Traefik (automatic SSL)
-docker-compose up -d
-```
-
-### Alternative: Development Setup
-```bash
-# Start with development Docker Compose (no SSL)
-docker-compose -f docker-compose.dev.yml up -d
-```
-
-### Legacy: Nginx + Certbot Setup
-```bash
-# Use production compose file with Nginx
-docker-compose -f docker-compose.prod.yml up -d
-
-# Setup SSL certificates manually
-chmod +x nginx/setup-ssl.sh
-./nginx/setup-ssl.sh
-```
-
-### Docker Compose Files
-- **`docker-compose.yml`**: **Production with Traefik (automatic SSL)**
-- **`docker-compose.dev.yml`**: Development and testing setup
-- **`nginx/`**: Nginx configuration for manual HTTPS setup
-- **`nginx/setup-ssl.sh`**: Manual SSL certificate setup script
-
-### HTTPS Features
-- **Traefik Reverse Proxy**: **Automatic SSL management with Docker labels**
-- **Let's Encrypt Support**: **Zero-config SSL certificate management**
-- **Nginx Alternative**: Manual SSL setup option for advanced users
-- **Security Headers**: XSS protection, content security policy
-- **Rate Limiting**: Configurable request limits per IP
-- **Gzip Compression**: Optimized content delivery
-- **Automatic Renewal**: **SSL certificates auto-renew without downtime**
-
-For detailed EC2 deployment instructions, see [EC2 Deployment Guide](docs/deployment/EC2_DEPLOYMENT.md).
-
-## 📋 Docker Compose Configuration
-
-### Development Setup (`docker-compose.yml`)
-```yaml
-services:
-  mcp-zapsign-server:      # Production server on port 3001
-  mcp-zapsign-server-dev:  # Development server on port 3002
-```
-
-### Production Setup (`docker-compose.prod.yml`)
-```yaml
-services:
-  nginx-proxy:             # HTTPS reverse proxy (ports 80, 443)
-  mcp-zapsign-server:      # Production server (internal port 3001)
-  certbot:                 # Let's Encrypt SSL certificate manager
-```
-
-### Key Features
-- **Load Balancing**: Nginx distributes traffic across multiple instances
-- **SSL Termination**: HTTPS handled at the proxy level
-- **Health Checks**: Automatic service monitoring and restart
-- **Resource Limits**: Memory and CPU constraints for production
-- **Logging**: Centralized log management
-- **Security**: Rate limiting and security headers
-
-## Available Tools
-
-### Document Operations
-- `create_document_from_upload` - Create document from uploaded file
-- `create_document_from_template` - Create document from template
-- `get_document_details` - Get document information
-- `list_documents` - List all documents
-- `update_document` - Update document properties
-- `delete_document` - Delete a document
-- `add_extra_document` - Add extra document to envelope
-- `place_signatures` - Position signatures on document
-
-### Template Operations
-- `list_templates` - List available templates
-- `get_template_details` - Get template information
-- `create_template` - Create new template
-- `update_template` - Update template properties
-- `delete_template` - Delete a template
-
-### Signer Operations
-- `add_signer` - Add signer to document
-- `update_signer` - Update signer information
-- `get_signer_details` - Get signer information
-- `delete_signer` - Remove signer from document
-- `sign_in_batch` - Batch signing operations
-
-### Background Check Operations
-- `create_person_background_check` - Check person background
-- `create_company_background_check` - Check company background
-- `get_background_check_status` - Get check status
-
-### Webhook Operations
-- `create_webhook` - Create webhook for notifications
-- `delete_webhook` - Remove webhook
-- `manage_webhook_headers` - Configure webhook headers
-
-### Timestamp Operations
-- `add_timestamp` - Add timestamp to document
-
-## API Documentation
-
-This server implements all ZapSign API endpoints as documented at:
-- [ZapSign API Documentation](https://docs.zapsign.com.br/)
-
-### Key API Features
-- **Authentication**: Bearer token authentication
-- **Rate Limiting**: Configurable request limits
-- **Error Handling**: Comprehensive error responses
-- **Validation**: Input validation using Zod schemas
-- **Logging**: Detailed request/response logging
-
-## Configuration
-
-### Environment Variables
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `PORT` | Server port | 3001 | No |
-| `HOST` | Server host | localhost | No |
-| `ZAPSIGN_API_KEY` | Main ZapSign API key | - | Yes |
-
-| `ZAPSIGN_BASE_URL` | ZapSign API base URL | https://api.zapsign.com.br | No |
-| `LOG_LEVEL` | Logging level | info | No |
-| `ENABLE_RATE_LIMITING` | Enable rate limiting | true | No |
-
-### Logging Levels
-- `error`: Only error messages
-- `warn`: Warning and error messages
-- `info`: Information, warning, and error messages
-- `debug`: All messages including debug information
-
-## Development
-
-### Project Structure
-```
-mcp-zapsign-server/
-├── lib/
-│   ├── config.js           # Configuration management
-│   ├── logger.js           # Logging infrastructure
-│   ├── tools.js            # Tool discovery
-│   └── services/
-│       ├── zapsignApi.js   # ZapSign API client
-│       ├── auth.js         # Authentication service
-│       └── validation.js   # Input validation
-├── tools/
-│   └── zapsign-workspace/
-│       └── api/            # Individual tool implementations
-├── mcpServer.js            # Main server file
-├── package.json
-└── README.md
-```
-
-### Adding New Tools
-
-1. Create a new tool file in `tools/zapsign-workspace/api/`
-2. Follow the existing tool structure:
-```javascript
-const executeFunction = async (args) => {
-  // Tool implementation
-};
-
-const apiTool = {
-  function: executeFunction,
-  definition: {
-    type: 'function',
-    function: {
-      name: 'tool_name',
-      description: 'Tool description',
-      parameters: {
-        // Parameter schema
+```json
+{
+  "mcpServers": {
+    "zapsign": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-zapsign"],
+      "env": {
+        "ZAPSIGN_API_KEY": "your-zapsign-api-token",
+        "ZAPSIGN_BASE_URL": "https://api.zapsign.com.br"
       }
     }
   }
-};
-
-export { apiTool };
+}
 ```
 
-3. Add the tool to `tools/paths.js`
+`ZAPSIGN_BASE_URL` is optional (defaults to production). Use the sandbox API URL when testing against sandbox.
 
-### Testing
+## Tools
+
+Core Workers names are preserved. Full union also includes webhooks, envelopes, timestamps, batch sign, and partner tools. See [`docs/TOOL_UNION.md`](docs/TOOL_UNION.md).
+
+### Documents
+
+| Tool | Purpose |
+|---|---|
+| `list_documents` | List/filter documents |
+| `get_document` | Document details |
+| `create_document` | Create from `url_pdf`, `url_docx`, or `base64_pdf` (`async` optional) |
+| `update_document` | Update metadata |
+| `delete_document` | Delete document |
+| `place_signatures` | Place signature fields |
+| `add_extra_document` | Attach extra PDF |
+| `add_extra_document_from_template` | Extra doc from template |
+| `add_timestamp` | Timestamp a document URL |
+| `reorder_envelope_documents` | Reorder envelope docs |
+
+### Signers / templates / webhooks / partner
+
+| Tool | Purpose |
+|---|---|
+| `add_signer` / `get_signer` / `update_signer` / `delete_signer` | Signer CRUD |
+| `sign_in_batch` | Batch signing |
+| `list_templates` / `get_template` / `create_from_template` | Templates (`async` optional) |
+| `create_webhook` / `delete_webhook` | Webhooks |
+| `create_webhook_header` / `delete_webhook_header` | Webhook headers |
+| `reprocess_documents_webhooks` | Reprocess deliveries |
+| `create_partner_account` / `update_partner_payment_status` | Partner APIs |
+
+Template tip: call `get_template` first and use exact braced strings from `inputs[].variable`: `{{name}}`, `{{address}}`, `{{start_date}}` — pass those exact braced keys as `data` keys to `create_from_template`.
+
+## Development
 
 ```bash
-# Run tests
+npm install
+cp .dev.vars.example .dev.vars
+npm run typecheck
+npm run lint
 npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Run specific test file
-npm test -- --testNamePattern="Tool Name"
+npm run dev          # wrangler local
+npm run build:stdio  # npm bin output
 ```
 
-## Error Handling
+Opt-in sandbox integration tests (never against production):
 
-The server provides comprehensive error handling:
+1. Copy `test/.env.test.example` → `test/.env.test`
+2. Set `ZAPSIGN_TEST_SIGNER_EMAIL`, `ZAPSIGN_TEST_PDF_URL`, and other sandbox fields
+3. Run `npm run test:integration`
 
-- **Validation Errors**: Input validation failures with detailed messages
-- **API Errors**: ZapSign API errors with context information
-- **Authentication Errors**: Invalid or expired API keys
-- **Network Errors**: Connection and timeout issues
-- **Internal Errors**: Server-side processing errors
+See [`AGENTS.md`](AGENTS.md) for coding standards and architecture.
 
-## Monitoring and Health Checks
+## Migration from v1 / zapsign-mcp
 
-### Health Endpoint
-When running in SSE mode, the server provides a health check endpoint:
+- npm v1 (`1.0.4`) was Express/SSE STDIO-only with different tool names → **breaking** in `2.0.0`
+- Remote OAuth path previously lived in `ZapSign/zapsign-mcp` → now this repo
+- Prefer `mcp.zapsign.com.br` over third-party hosted proxies
 
-```bash
-curl http://localhost:3001/health
-```
+## Related community integrations
 
-Response includes:
-- Server status
-- Authentication status
-- API health
-- Tool count
-- Timestamp
+These are **not** the official server. Prefer this package / `mcp.zapsign.com.br`.
 
-### Logging
-All operations are logged with structured data:
-- Request/response logging
-- Error tracking
-- Performance metrics
-- Authentication events
+| Source | Role |
+|---|---|
+| [vm0-ai zapsign SKILL.md](https://github.com/vm0-ai/vm0-skills/blob/main/zapsign/SKILL.md) | Community curl/skill |
+| [mcpmarket ZapSign Signature Manager](https://mcpmarket.com/tools/skills/zapsign-signature-manager) | Directory listing |
+| [mcp.ai/zapsign](https://mcp.ai/zapsign) | Third-party hosted proxy |
+| [@marcelocorrea/mcp-zapsign](https://www.npmjs.com/package/@marcelocorrea/mcp-zapsign) | Community npm package |
+| [mcpbundles.com/skills/zapsign](https://www.mcpbundles.com/skills/zapsign) | Community bundle |
 
-## Security Considerations
-
-- API keys are stored in environment variables
-- Input validation prevents malicious data
-- Rate limiting prevents abuse
-- Comprehensive error logging for security monitoring
-- No sensitive data in logs
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Authentication Failed**
-   - Verify API keys are correct
-   - Check API key permissions
-   - Ensure keys are not expired
-
-2. **Tool Not Found**
-   - Verify tool is properly exported
-   - Check tool is listed in `tools/paths.js`
-   - Restart server after adding new tools
-
-3. **API Errors**
-   - Check ZapSign API status
-   - Verify request parameters
-   - Check rate limits
-
-4. **Server Won't Start**
-   - Verify environment variables
-   - Check port availability
-   - Review error logs
-
-### Debug Mode
-
-Enable debug logging:
-```bash
-LOG_LEVEL=debug npm start
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Implement your changes
-4. Add tests for new functionality
-5. Submit a pull request
+Also scan Smithery, Glama, PulseMCP, mcpservers.org, and the Anthropic Connectors Directory after cutover.
 
 ## License
 
-MIT License - see LICENSE file for details
-
-## Support
-
-- **Documentation**: [ZapSign API Docs](https://docs.zapsign.com.br/)
-- **Issues**: [GitHub Issues](https://github.com/ZapSign/api-mcp/issues)
-- **Contact**: [ZapSign Support](mailto:support@zapsign.com.br)
-
-## Changelog
-
-### Version 1.0.0
-- Initial release
-- Complete ZapSign API integration
-- MCP protocol support
-- Comprehensive tool set
-- Authentication and validation
-- Logging and monitoring
+MIT © ZapSign

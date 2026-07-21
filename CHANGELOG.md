@@ -1,106 +1,25 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## 2.0.0 — 2026-07-21
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Breaking
 
-## [1.0.3] - 2024-12-28
-
-### Changed
-- **COMPLETED**: All tool files now use centralized authentication service
-- **FINALIZED**: API key consolidation - no more references to `ZAPSIGN_WORKSPACE_API_KEY`
-- **UNIFIED**: All 28 tools now use `authService.getApiKey()` method
-
-### Technical Improvements
-- **100% Centralized Auth**: All tools now use the same authentication method
-- **Consistent Implementation**: Uniform authentication across all API operations
-- **Maintainability**: Single source of truth for API key management
-- **Code Quality**: Eliminated duplicate environment variable access patterns
-
-### Files Updated
-- **23 tool files** updated to use centralized authentication
-- **Import statements** added to all tools requiring authentication
-- **Token assignments** standardized across all API operations
-
-## [1.0.2] - 2024-12-28
+- Replaced Express/SSE architecture with Cloudflare Workers + OAuth 2.1 (remote) and Node STDIO (local)
+- Renamed/normalized tools to the Workers Claude-friendly snake_case set (see `docs/TOOL_UNION.md`)
+- npm consumers must use `ZAPSIGN_API_KEY` with the new STDIO bin; Docker/Traefik/SSE hosting is no longer the supported path (archived under `docs/archive/api-mcp-v1/`)
 
 ### Added
-- **HTTPS Proxy Service**: Nginx reverse proxy for production deployments
-- **SSL Certificate Management**: Support for Let's Encrypt, self-signed, and existing certificates
-- **Production Docker Compose**: `docker-compose.prod.yml` optimized for EC2 deployment
-- **EC2 Deployment Guide**: Comprehensive deployment documentation with HTTPS setup
-- **Security Features**: Rate limiting, security headers, and firewall configuration
 
-### Docker Enhancements
-- **Nginx Configuration**: Production-ready Nginx setup with SSL termination
-- **Load Balancing**: Support for multiple MCP server instances
-- **Health Checks**: Automatic service monitoring and restart
-- **Resource Management**: Memory and CPU limits for production environments
-
-### Documentation
-- **Updated README**: Added Docker deployment and HTTPS information
-- **EC2 Deployment Guide**: Step-by-step instructions for AWS deployment
-- **SSL Setup Script**: Interactive script for certificate management
-- **Production Best Practices**: Security, monitoring, and scaling guidelines
-
-## [1.0.1] - 2024-12-28
+- Full tool union: core document/signer/template tools plus place signatures, extra docs, timestamp, envelope reorder, batch sign, webhooks, reprocess, and partner tools
+- Shared auth adapter (`getAuthProps`) for Workers OAuth props and STDIO env credentials
+- OAuth scopes: `webhooks:read`, `webhooks:write`, `partner:write`
+- `create_document` supports `url_docx` and `async`; `create_from_template` supports `async`
 
 ### Changed
-- **BREAKING CHANGE**: Simplified authentication configuration to use single `ZAPSIGN_API_KEY`
-- Simplified authentication configuration - now only requires one API key
-- Updated all tools to use centralized authentication service
-- Removed dual API key complexity from configuration and documentation
 
-### Technical Improvements
-- Centralized authentication logic in `authService`
-- Simplified configuration schema
-- Updated all tool files to use `authService.getApiKey()` instead of direct environment variable access
-- Improved code maintainability and consistency
+- Package remains `mcp-server-zapsign`; implementation now matches the former `zapsign-mcp` Workers quality bar
+- Canonical remote URL: `https://mcp.zapsign.com.br/mcp`
 
-## [1.0.0-beta.1] - 2024-12-28
+## 1.0.4
 
-### Added
-- Initial release of MCP ZapSign Server
-- Complete MCP (Model Context Protocol) server implementation
-- Comprehensive ZapSign API integration with all documented endpoints
-- Support for both STDIO and SSE (Server-Sent Events) modes
-- Authentication service with dual API key support (main + workspace)
-- Input validation using Zod schemas for all API operations
-- Structured logging with Winston
-- Health monitoring with `/health` endpoint
-- Configuration management with environment variable validation
-- Error handling with detailed context information
-- Docker and Docker Compose support for easy deployment
-- Comprehensive documentation and setup instructions
-
-### Features
-- **Document Operations**: Create, update, delete, list, place signatures
-- **Template Operations**: List, create, update, delete templates
-- **Signer Operations**: Add, update, delete signers with validation
-- **Background Checks**: Person and company checks with Brazilian format validation
-- **Webhook Management**: Create, delete, configure webhooks
-- **Timestamp Services**: Add timestamps to documents
-
-### Technical Details
-- Node.js 18+ with ES modules
-- Built-in support for Brazilian document formats (CPF, CNPJ)
-- Comprehensive error handling and logging
-- Ready for production deployment
-- Full MCP protocol compliance
-
-### Dependencies
-- @modelcontextprotocol/sdk: ^1.9.0
-- axios: ^1.6.0
-- dotenv: ^16.4.7
-- express: ^5.1.0
-- winston: ^3.11.0
-- zod: ^3.22.4
-
-## [Unreleased]
-
-### Planned
-- Enhanced template form management
-- Additional webhook event types
-- Performance optimizations
-- Extended documentation with more examples
+Previous Express/SSE release. See `docs/archive/api-mcp-v1/`.

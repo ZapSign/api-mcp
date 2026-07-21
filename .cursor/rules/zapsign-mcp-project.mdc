@@ -1,0 +1,35 @@
+---
+description: ZapSign MCP server project context — architecture, plan, and key references. Auto-applied to every session.
+alwaysApply: true
+---
+
+# ZapSign MCP Server — Project Context
+
+## Key Context (read before ANY task)
+- @file AGENTS.md — Coding standards, dev commands, task protocol, and commit convention
+- The assigned task, issue, or pull request — Scope, acceptance criteria, dependencies, and blockers
+- Relevant code, tests, and documentation — Current contract for the affected area
+
+## Architecture Summary
+Remote MCP server: Claude AI → OAuth 2.1 (Cloudflare OAuthProvider) → ZapSign API v1.
+Stack: TypeScript strict, Cloudflare Workers, @modelcontextprotocol/sdk ^1.27.0, agents 0.6.0.
+12 tools across 3 domains: documents (5), signers (4), templates (3).
+
+## Key References (fetch when implementing MCP or auth features)
+- MCP spec (2025-06-18): https://modelcontextprotocol.io/specification/2025-06-18
+- MCP SDK V1 API: https://github.com/modelcontextprotocol/typescript-sdk/tree/v1.x
+- Cloudflare OAuthProvider: https://github.com/cloudflare/workers-oauth-provider
+- Cloudflare Agents SDK: https://developers.cloudflare.com/agents/api-reference/mcp-handler-api/
+- ZapSign API docs: https://docs.zapsign.com.br/english
+- ZapSign auth (API token): https://docs.zapsign.com.br/english/authentication
+- ZapSign create doc: https://docs.zapsign.com.br/english/documentos/criar-documento
+- ZapSign signers: https://docs.zapsign.com.br/english/signatarios
+- ZapSign templates: https://docs.zapsign.com.br/english/templates
+- ZapSign environments: https://docs.zapsign.com.br/english/zapsign-environments
+- Anthropic directory submission: https://support.claude.com/en/articles/12922490-remote-mcp-server-submission-guide
+
+## Before Implementing ANY Task
+1. Read AGENTS.md and the assigned task before inspecting or changing code
+2. Record a focused failing test or executable evidence check before making a change
+3. Follow the checkpoint protocol after completing the task
+4. Do not run tests against the real ZapSign API unless the task explicitly authorizes them and the sandbox preflight passes

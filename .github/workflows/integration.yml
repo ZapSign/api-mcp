@@ -1,0 +1,29 @@
+name: Integration Tests (Sandbox)
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx vitest run --config vitest.integration.config.ts
+        env:
+          ZAPSIGN_API_TOKEN: ${{ secrets.ZAPSIGN_API_TOKEN }}
+          ZAPSIGN_API_URL: ${{ vars.ZAPSIGN_API_URL }}
+          ZAPSIGN_TEMPLATE_TOKEN: ${{ vars.ZAPSIGN_TEMPLATE_TOKEN }}
+          ZAPSIGN_TEST_SIGNER_EMAIL: ${{ vars.ZAPSIGN_TEST_SIGNER_EMAIL }}
+          ZAPSIGN_TEST_PDF_URL: ${{ vars.ZAPSIGN_TEST_PDF_URL }}
+          ZAPSIGN_ENABLE_NOTIFICATIONS: "false"

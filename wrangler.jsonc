@@ -1,0 +1,29 @@
+{
+  "name": "zapsign-mcp",
+  "account_id": "2182d309fab87e91c1ee112e8b9eca23",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-02-27",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "routes": [
+    {
+      "pattern": "mcp.zapsign.com.br/*",
+      "custom_domain": true
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_KV",
+      "id": "966f936ef0ad4366869960e37a16d6e5"
+    }
+  ],
+  "vars": {
+    "ZAPSIGN_API_URL": "https://api.zapsign.com.br",
+    "ENVIRONMENT": "production"
+  },
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# Local Wrangler bindings only. Copy to .dev.vars for `npm run dev`.
+# Do not add a Cloudflare API token or a ZapSign user API token to this file.
+ZAPSIGN_API_URL=https://sandbox.api.zapsign.com.br
+COOKIE_ENCRYPTION_KEY=
+ENVIRONMENT=sandbox

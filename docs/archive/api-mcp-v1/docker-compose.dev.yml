@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Development MCP ZapSign Server (HTTP only)
+  mcp-zapsign-server:
+    build: .
+    container_name: mcp-zapsign-server-dev
+    ports:
+      - "3001:3001"  # Expose for testing
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - HOST=0.0.0.0
+      - LOG_LEVEL=info
+      - ENABLE_RATE_LIMITING=false
+      - MAX_REQUESTS_PER_MINUTE=1000
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - .:/app  # Mount source code for development
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - mcp-dev-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+networks:
+  mcp-dev-network:
+    driver: bridge

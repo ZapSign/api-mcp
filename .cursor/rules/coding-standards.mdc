@@ -1,0 +1,36 @@
+---
+description: Coding standards for all TypeScript source files
+globs: src/**/*.ts
+alwaysApply: true
+---
+
+# Coding Standards
+
+## Structural Rules
+- Early return pattern: always. Guard clauses at the top.
+- No `else` after `return`. No `else` blocks at all.
+- No `switch` statements: use object maps (`Record<string, handler>`).
+- Maximum 2 levels of nesting. Extract to a function if deeper.
+- Cyclomatic complexity < 10 per function.
+- Cognitive complexity < 10 per function.
+- Maximum function length: 40 lines (excluding type signatures and JSDoc).
+- Single responsibility: each function does ONE thing.
+
+## Type Safety
+- No `any`: use `unknown` + type guards.
+- No `as` type assertions (except untyped library interfaces, with comment).
+- No silent catch blocks: re-throw, log, or return an error.
+- Use `as const` objects for finite value sets (NOT TypeScript enums).
+
+## Naming
+- Files: kebab-case (`create-document.ts`)
+- Types/Interfaces/Classes: PascalCase (`ZapSignDocument`)
+- Functions/Variables: camelCase (`listDocuments`)
+- Constants: UPPER_SNAKE_CASE (`MAX_RETRY_ATTEMPTS`)
+- Const value objects: PascalCase name + keys (`DocumentStatus.Pending`)
+- Log events: snake_case, past tense, max 35 chars (`document_created`)
+
+## Comments
+- English only. Explain WHY, never WHAT.
+- No narration comments.
+- JSDoc only on exported functions with `@param`, `@returns`, `@throws`.
