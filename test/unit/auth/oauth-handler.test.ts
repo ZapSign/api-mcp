@@ -315,14 +315,17 @@ describe('GET /authorize', () => {
     expect(html).toContain('lang="en"');
   });
 
-  it('should default to Portuguese when Accept-Language is missing', async () => {
+  it('should default to English when Accept-Language is missing', async () => {
     const env = createMockEnv();
     const request = makeRequest('GET', '/authorize');
 
     const response = await callHandler(request, env);
     const html = await response.text();
 
-    expect(html).toContain('Conectar ao ZapSign');
+    expect(response.headers.get('Content-Language')).toBe('en');
+    expect(response.headers.get('Vary')).toBe('Accept-Language');
+    expect(html).toContain('Connect to ZapSign');
+    expect(html).toContain('lang="en"');
   });
 
   it('should include guided steps and dashboard link', async () => {

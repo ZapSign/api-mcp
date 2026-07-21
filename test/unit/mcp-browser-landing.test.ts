@@ -49,10 +49,61 @@ describe('browser GET /mcp', () => {
 
       expect(response.status).toBe(200);
       expect(response.headers.get('Content-Type')).toContain('text/html');
+      expect(response.headers.get('Content-Language')).toBe('en');
       const html = await response.text();
       expect(html).toContain('mcp.zapsign.com.br/mcp');
-      expect(html).toContain('Conectar');
+      expect(html).toContain('Connect to ZapSign');
+      expect(html).toContain('lang="en"');
       expect(testState.oauthProviderFetch).not.toHaveBeenCalled();
+    },
+    15_000,
+  );
+
+  it(
+    'localizes the connect page from Accept-Language pt-BR',
+    async () => {
+      const worker = (await import('../../src/index.js')).default as WorkerHandler;
+
+      const response = await worker.fetch(
+        new Request('https://mcp.zapsign.com.br/mcp', {
+          headers: {
+            Accept: 'text/html',
+            'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+            'Sec-Fetch-Dest': 'document',
+          },
+        }),
+        { OAUTH_KV: { get: vi.fn() } },
+        {},
+      );
+
+      expect(response.headers.get('Content-Language')).toBe('pt-BR');
+      const html = await response.text();
+      expect(html).toContain('Conectar ao ZapSign');
+      expect(html).toContain('lang="pt-BR"');
+    },
+    15_000,
+  );
+
+  it(
+    'honors ?lang=es over Accept-Language',
+    async () => {
+      const worker = (await import('../../src/index.js')).default as WorkerHandler;
+
+      const response = await worker.fetch(
+        new Request('https://mcp.zapsign.com.br/mcp?lang=es', {
+          headers: {
+            Accept: 'text/html',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Sec-Fetch-Dest': 'document',
+          },
+        }),
+        { OAUTH_KV: { get: vi.fn() } },
+        {},
+      );
+
+      expect(response.headers.get('Content-Language')).toBe('es');
+      const html = await response.text();
+      expect(html).toContain('Conectar a ZapSign');
     },
     15_000,
   );
