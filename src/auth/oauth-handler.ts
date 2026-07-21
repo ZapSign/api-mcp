@@ -1,7 +1,7 @@
 import type { Env } from '../types/env.js';
 import {
-  CANONICAL_OAUTH_ORIGIN,
   DEFAULT_OAUTH_SCOPES,
+  isSupportedOAuthOrigin,
   type AuthProps,
 } from './types.js';
 import { handleDocs } from '../docs/index.js';
@@ -245,7 +245,7 @@ function validateLoginOrigin(
   cfConnectingIp: string | undefined,
 ): Response | null {
   const origin = request.headers.get('Origin');
-  if (!origin || origin === CANONICAL_OAUTH_ORIGIN) {
+  if (!origin || isSupportedOAuthOrigin(origin)) {
     return null;
   }
 

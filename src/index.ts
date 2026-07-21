@@ -6,9 +6,11 @@ import { AuthHandler } from './auth/oauth-handler.js';
 import { handleTokenExchange } from './auth/token-exchange.js';
 import {
   CANONICAL_MCP_RESOURCE,
-  CANONICAL_OAUTH_ENDPOINTS,
   CANONICAL_OAUTH_ORIGIN,
   DEFAULT_OAUTH_SCOPES,
+  OAUTH_ROUTE_PATHS,
+  SUPPORTED_OAUTH_ORIGINS,
+  isSupportedOAuthOrigin,
 } from './auth/types.js';
 import {
   handleMcpBrowserLanding,
@@ -34,7 +36,7 @@ function isStoredTokenData(value: unknown): value is StoredTokenData {
 function isRootAudience(value: string): boolean {
   try {
     const audience = new URL(value);
-    return audience.origin === CANONICAL_OAUTH_ORIGIN
+    return isSupportedOAuthOrigin(audience.origin)
       && (audience.pathname === '' || audience.pathname === '/');
   } catch {
     return false;
@@ -59,7 +61,7 @@ async function hashToken(token: string): Promise<string> {
 
 async function rejectRootAudience(request: Request, env: Env): Promise<Response | null> {
   const url = new URL(request.url);
-  if (url.origin !== CANONICAL_OAUTH_ORIGIN || url.pathname !== '/mcp') {
+  if (!isSupportedOAuthOrigin(url.origin) || url.pathname !== OAUTH_ROUTE_PATHS.Api) {
     return null;
   }
 
@@ -117,19 +119,20 @@ const mcpHandler = {
 };
 
 const oauthProvider = new OAuthProvider<Env>({
-  apiRoute: CANONICAL_MCP_RESOURCE,
+  // Path routes so mcp.zapsign.com.br and mcp.zapsign.co share the same Worker.
+  apiRoute: OAUTH_ROUTE_PATHS.Api,
   apiHandler: mcpHandler,
   defaultHandler: AuthHandler,
-  authorizeEndpoint: CANONICAL_OAUTH_ENDPOINTS.Authorize,
-  tokenEndpoint: CANONICAL_OAUTH_ENDPOINTS.Token,
-  clientRegistrationEndpoint: CANONICAL_OAUTH_ENDPOINTS.Register,
+  authorizeEndpoint: OAUTH_ROUTE_PATHS.Authorize,
+  tokenEndpoint: OAUTH_ROUTE_PATHS.Token,
+  clientRegistrationEndpoint: OAUTH_ROUTE_PATHS.Register,
   allowPlainPKCE: false,
   scopesSupported: [...DEFAULT_OAUTH_SCOPES],
   tokenExchangeCallback: handleTokenExchange,
   refreshTokenTTL: REFRESH_TOKEN_TTL_SECONDS,
   resourceMetadata: {
     resource: CANONICAL_MCP_RESOURCE,
-    authorization_servers: [CANONICAL_OAUTH_ORIGIN],
+    authorization_servers: [...SUPPORTED_OAUTH_ORIGINS],
     scopes_supported: [...DEFAULT_OAUTH_SCOPES],
   },
 });

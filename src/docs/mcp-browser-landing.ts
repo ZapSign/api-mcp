@@ -9,10 +9,8 @@ import {
   withSecurityHeaders,
   type SupportedLanguage,
 } from '../utils/html.js';
-import { CANONICAL_MCP_RESOURCE } from '../auth/types.js';
-
 const CLAUDE_TUTORIAL_URL = 'https://agents.zapsign.com.br/tutoriais/claude.html';
-const DOCS_URL = 'https://mcp.zapsign.com.br/docs';
+const MCP_URL_PLACEHOLDER = '{mcpUrl}';
 
 type LandingCopy = {
   title: string;
@@ -33,7 +31,7 @@ const COPY: Record<SupportedLanguage, LandingCopy> = {
     lead: 'Esta URL é o endpoint MCP. A tela de autorização com o Token API abre quando você adiciona o conector no Claude (ou outro cliente MCP).',
     howTitle: 'Como conectar no Claude',
     step1: 'Abra Claude → Configurações → Conectores → Adicionar conector personalizado',
-    step2: 'Nome: ZapSign · URL: https://mcp.zapsign.com.br/mcp',
+    step2: `Nome: ZapSign · URL: ${MCP_URL_PLACEHOLDER}`,
     step3: 'Deixe Client ID / Client Secret vazios e clique em Adicionar',
     step4: 'Ao conectar, a ZapSign abre a página de autorização para você colar o Token API',
     ctaClaude: 'Ver tutorial do Claude',
@@ -45,7 +43,7 @@ const COPY: Record<SupportedLanguage, LandingCopy> = {
     lead: 'This URL is the MCP endpoint. The API Token authorization page opens when you add the connector in Claude (or another MCP client).',
     howTitle: 'How to connect in Claude',
     step1: 'Open Claude → Settings → Connectors → Add custom connector',
-    step2: 'Name: ZapSign · URL: https://mcp.zapsign.com.br/mcp',
+    step2: `Name: ZapSign · URL: ${MCP_URL_PLACEHOLDER}`,
     step3: 'Leave OAuth Client ID / Secret empty and click Add',
     step4: 'When you connect, ZapSign opens the authorization page to paste your API Token',
     ctaClaude: 'Open Claude tutorial',
@@ -57,7 +55,7 @@ const COPY: Record<SupportedLanguage, LandingCopy> = {
     lead: 'Esta URL es el endpoint MCP. La página de autorización con Token API se abre al agregar el conector en Claude (u otro cliente MCP).',
     howTitle: 'Cómo conectar en Claude',
     step1: 'Abre Claude → Configuración → Conectores → Agregar conector personalizado',
-    step2: 'Nombre: ZapSign · URL: https://mcp.zapsign.com.br/mcp',
+    step2: `Nombre: ZapSign · URL: ${MCP_URL_PLACEHOLDER}`,
     step3: 'Deja Client ID / Client Secret vacíos y haz clic en Agregar',
     step4: 'Al conectar, ZapSign abre la página de autorización para pegar tu Token API',
     ctaClaude: 'Ver tutorial de Claude',
@@ -95,18 +93,18 @@ export function isBrowserMcpNavigation(request: Request): boolean {
   return request.headers.get('Sec-Fetch-Dest') === 'document';
 }
 
-function renderLanding(lang: SupportedLanguage): string {
+function renderLanding(lang: SupportedLanguage, mcpUrl: string, docsUrl: string): string {
   const t = resolveUiCopy(COPY, lang);
   const title = escapeHtml(t.title);
   const lead = escapeHtml(t.lead);
   const howTitle = escapeHtml(t.howTitle);
   const steps = [t.step1, t.step2, t.step3, t.step4]
-    .map((step) => `<li>${escapeHtml(step)}</li>`)
+    .map((step) => `<li>${escapeHtml(step.replaceAll(MCP_URL_PLACEHOLDER, mcpUrl))}</li>`)
     .join('');
   const urlLabel = escapeHtml(t.urlLabel);
   const ctaClaude = escapeHtml(t.ctaClaude);
   const ctaDocs = escapeHtml(t.ctaDocs);
-  const mcpUrl = escapeAttr(CANONICAL_MCP_RESOURCE);
+  const escapedMcpUrl = escapeHtml(mcpUrl);
 
   return `<!DOCTYPE html>
 <html lang="${escapeAttr(lang)}">
@@ -138,12 +136,12 @@ function renderLanding(lang: SupportedLanguage): string {
       <h1>${title}</h1>
       <p>${lead}</p>
       <div class="label">${urlLabel}</div>
-      <div class="url-box">${mcpUrl}</div>
+      <div class="url-box">${escapedMcpUrl}</div>
       <h2 style="font-size:1rem;margin:0 0 10px;">${howTitle}</h2>
       <ol>${steps}</ol>
       <div class="actions">
         <a class="btn primary" href="${escapeAttr(CLAUDE_TUTORIAL_URL)}">${ctaClaude}</a>
-        <a class="btn secondary" href="${escapeAttr(DOCS_URL)}">${ctaDocs}</a>
+        <a class="btn secondary" href="${escapeAttr(docsUrl)}">${ctaDocs}</a>
       </div>
     </div>
   </div>
@@ -159,5 +157,8 @@ function renderLanding(lang: SupportedLanguage): string {
  */
 export function handleMcpBrowserLanding(request: Request): Response {
   const lang = detectLanguage(request);
-  return withSecurityHeaders(htmlResponse(renderLanding(lang), 200, { lang }));
+  const origin = new URL(request.url).origin;
+  const mcpUrl = `${origin}/mcp`;
+  const docsUrl = `${origin}/docs`;
+  return withSecurityHeaders(htmlResponse(renderLanding(lang, mcpUrl, docsUrl), 200, { lang }));
 }
