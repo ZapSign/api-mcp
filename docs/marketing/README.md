@@ -1,8 +1,24 @@
 # ZapSign MCP growth metrics
 
-Track search intent and package adoption for the official MCP server over time.
+Track search intent, package adoption, and shared marketing analytics for Agents + MCP.
 
-## How to refresh
+## Shared analytics (live)
+
+GA4 + Microsoft Clarity + Google Search Console cover marketing surfaces on:
+
+- [agents.zapsign.com.br](https://agents.zapsign.com.br)
+- [mcp.zapsign.com.br](https://mcp.zapsign.com.br) (`/docs`, `/mcp` landing)
+- [mcp.zapsign.co](https://mcp.zapsign.co) (same Worker)
+
+Consent Mode v2 + banner gate tags. OAuth `/authorize` is never instrumented.
+
+Canonical IDs and admin notes: [`MEASUREMENT_IDS.md`](MEASUREMENT_IDS.md)  
+Baseline checklist + 30-day ritual: [`SEO_CADENCE.md`](SEO_CADENCE.md)  
+Privacy wording: [`../PRIVACY_POLICY_WEB.md`](../PRIVACY_POLICY_WEB.md) §4.5
+
+Deployed wiring: Agents PR [#5](https://github.com/ZapSign/agents/pull/5), MCP PR [#22](https://github.com/ZapSign/api-mcp/pull/22).
+
+## How to refresh (Trends / npm)
 
 ```bash
 node scripts/marketing/take-snapshot.mjs
@@ -18,9 +34,10 @@ Then follow [`.cursor/skills/mcp-growth-metrics/SKILL.md`](../../.cursor/skills/
 
 | Path | Purpose |
 |------|---------|
-| `snapshots/YYYY-MM-DD.json` | Point-in-time metrics |
+| `MEASUREMENT_IDS.md` | Live GA4 / Clarity / GSC IDs + wiring |
+| `SEO_CADENCE.md` | Baseline checklist + 30-day organic review ritual |
+| `snapshots/YYYY-MM-DD.json` | Point-in-time Trends/npm metrics |
 | `STATUS.md` | Human-readable deltas over time |
-| `SEO_CADENCE.md` | GA4 / Clarity / GSC baseline + 30-day organic review ritual |
 | `../../scripts/marketing/take-snapshot.mjs` | npm + scaffold writer |
 
 ## Official surfaces

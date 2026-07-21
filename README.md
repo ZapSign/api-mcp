@@ -117,13 +117,21 @@ These are **not** the official server. Prefer this package, `mcp.zapsign.com.br`
 
 Also scan Smithery, Glama, PulseMCP, mcpservers.org, and the Anthropic Connectors Directory after cutover.
 
-## Growth metrics
+## Growth metrics & analytics
 
-Track BR search intent (Google Trends) and npm downloads over time:
+Track BR search intent (Google Trends), npm downloads, and shared marketing analytics:
 
 - Docs: [`docs/marketing/README.md`](docs/marketing/README.md)
+- Measurement IDs (GA4 / Clarity / GSC): [`docs/marketing/MEASUREMENT_IDS.md`](docs/marketing/MEASUREMENT_IDS.md)
+- SEO cadence (30-day review): [`docs/marketing/SEO_CADENCE.md`](docs/marketing/SEO_CADENCE.md)
 - Snapshot: `node scripts/marketing/take-snapshot.mjs`
 - Cursor skill: `mcp-growth-metrics` · agent: `mcp-marketing`
+
+**Live marketing analytics** (Consent Mode v2 + banner; shared with [agents.zapsign.com.br](https://agents.zapsign.com.br)):
+
+- GA4 `G-GNJFSQFD50` + Clarity `xq06022ata` on `/docs` and the `/mcp` browser landing only
+- Never on `/authorize`
+- Hosts: `mcp.zapsign.com.br`, `mcp.zapsign.co` (same Worker vars)
 
 ## License
 
