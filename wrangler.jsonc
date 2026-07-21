@@ -23,8 +23,8 @@
   "vars": {
     "ZAPSIGN_API_URL": "https://api.zapsign.com.br",
     "ENVIRONMENT": "production",
-    "GA4_MEASUREMENT_ID": "",
-    "CLARITY_PROJECT_ID": ""
+    "GA4_MEASUREMENT_ID": "G-GNJFSQFD50",
+    "CLARITY_PROJECT_ID": "xq06022ata"
   },
   "observability": {
     "logs": {
