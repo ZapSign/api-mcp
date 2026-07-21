@@ -1,12 +1,12 @@
-# Node modules
 node_modules/
-
-# Environment variables
-.env*
-
-# SSL certificates and sensitive data
-traefik/letsencrypt/
-
-# Log files
-logs/
-*.log
+dist/
+.env
+.env.*
+!.env.example
+.dev.vars
+test/.env.test
+!test/.env.test.example
+.context/
+.wrangler/
+*.swp
+*.swo

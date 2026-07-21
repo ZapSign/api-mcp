@@ -1,0 +1,35 @@
+---
+description: Testing conventions for vitest test files
+globs: test/**/*.ts
+---
+
+# Testing Conventions
+
+## Framework
+- Vitest with `@cloudflare/vitest-pool-workers` (runs in workerd runtime)
+- Config: `vitest.config.ts` using `defineWorkersConfig`
+
+## File Locations
+- Unit tests: `test/unit/**/*.test.ts`
+- Integration tests: `test/integration/**/*.test.ts`
+- Mock data: `test/mocks/zapsign-responses.ts`
+
+## Test Naming
+- Use `describe('module/function name', () => { ... })`
+- Use `it('should + expected behavior', () => { ... })`
+- Group by happy path, error cases, edge cases
+
+## Mock Conventions
+- Mock `global.fetch` for API client tests
+- Mock `ZapSignClient` methods for tool tests
+- Use realistic data from `test/mocks/zapsign-responses.ts`
+- Never mock the module under test
+
+## Assertions
+- Prefer `expect(x).toBe(y)` for primitives
+- Prefer `expect(x).toEqual(y)` for objects
+- Prefer `expect(fn).toThrow(ErrorClass)` for error testing
+- Always assert on error properties (code, statusCode, retryable)
+
+## Pre-commit
+Run before every commit: `npm run typecheck && npm run lint && npm test`

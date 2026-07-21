@@ -1,0 +1,47 @@
+---
+description: MCP tool implementation pattern for ZapSign tools
+globs: src/tools/**/*.ts
+---
+
+# Tool Implementation Pattern
+
+## File Structure
+- Each file exports ONE function: `registerXxxTool(server: McpServer): void`
+- The registry (`src/tools/registry.ts`) is the ONLY file that imports tool modules
+
+## Required Imports
+- `McpServer` from `@modelcontextprotocol/sdk/server/mcp.js`
+- `getMcpAuthContext` from `agents/mcp`
+- `ZapSignClient` from `../../api/client`
+- `formatToolSuccess`, `formatToolError` from `../../utils/tool-response`
+- `AuthProps` from `../../auth/types`
+- `ZapSignMcpError` from `../../errors/base`
+- `requireScope` from `../../utils/scope`
+- Schemas from `./schemas`
+
+## server.registerTool() Call
+Use `registerTool` (NOT deprecated `server.tool()`):
+```typescript
+server.registerTool('tool_name', { title, description, inputSchema: XxxSchema.shape, annotations: { readOnlyHint, destructiveHint, idempotentHint, openWorldHint: true } }, handler)
+```
+
+## Handler Pattern (5 steps)
+1. `const auth = getMcpAuthContext()` — no generic (SDK does not support it)
+2. Guard: `if (!auth) return formatToolError('Authentication required...')`
+3. `const props = auth.props as unknown as AuthProps` — cast needed, SDK types props as Record
+4. `requireScope(props.grantedScope, 'scope:level')` — enforced per tool
+5. `const client = new ZapSignClient(props.zapSignApiUrl, props.zapSignApiToken)`
+6. `const result = await client.method(args)`
+7. `return formatToolSuccess(JSON.stringify(result))` — compact JSON, no pretty-print
+
+## Error Handling
+- Catch `ZapSignMcpError` → `formatToolError(error.message)`
+- Catch unknown → `formatToolError('An unexpected error occurred')`
+- NEVER throw from a tool handler — always return formatToolError
+
+## Annotations (required on every tool)
+- `readOnlyHint`: true for GET tools, false for write tools
+- `destructiveHint`: true only for DELETE tools
+- `idempotentHint`: true for GET and PATCH tools
+- `openWorldHint`: true (all tools call external ZapSign API)
+- `title`: human-readable name for Claude.ai display

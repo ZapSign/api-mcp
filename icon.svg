@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D45A"/>
+      <stop offset="100%" stop-color="#00B74F"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" ry="96" fill="url(#bg)"/>
+  <g transform="translate(256,256)">
+    <!-- Pen nib / signature symbol -->
+    <path d="M-40,-120 L60,-120 L100,-80 L100,40 L-40,40 Z" fill="none" stroke="white" stroke-width="16" stroke-linejoin="round"/>
+    <line x1="-10" y1="-80" x2="70" y2="-80" stroke="white" stroke-width="12" stroke-linecap="round"/>
+    <line x1="-10" y1="-40" x2="70" y2="-40" stroke="white" stroke-width="12" stroke-linecap="round"/>
+    <line x1="-10" y1="0" x2="40" y2="0" stroke="white" stroke-width="12" stroke-linecap="round"/>
+    <!-- Checkmark -->
+    <path d="M20,60 L50,90 L110,20" fill="none" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Signature wave -->
+    <path d="M-100,100 Q-60,60 -20,100 Q20,140 60,100 Q100,60 140,100" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" opacity="0.8"/>
+  </g>
+</svg>
