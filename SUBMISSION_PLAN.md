@@ -31,7 +31,7 @@ Pre-submission plan to achieve full compliance with Anthropic's MCP Connectors D
 | Tool descriptions match actual functionality | Audited — no mismatches |
 | No hidden/obfuscated instructions | `SERVER_INSTRUCTIONS` is static and readable |
 | No financial transactions, ads, or AI media generation | N/A — only e-signature |
-| Production deployed and running | Connector endpoint: `https://mcp.zapsign.co/mcp` |
+| Production deployed and running | Connector endpoint: `https://mcp.zapsign.com.br/mcp` |
 | 225+ tests passing | Unit + integration |
 | CI/CD configured | GitHub Actions |
 | Firewall/IP allowlisting | Not applicable — Cloudflare Workers is public |
@@ -90,15 +90,19 @@ Our server runs on **Cloudflare Workers**, which is a public edge network. There
 
 ## SECTION 3: Current Tool Inventory
 
-The connector currently exposes exactly 12 tools across three domains: 5 document tools, 4 signer tools, and 3 template tools. Webhook tools are not part of this submission and must not be described as available.
+**Decision (2026-07-31):** Directory submissions list the truthful production registry of **25 tools**. Do not describe the remote marketplace surface as “exactly 12” on first submit. After both Anthropic and OpenAI listings are Live, Phase 4 may gate the remote Worker to the original core 12 (docs×5, signers×4, templates×3); STDIO/npm may keep the full union.
 
-The authoritative inventory is the registry in `src/tools/registry.ts`. Keep the public documentation, reviewer guide, and submission copy aligned with that registry.
+The authoritative inventory is the registry in `src/tools/registry.ts`. Keep the public documentation, reviewer guide, and submission copy aligned with that registry. Frozen form copy: `docs/submission/anthropic.md` and `docs/submission/openai.md`.
 
 | Domain | Tools |
 |---|---|
-| Documents | `list_documents`, `get_document`, `create_document`, `update_document`, `delete_document` |
-| Signers | `add_signer`, `get_signer`, `update_signer`, `delete_signer` |
-| Templates | `list_templates`, `get_template`, `create_from_template` |
+| Documents (10) | `list_documents`, `get_document`, `create_document`, `update_document`, `delete_document`, `place_signatures`, `add_extra_document`, `add_extra_document_from_template`, `add_timestamp`, `reorder_envelope_documents` |
+| Signers (5) | `add_signer`, `get_signer`, `update_signer`, `delete_signer`, `sign_in_batch` |
+| Templates (3) | `list_templates`, `get_template`, `create_from_template` |
+| Webhooks (5) | `create_webhook`, `delete_webhook`, `create_webhook_header`, `delete_webhook_header`, `reprocess_documents_webhooks` |
+| Partner (2) | `create_partner_account`, `update_partner_payment_status` |
+
+Partner tools require partner privileges; non-partner demo tokens receive actionable API errors.
 
 ---
 
@@ -112,7 +116,7 @@ The authoritative inventory is the registry in `src/tools/registry.ts`. Keep the
 **Modifies**: `src/auth/oauth-handler.ts`
 **Reads**: `docs/PRIVACY_POLICY.md`
 
-**Outcome**: Add a `/privacy` route to the `AuthHandler` that serves the privacy policy as HTML. This creates a stable HTTPS URL at `https://mcp.zapsign.co/privacy`.
+**Outcome**: Add a `/privacy` route to the `AuthHandler` that serves the privacy policy as HTML. This creates a stable HTTPS URL at `https://mcp.zapsign.com.br/privacy`.
 
 **Implementation**:
 
@@ -126,7 +130,7 @@ The authoritative inventory is the registry in `src/tools/registry.ts`. Keep the
 
 **Why not GitHub raw URL**: GitHub URLs can change with repo renames/transfers. A Worker endpoint is fully under our control and stable.
 
-**Acceptance**: `curl https://mcp.zapsign.co/privacy` returns 200 with HTML content. Privacy policy is readable in a browser. `tsc --noEmit` and `eslint` pass.
+**Acceptance**: `curl https://mcp.zapsign.com.br/privacy` returns 200 with HTML content. Privacy policy is readable in a browser. `tsc --noEmit` and `eslint` pass.
 
 ---
 
@@ -194,14 +198,14 @@ The authoritative inventory is the registry in `src/tools/registry.ts`. Keep the
 **Deps**: S1 (can start in parallel if needed)
 **Reads**: `src/tools/registry.ts`, `README.md`, `docs/REVIEWER_GUIDE.md`
 
-**Outcome**: Confirm that the submission describes exactly the 12 tools currently registered: five documents, four signers, and three templates.
+**Outcome**: Confirm that the submission describes the **25 tools** currently registered (documents, signers, templates, webhooks, partner). Gate-to-12 is a post-Live Phase 4 change only.
 
 **Checks**:
 
-1. Compare the three public inventories with `src/tools/registry.ts`.
-2. Confirm no copy mentions webhook tools or a variable tool count.
+1. Compare the public inventories with `src/tools/registry.ts`.
+2. Confirm submission packs (`docs/submission/*.md`) list the same 25 tools with human titles.
 
-**Acceptance**: The registry and all submission-facing inventories list the same 12 tools.
+**Acceptance**: The registry and all submission-facing inventories list the same 25 tools.
 
 ---
 
@@ -265,7 +269,7 @@ export function formatToolSuccess(text: string): ToolResponse {
 
 5. **Update REVIEWER_GUIDE.md**:
    - Provide reviewer credentials through an approved secure channel; never commit the token or add it to the connector URL
-   - Confirm the guide lists exactly 12 tools
+   - Confirm the guide lists all 25 tools
    - Add a note about what demo data is pre-loaded
    - Include a section: "Pre-loaded Test Data" listing the documents, templates, and signers the reviewer will see
 
@@ -326,23 +330,23 @@ Also review any previously uncommitted files from git status without reverting c
 3. Verify endpoints:
    ```bash
    # Health
-   curl https://mcp.zapsign.co/health
+   curl https://mcp.zapsign.com.br/health
 
    # Privacy policy (new)
-   curl https://mcp.zapsign.co/privacy
+   curl https://mcp.zapsign.com.br/privacy
 
    # OAuth discovery
-   curl https://mcp.zapsign.co/.well-known/oauth-authorization-server
+   curl https://mcp.zapsign.com.br/.well-known/oauth-authorization-server
 
    # MCP (should return 401 without auth)
-   curl https://mcp.zapsign.co/mcp
+   curl https://mcp.zapsign.com.br/mcp
    ```
 
 4. Test with MCP Inspector:
    ```bash
    npx @modelcontextprotocol/inspector@latest
    # Connect to production URL
-   # Verify exactly 12 tools are listed
+   # Verify 25 tools are listed (truthful first-submit inventory)
    # Test list_documents with real token
    ```
 
@@ -377,13 +381,13 @@ Also review any previously uncommitted files from git status without reverting c
 
 **Submission information** (prepare this before submitting):
 
-1. **Server URL**: `https://mcp.zapsign.co/mcp`
-2. **Server name**: ZapSign MCP Server
+1. **Server URL**: `https://mcp.zapsign.com.br/mcp`
+2. **Server name**: ZapSign
 3. **Tagline**: Create, send, and track e-signatures in Claude.
-4. **Server description**: Bring ZapSign’s e-signature workflow into Claude. Create signing requests from a PDF URL or reusable template, add signers, deliver signing links by email or WhatsApp, and track document status—all in one conversation.
-5. **Tools**: Exactly 12 tools covering document management, signer management, and templates.
-6. **Documentation URL**: Link to README on GitHub
-7. **Privacy Policy URL**: `https://mcp.zapsign.co/privacy`
+4. **Server description**: Bring ZapSign’s e-signature workflow into Claude. Create signing requests from a PDF URL or reusable template, add signers, deliver signing links by email or WhatsApp, track document status, manage webhooks, and (for partner accounts) provision partner companies—all in one conversation.
+5. **Tools**: **25 tools** (documents, signers, templates, webhooks, partner) — see `docs/submission/anthropic.md`.
+6. **Documentation URL**: `https://mcp.zapsign.com.br/docs`
+7. **Privacy Policy URL**: `https://mcp.zapsign.com.br/privacy`
 8. **Support contact**: support@zapsign.com.br
 9. **Test account credentials**: Share through an approved secure channel; the reviewer enters the token on the authorization page, never in the server URL
 10. **Usage examples**: The 3 examples from README
@@ -444,10 +448,10 @@ graph TD
 
 ## SECTION 6: Open Questions
 
-1. **Domain**: ~~Resolved~~ — Custom domain `mcp.zapsign.co` is configured and active on ZapSign's Cloudflare account.
+1. **Domain**: ~~Resolved~~ — Canonical custom domain `mcp.zapsign.com.br` (Worker may also alias `mcp.zapsign.co`; do not use `.co` as primary in directory forms).
 
 2. **API Token security for submission**: Share test credentials through an approved secure method. The reviewer enters the token on the authorization page; never place it in the connector URL.
 
-3. **Future tool additions**: The current submission includes exactly 12 tools. Any future tool addition requires a separate implementation, testing, and documentation review.
+3. **Future tool additions / gate-to-12**: First submit lists all 25 registered tools. After both listings are Live, Phase 4 may reduce the remote marketplace surface to the original core 12; document any amendment in the portals.
 
 4. **Post-submission monitoring**: Set up monitoring for the production Worker to ensure uptime during the review period. Cloudflare Dashboard > Workers & Pages > zapsign-mcp > Metrics. Consider enabling Logpush for persistent logs.

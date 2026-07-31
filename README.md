@@ -16,7 +16,14 @@ Package: [`mcp-server-zapsign`](https://www.npmjs.com/package/mcp-server-zapsign
 3. Complete OAuth and paste your ZapSign API token on the authorization page (never put the token in the URL)
 4. Approve scopes and finish
 
-Docs page: `https://mcp.zapsign.com.br/docs`
+Docs page: `https://mcp.zapsign.com.br/docs`  
+Privacy policy: `https://mcp.zapsign.com.br/privacy`
+
+## Usage examples
+
+1. **Track pending signatures** — “List my ZapSign documents that are still pending and summarize who still needs to sign.”
+2. **Send a contract** — “Create a signing request from this PDF URL, add two signers by email, and show me their signing links.”
+3. **Fill a template** — “Create a document from my contract template for client ACME using `{{client_name}}` and `{{address}}`, then confirm the status.”
 
 ## Agent tutorials hub
 
