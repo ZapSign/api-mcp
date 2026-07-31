@@ -253,7 +253,7 @@ const URLS = {
   support: 'mailto:support@zapsign.com.br',
   helpCenter: 'https://clients.zapsign.com.br/en/help',
   trustCenter: 'https://app.vanta.com/zapsign.com.br/trust/2r7pzu657cx76es2ji28l',
-  privacy: 'https://zapsign.co/politica-de-privacidade',
+  privacy: 'https://mcp.zapsign.com.br/privacy',
   terms: 'https://zapsign.co/termos-de-uso',
   dataRequest: 'https://cl3jb.share.hsforms.com/2C5HgRQBzTQySthuwNJ0zAQ',
 } as const;

@@ -159,6 +159,40 @@ describe('GET /health', () => {
 });
 
 // ---------------------------------------------------------------------------
+// GET /privacy
+// ---------------------------------------------------------------------------
+
+describe('GET /privacy', () => {
+  it('should return 200 HTML privacy policy for Claude and ChatGPT', async () => {
+    const env = createMockEnv();
+    const request = makeRequest('GET', '/privacy');
+
+    const response = await callHandler(request, env);
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Content-Type')).toContain('text/html');
+    expect(html).toContain('<!DOCTYPE html>');
+    expect(html).toContain('Privacy Policy');
+    expect(html).toContain('Claude');
+    expect(html).toContain('ChatGPT');
+    expect(html).toContain('support@zapsign.com.br');
+    expect(html).toContain('mcp.zapsign.com.br/privacy');
+  });
+
+  it('should use marketing CSP for privacy page', async () => {
+    const env = createMockEnv();
+    const request = makeRequest('GET', '/privacy');
+
+    const response = await callHandler(request, env);
+    const csp = response.headers.get('Content-Security-Policy') ?? '';
+
+    expect(csp).toContain('googletagmanager.com');
+    expect(csp).not.toContain("script-src 'none'");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Unknown routes → 404
 // ---------------------------------------------------------------------------
 

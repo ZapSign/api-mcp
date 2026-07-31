@@ -1,4 +1,8 @@
-# Privacy Policy — ZapSign MCP Connector
+/**
+ * Runtime copy of docs/PRIVACY_POLICY.md (Workers cannot read the repo filesystem).
+ * Keep this string in sync when editing the markdown source.
+ */
+export const PRIVACY_POLICY_MARKDOWN = `# Privacy Policy — ZapSign MCP Connector
 
 **Canonical URL:** https://mcp.zapsign.com.br/privacy  
 **Last updated:** July 31, 2026
@@ -45,7 +49,7 @@ The Connector operates as a pass-through proxy: it forwards requests from the MC
 - **Anthropic (Claude) / OpenAI (ChatGPT)**: The MCP host receives tool results returned by the Connector. How those hosts process conversations is governed by their own privacy policies.
 - **No other third parties**: No data is sold to or made available to any other third party for marketing purposes.
 
-Optional marketing analytics (Google Analytics 4 and Microsoft Clarity) may run on public documentation pages (`/docs`, browser landing for `/mcp`, and `/privacy`) only after the user consents via the on-page banner. Authorization pages (`/authorize`) are never instrumented.
+Optional marketing analytics (Google Analytics 4 and Microsoft Clarity) may run on public documentation pages (\`/docs\`, browser landing for \`/mcp\`, and \`/privacy\`) only after the user consents via the on-page banner. Authorization pages (\`/authorize\`) are never instrumented.
 
 ## Data Location
 
@@ -62,3 +66,4 @@ All data is processed on [Cloudflare's global edge network](https://www.cloudfla
 For privacy inquiries or questions about data handling, contact:
 
 **support@zapsign.com.br**
+`;

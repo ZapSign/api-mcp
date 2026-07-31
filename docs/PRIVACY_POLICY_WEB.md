@@ -434,7 +434,7 @@ We may update this Privacy Policy from time to time to reflect changes in our pr
 
 **Non-material changes** (clarifications, formatting, grammar) will be reflected in the version history with an updated date.
 
-The full version history of this policy is available in our [GitHub repository](https://github.com/fabricioism/zapsign-mcp/blob/main/docs/PRIVACY_POLICY_WEB.md).
+The full version history of this policy is available in our [GitHub repository](https://github.com/ZapSign/api-mcp/blob/main/docs/PRIVACY_POLICY_WEB.md). The live connector policy is served at [https://mcp.zapsign.com.br/privacy](https://mcp.zapsign.com.br/privacy).
 
 ---
 

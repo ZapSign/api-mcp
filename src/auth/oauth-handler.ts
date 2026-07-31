@@ -5,6 +5,7 @@ import {
   type AuthProps,
 } from './types.js';
 import { handleDocs } from '../docs/index.js';
+import { handlePrivacy } from '../docs/privacy-page.js';
 import type { AuthRequest, ClientInfo } from '@cloudflare/workers-oauth-provider';
 import { ZapSignClient } from '../api/client.js';
 import { log, logError } from '../utils/logger.js';
@@ -798,11 +799,13 @@ const routeHandlers: Record<string, RouteHandler> = {
   'GET /health': handleHealth,
   'GET /authorize': handleAuthorize,
   'GET /docs': handleDocs,
+  'GET /privacy': handlePrivacy,
   'POST /authorize/login': handleTokenSubmit,
 };
 
 const ROUTE_CSP_PROFILES: Record<string, CspProfileName> = {
   'GET /docs': CspProfile.Marketing,
+  'GET /privacy': CspProfile.Marketing,
 };
 
 function buildRouteKey(request: Request): string {

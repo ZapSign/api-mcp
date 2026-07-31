@@ -14,7 +14,7 @@ import {
 import { readMeasurementIds, renderMeasurementSnippets } from '../utils/measurement.js';
 
 const CHATGPT_TUTORIAL_URL = 'https://agents.zapsign.com.br/tutoriais/chatgpt.html';
-const PRIVACY_POLICY_URL = 'https://zapsign.co/politica-de-privacidade';
+const PRIVACY_POLICY_URL = 'https://mcp.zapsign.com.br/privacy';
 const MCP_URL_PLACEHOLDER = '{mcpUrl}';
 
 type LandingCopy = {

@@ -66,7 +66,7 @@ describe('browser GET /mcp', () => {
       expect(html).toContain('ChatGPT (or another MCP client, such as Claude)');
       expect(html).toContain('Apps &amp; Connectors');
       expect(html).toContain('lang="en"');
-      expect(html).toContain('politica-de-privacidade');
+      expect(html).toContain('https://mcp.zapsign.com.br/privacy');
       expect(html).not.toContain('tutoriais/claude.html');
       expect(html).not.toContain('<script');
       expect(testState.oauthProviderFetch).not.toHaveBeenCalled();

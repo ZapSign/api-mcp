@@ -108,7 +108,7 @@ describe('renderDocumentationPage', () => {
     expect(html).toContain('mailto:support@zapsign.com.br');
     expect(html).toContain('clients.zapsign.com.br');
     expect(html).toContain('vanta.com');
-    expect(html).toContain('politica-de-privacidade');
+    expect(html).toContain('https://mcp.zapsign.com.br/privacy');
     expect(html).toContain('plans-and-prices');
   });
 

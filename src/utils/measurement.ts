@@ -8,7 +8,7 @@ import { escapeAttr, escapeHtml, type SupportedLanguage } from './html.js';
 
 const GA4_ID_PATTERN = /^G-[A-Z0-9]+$/i;
 const CLARITY_ID_PATTERN = /^[a-z0-9]+$/i;
-const PRIVACY_POLICY_URL = 'https://zapsign.co/politica-de-privacidade';
+const PRIVACY_POLICY_URL = 'https://mcp.zapsign.com.br/privacy';
 const CONSENT_STORAGE_KEY = 'zapsign_mcp_analytics_consent';
 
 type ConsentCopy = {
