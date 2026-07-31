@@ -1,0 +1,66 @@
+{
+  "date": "2026-07-31",
+  "geo": "BR",
+  "trends": {
+    "source_url": "https://trends.google.com/trends/explore?geo=BR&q=zapsign%20api,zapsign%20mcp,zapsign%20chatgpt,zapsign%20claude",
+    "timeframe": "past_12_months",
+    "terms": {
+      "zapsign api": null,
+      "zapsign mcp": null,
+      "zapsign chatgpt": null,
+      "zapsign claude": null
+    },
+    "notes": "Fill relative interest (0-100) from Trends UI; do not invent values."
+  },
+  "npm": {
+    "mcp-server-zapsign": {
+      "last_day": 7,
+      "last_week": 121,
+      "last_month": 504,
+      "version": "2.0.0"
+    },
+    "@marcelocorrea/mcp-zapsign": {
+      "last_day": 2,
+      "last_week": 18,
+      "last_month": 74,
+      "version": "2.0.0"
+    }
+  },
+  "presence": {
+    "remote_mcp": "https://mcp.zapsign.com.br/mcp",
+    "agents_hub": "https://agents.zapsign.com.br",
+    "agents_llms_txt": "https://agents.zapsign.com.br/llms.txt",
+    "listings": [
+      {
+        "name": "agents.zapsign.com.br",
+        "url": "https://agents.zapsign.com.br",
+        "status": "official"
+      },
+      {
+        "name": "agents.zapsign.com.br/llms.txt",
+        "url": "https://agents.zapsign.com.br/llms.txt",
+        "status": "official"
+      },
+      {
+        "name": "npm mcp-server-zapsign",
+        "url": "https://www.npmjs.com/package/mcp-server-zapsign",
+        "status": "listed"
+      },
+      {
+        "name": "mcp.ai/zapsign",
+        "url": "https://mcp.ai/zapsign",
+        "status": "third_party"
+      },
+      {
+        "name": "mcpbundles zapsign",
+        "url": "https://www.mcpbundles.com/skills/zapsign",
+        "status": "third_party"
+      },
+      {
+        "name": "mcpmarket zapsign-signature-manager",
+        "url": "https://mcpmarket.com/tools/skills/zapsign-signature-manager",
+        "status": "unknown"
+      }
+    ]
+  }
+}
