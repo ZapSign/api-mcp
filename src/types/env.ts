@@ -10,4 +10,6 @@ export interface Env {
   GA4_MEASUREMENT_ID: string;
   /** Public Microsoft Clarity project ID; empty until project is created */
   CLARITY_PROJECT_ID: string;
+  /** OpenAI Apps domain-verification challenge token (plain text at well-known URL) */
+  OPENAI_APPS_CHALLENGE_TOKEN?: string;
 }

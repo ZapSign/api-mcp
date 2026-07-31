@@ -5,6 +5,7 @@ import {
   type AuthProps,
 } from './types.js';
 import { handleDocs } from '../docs/index.js';
+import { handleOpenAiAppsChallenge } from '../docs/openai-apps-challenge.js';
 import { handlePrivacy } from '../docs/privacy-page.js';
 import type { AuthRequest, ClientInfo } from '@cloudflare/workers-oauth-provider';
 import { ZapSignClient } from '../api/client.js';
@@ -800,6 +801,7 @@ const routeHandlers: Record<string, RouteHandler> = {
   'GET /authorize': handleAuthorize,
   'GET /docs': handleDocs,
   'GET /privacy': handlePrivacy,
+  'GET /.well-known/openai-apps-challenge': handleOpenAiAppsChallenge,
   'POST /authorize/login': handleTokenSubmit,
 };
 

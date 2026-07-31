@@ -1,8 +1,13 @@
 # Local Wrangler bindings only. Copy to .dev.vars for `npm run dev`.
-# Do not add a Cloudflare API token or a ZapSign user API token to this file.
+# Do not commit real secrets. For Phase 1 demo work, set ZAPSIGN_API_TOKEN here or in the shell
+# (gitignored `.dev.vars` only — never commit the token).
 ZAPSIGN_API_URL=https://sandbox.api.zapsign.com.br
 COOKIE_ENCRYPTION_KEY=
 ENVIRONMENT=sandbox
 # Public marketing analytics (optional). Leave empty to disable snippets.
 GA4_MEASUREMENT_ID=
 CLARITY_PROJECT_ID=
+# OpenAI Apps domain challenge (plain text served at /.well-known/openai-apps-challenge).
+# Prefer: npx wrangler secret put OPENAI_APPS_CHALLENGE_TOKEN
+# OPENAI_APPS_CHALLENGE_TOKEN=
+

@@ -1,68 +1,46 @@
-# OpenAI org / verification status (Phase 2B early)
+# OpenAI org / verification status (Phase 2B)
 
-**Date:** 2026-07-31  
+**Date:** 2026-07-31 (updated)  
 **Ticket:** [CAO-148](https://truora.atlassian.net/browse/CAO-148)  
-**Agent pass:** Phase 2B parallel start (org registration & business verification)  
-**Note:** `LAUNCH_STATE.md` did not exist yet — findings live here until Phase 0 merges them into the OPENAI section.
+**Canonical:** also mirrored in `LAUNCH_STATE.md` OPENAI track.
 
-## Session evidence
+## Session evidence (authenticated)
 
 | Check | Result |
 |---|---|
-| Browser session signed into OpenAI? | **No** — Cursor browser has no authenticated OpenAI session |
-| `https://platform.openai.com` | Redirects to `https://platform.openai.com/login` |
-| `https://platform.openai.com/plugins` | Redirects to `https://platform.openai.com/login?next=%2Fplugins` |
-| Login UI | Email + Continue; Google / Apple / Microsoft / phone SSO options |
-| ZapSign org exists? | **Unknown** — blocked before dashboard |
-| Apps Management write (`api.apps.write`)? | **Unknown** — blocked |
-| Business / developer verification? | **Unknown** — blocked |
-| Support contact `support@zapsign.com.br`? | **Unknown** — blocked |
-| Final app submission | **Not started** (correct — listing materials depend on Phase 0 `docs/submission/openai.md`) |
+| Browser session signed into OpenAI? | **Yes** |
+| Org | **ZapSign** (`org-zytAEIEHDhfBrgREh8gTiYUA`) |
+| Submitter | André Chaves — **Owner** (Apps Management Write included) |
+| `/plugins` under ZapSign | Loads; Create plugin available |
+| Business verification | **Started** — Persona inquiry `inq_Ab5jmhWL315dJws5trTcSecHwAxkpK` |
+| Persona email | Code sent to `andre@zapsign.com.br` — **HARD GATE** awaiting 5-digit code |
+| Create plugin With MCP | Blocked by modal: “Complete identity verification” until Persona finishes |
+| Support contact `support@zapsign.com.br` | Not set in listing yet (form blocked until verify) |
+| Domain challenge token | **Not issued** — requires plugin draft after identity verify |
+| Final app submission | **Not started** (blocked on identity verify + Phase 1 demo creds) |
 
-## HARD GATE (active)
+## HARD GATEs (active)
 
-**Login / missing OpenAI Platform credentials for ZapSign org.**
+1. **Persona email confirmation code** (and subsequent business/CNPJ docs + biometrics in Persona).
+2. **Phase 1 local demo token** — GitHub secret `ZAPSIGN_API_TOKEN` exists; not available in agent local env / `.dev.vars` / Wrangler secrets.
 
-Posted on CAO-148. Do not invent credentials. After a human provides an authenticated session (or credentials + 2FA when prompted), re-run this pass to:
-
-1. Confirm ZapSign org (or create it).
-2. Grant submitter role with **Apps Management → Write**.
-3. Start **business verification** (longest pole; may need CNPJ / legal package — separate gate).
-4. Set customer support contact to `support@zapsign.com.br`.
-5. Note portal challenge token for domain verify (do not submit final listing yet).
-
-## Domain verification method (docs — pre-login)
-
-Source: [OpenAI plugin submission — Domain verification](https://developers.openai.com/plugins/deploy/submission)
+## Domain verification method (ready in Worker)
 
 | Item | Guidance |
 |---|---|
-| Preferred method | **Well-known HTTPS challenge** (not DNS TXT/CNAME) |
+| Preferred method | Well-known HTTPS challenge |
 | Challenge URL | `https://mcp.zapsign.com.br/.well-known/openai-apps-challenge` |
-| Response body | Exact portal token as **plain text only** (no JSON/HTML/list) |
-| Challenge base | MCP hostname or parent hostname; **paths ignored** |
-| MCP URL planned | `https://mcp.zapsign.com.br/mcp` (Universal) |
-| DNS-panel gate | Only if Worker cannot serve `/.well-known/openai-apps-challenge` — prefer Worker route |
+| Response body | Exact portal token as **plain text only** |
+| Worker | `handleOpenAiAppsChallenge` + env/secret `OPENAI_APPS_CHALLENGE_TOKEN` |
+| Deploy step | After portal shows token: `npx wrangler secret put OPENAI_APPS_CHALLENGE_TOKEN` then deploy |
 
-Implementation note for later (post-login, when token exists): add a Worker route mirroring other `/.well-known` handlers; deploy before clicking Verify in the portal.
+## Next unblocked OpenAI steps (after Persona)
 
-## Apps Management permission (docs — pre-login)
-
-Source: [Get plugin submission access](https://developers.openai.com/plugins/deploy/submission)
-
-1. Platform → organization roles settings.
-2. Role for submitter: **Apps Management = Write**.
-3. Owners already have it; non-owners need Write to create/submit drafts.
-4. Reload `/plugins` after role change.
-
-## Next unblocked OpenAI steps (after login gate clears)
-
-1. Inspect org name / ID; confirm ZapSign ownership.
-2. Start business verification immediately; upload legal docs if prompted (HARD GATE on CNPJ package if missing).
-3. Set support contact to `support@zapsign.com.br`.
-4. Confirm Apps Management Write on submitter.
-5. Draft-only: create plugin shell only if useful for domain challenge token — **do not** submit for review until Phase 0 listing pack + Phase 1 demo credentials exist.
-6. Merge this file into `LAUNCH_STATE.md` OPENAI section when Phase 0 creates it.
+1. Finish Persona business verification (CNPJ / legal package if prompted).
+2. Create plugin With MCP → paste Public MCP URL `https://mcp.zapsign.com.br/mcp`.
+3. Capture domain challenge token → set Worker secret → deploy → Verify Domain.
+4. Set support to `support@zapsign.com.br`; paste listing from `docs/submission/openai.md`.
+5. Submit only when Phase 1 demo credentials are frozen.
 
 ## Secrets policy
 
