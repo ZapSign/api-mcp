@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.0 — 2026-08-13
+
+### Added
+
+- Stamp MCP-created documents with reserved `origin=mcp` metadata on `createDocument` and `createFromTemplate` (STDIO and OAuth) so webhooks can attribute agent-created docs
+
 ## 2.0.0 â€” 2026-07-21
 
 ### Breaking
