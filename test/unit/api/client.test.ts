@@ -625,8 +625,44 @@ describe('ZapSignClient document methods', () => {
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(init.method).toBe('POST');
     expect(url).toBe(`${BASE_URL}/api/v1/docs/`);
-    expect(JSON.parse(init.body as string)).toEqual(body);
+    expect(JSON.parse(init.body as string)).toEqual({
+      ...body,
+      metadata: [{ key: 'origin', value: 'mcp' }],
+    });
     expect(result).toEqual(MOCK_CREATED_DOCUMENT);
+  });
+
+  it('createDocument should POST metadata origin mcp', async () => {
+    fetchMock.mockResolvedValueOnce(mockResponse(200, MOCK_CREATED_DOCUMENT));
+    await client.createDocument({
+      name: 'New Doc',
+      url_pdf: 'https://example.com/test.pdf',
+      signers: [],
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const sentBody = JSON.parse(init.body as string);
+    expect(sentBody.metadata).toEqual([{ key: 'origin', value: 'mcp' }]);
+  });
+
+  it('createDocument should keep origin mcp when request already has metadata', async () => {
+    fetchMock.mockResolvedValueOnce(mockResponse(200, MOCK_CREATED_DOCUMENT));
+    await client.createDocument({
+      name: 'New Doc',
+      url_pdf: 'https://example.com/test.pdf',
+      signers: [],
+      metadata: [
+        { key: 'campaign', value: 'q3' },
+        { key: 'origin', value: 'web' },
+      ],
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const sentBody = JSON.parse(init.body as string);
+    expect(sentBody.metadata).toEqual([
+      { key: 'campaign', value: 'q3' },
+      { key: 'origin', value: 'mcp' },
+    ]);
   });
 
   it('updateDocument should PUT /api/v1/docs/:token/ with body', async () => {
@@ -834,5 +870,18 @@ describe('ZapSignClient template methods', () => {
     const sentBody = JSON.parse(init.body as string);
     expect(sentBody.send_automatic_email).toBeUndefined();
     expect(sentBody.send_automatic_whatsapp).toBeUndefined();
+  });
+
+  it('createFromTemplate should POST metadata origin mcp', async () => {
+    fetchMock.mockResolvedValueOnce(mockResponse(200, MOCK_CREATED_DOCUMENT));
+    await client.createFromTemplate({
+      template_token: 'tpl-token-1',
+      signer_name: 'Test Signer',
+      data: {},
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const sentBody = JSON.parse(init.body as string);
+    expect(sentBody.metadata).toEqual([{ key: 'origin', value: 'mcp' }]);
   });
 });

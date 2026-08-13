@@ -1,5 +1,6 @@
 import { ZapSignApiError } from '../errors/api-error.js';
 import { logError, logWarning } from '../utils/logger.js';
+import { withAgentDocumentMetadata } from './agent-document-metadata.js';
 import { ZAPSIGN_ENDPOINTS } from './endpoints.js';
 import type {
   AddExtraDocumentFromTemplateRequest,
@@ -399,7 +400,10 @@ export class ZapSignClient {
     const path = useAsync
       ? ZAPSIGN_ENDPOINTS.documentsAsync
       : ZAPSIGN_ENDPOINTS.documents;
-    return this.request('POST', path, body);
+    return this.request('POST', path, {
+      ...body,
+      metadata: withAgentDocumentMetadata(body.metadata),
+    });
   }
 
   /** @returns The updated document. */
@@ -483,6 +487,7 @@ export class ZapSignClient {
       data: Object.entries(request.data).map(([de, para]) => ({ de, para })),
       send_automatic_email: request.send_automatic_email,
       send_automatic_whatsapp: request.send_automatic_whatsapp,
+      metadata: withAgentDocumentMetadata(),
     };
     const path = request.async
       ? ZAPSIGN_ENDPOINTS.templateCreateDocAsync
