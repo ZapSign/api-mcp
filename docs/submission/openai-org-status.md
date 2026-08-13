@@ -1,6 +1,6 @@
 # OpenAI org / verification status (Phase 2B)
 
-**Date:** 2026-08-13 (updated)  
+**Date:** 2026-08-13 (updated — continue after auth hard-stop)  
 **Ticket:** [CAO-148](https://truora.atlassian.net/browse/CAO-148)  
 **Canonical:** also mirrored in `LAUNCH_STATE.md` OPENAI track.
 
@@ -12,8 +12,9 @@
 | Org | **ZapSign** (`org-zytAEIEHDhfBrgREh8gTiYUA`) |
 | Submitter | André Chaves — **Owner** (Apps Management Write included) |
 | `/plugins` under ZapSign | Loads; Create plugin menu shows With MCP + Skills only |
-| Business verification | **Identity incomplete** — Persona inquiry `inq_Ab5jmhWL315dJws5trTcSecHwAxkpK` (link refreshed with `code=` URL) |
-| Persona email | **HARD GATE** — Confirm your email address; 5-digit code to `andre@zapsign.com.br` |
+| Business verification | **Identity incomplete** — Persona inquiry `inq_Ab5jmhWL315dJws5trTcSecHwAxkpK` (OpenAI `TRUSTED_BUSINESS` STARTED; `PERSONA_BUSINESS` STARTED; billing/sentinel APPROVED) |
+| Persona session | Prior `inquiry-id` / old `code=` links → **Session/Link expired**. Refreshed successfully via `PUT https://api.openai.com/v1/dashboard/organizations/verifications` → new one-time `code=` URL |
+| Persona email | **HARD GATE** — Confirm your email address; 5-digit code to `andre@zapsign.com.br` (browser unlocked; ~10 min poll still on this step) |
 | Create plugin With MCP | Blocked by modal: “Complete identity verification” until Persona finishes |
 | Support contact `support@zapsign.com.br` | Not set in listing yet (form blocked until verify) |
 | Domain challenge token | **Not issued** — requires plugin draft after identity verify |
@@ -22,7 +23,7 @@
 
 ## HARD GATEs (active)
 
-1. **Persona email confirmation code** (and subsequent business/CNPJ docs + biometrics in Persona).
+1. **Persona email confirmation code** (then CNPJ / legal package + biometrics if Persona prompts).
 2. ~~Phase 1 local demo token~~ — cleared for this agent session via AWS SM (still not in Wrangler/GitHub-readable env for CI).
 
 ## Domain verification method (ready in Worker)
@@ -37,7 +38,7 @@
 
 ## Next unblocked OpenAI steps (after Persona)
 
-1. Finish Persona business verification (CNPJ / legal package if prompted).
+1. Finish Persona business verification (CNPJ / legal package if prompted) — ask once if docs needed.
 2. Create plugin With MCP → paste Public MCP URL `https://mcp.zapsign.com.br/mcp`.
 3. Capture domain challenge token → set Worker secret → deploy → Verify Domain.
 4. Set support to `support@zapsign.com.br`; paste listing from `docs/submission/openai.md`.

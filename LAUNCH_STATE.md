@@ -16,7 +16,7 @@ Do **not** put `mcp.zapsign.co` or legacy/`fabricio` URLs in submission forms. W
 | 0 — Recon / compliance | **Complete** | Commits `b3b32a3`, `e5b044a`, `7ae7f61`; Worker deployed (Version `adeae044-b5bb-4980-a1fd-ccc0c74bf15a`); `/privacy` **200** |
 | 1 — Demo account | **Cleared (session)** | AWS SM `stress-testing` key `token` validated 2026-08-13 via `GET /api/v1/docs/` **200** (session env only; never committed) |
 | 2A — Anthropic submit | **Blocked** | Portal requires Claude **Team/Enterprise** org; current session is individual **Max** (Andre Chaves) |
-| 2B — OpenAI submit | **Hard-gated** | ZapSign org Owner OK; Create plugin With MCP blocked until Persona business verify; email code HARD GATE active |
+| 2B — OpenAI submit | **Hard-gated** | ZapSign org Owner OK; Create plugin With MCP blocked until Persona business verify; session refreshed 2026-08-13; email code still HARD GATE |
 | 3 — Follow-up until Live | Pending | No gate-to-12 during review |
 | 4 — Close-out + gate to 12 | Pending | After both Live |
 
@@ -101,7 +101,7 @@ Merged from `docs/submission/openai-org-status.md`.
 - [ ] Support contact registered (support@zapsign.com.br) — listing form blocked until verify
 - [ ] Domain verification for `mcp.zapsign.com.br` (Worker route ready; token not issued yet)
 
-**HARD GATE (active) — Persona email code:** Inquiry refreshed; browser on “Confirm your email address” (5-digit code → `andre@zapsign.com.br`). Create plugin With MCP shows “Complete identity verification” until Persona finishes. Jira comment `134921`. Details: [`docs/submission/openai-org-status.md`](docs/submission/openai-org-status.md).
+**HARD GATE (active) — Persona email code:** Prior inquiry session expired; refreshed via OpenAI `PUT /v1/dashboard/organizations/verifications` (new one-time `code=` link). Browser unlocked on “Confirm your email address” (5-digit code → `andre@zapsign.com.br`). ~10 min poll: still on confirm-email (transient Persona “network issues” toast once). Create plugin With MCP still blocked until Persona finishes. Details: [`docs/submission/openai-org-status.md`](docs/submission/openai-org-status.md).
 
 ### B. Technical compliance
 
@@ -147,7 +147,7 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | Demo/reviewer ZapSign API token (session) | CAO-147 (+148) | AWS SM `stress-testing` / session env | **Cleared (session)** 2026-08-13 |
 | Deploy `/privacy` | CAO-147 | `wrangler deploy` with Cloudflare account access | **Cleared** — privacy 200 |
 | OpenAI 2FA / org login | CAO-148 | Authenticated ZapSign Platform session | **Cleared** |
-| Persona email confirmation code | CAO-148 | 5-digit code to `andre@zapsign.com.br` (or complete Persona manually) | **ACTIVE** — browser on Persona |
+| Persona email confirmation code | CAO-148 | 5-digit code to `andre@zapsign.com.br` on refreshed Persona tab (or complete manually) | **ACTIVE** — session refreshed; awaiting code |
 | OpenAI business verification docs | CAO-148 | CNPJ / legal package + biometrics in Persona (after email code) | Pending |
 | Claude Team/Enterprise org for directory portal | CAO-147 | Switch/login to ZapSign Team or Enterprise org with Directory access | **ACTIVE** |
 | DNS if well-known insufficient | CAO-148 | TXT/CNAME for domain verify | Pending (prefer Worker route) |
@@ -171,3 +171,4 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | 2026-07-31 | Deploy OK (Version `adeae044…`); `/privacy` **200**; Phase 1 HARD GATE on CAO-147 comment `133026` + CAO-148 comment `133027`; OpenAI login gate merged from `openai-org-status.md` |
 | 2026-07-31 | OpenAI login cleared; ZapSign org confirmed; Persona business verify started; Phase 1 local-token HARD GATE restated (CAO-147 `133093`); OpenAI challenge route implemented in code; plugin create blocked until identity verify |
 | 2026-08-13 | Resume: session on local `main` (ahead of origin); demo token from AWS SM validated; Anthropic portal blocked (Max ≠ Team/Enterprise) — CAO-147 `134920`; OpenAI Create With MCP still gated on Persona email — CAO-148 `134921`; browser left on Persona confirm-email |
+| 2026-08-13 | Continue after auth hard-stop: expired Persona inquiry recovered via OpenAI refresh → new `code=` session; polled ~10 min; email OTP not entered; submission not started; Phase 2A still blocked on Team/Enterprise |
