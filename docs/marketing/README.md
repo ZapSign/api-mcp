@@ -12,6 +12,8 @@ GA4 + Microsoft Clarity + Google Search Console cover marketing surfaces on:
 
 Consent Mode v2 + banner gate tags. OAuth `/authorize` is never instrumented.
 
+Agent-created documents (STDIO and remote OAuth) are tagged with ZapSign create metadata `origin=mcp` on webhooks. Warehouse/analytics should filter webhook `metadata`, not `created_through` (that stays `api`).
+
 Canonical IDs and admin notes: [`MEASUREMENT_IDS.md`](MEASUREMENT_IDS.md)  
 Baseline checklist + 30-day ritual: [`SEO_CADENCE.md`](SEO_CADENCE.md)  
 Privacy wording: [`../PRIVACY_POLICY_WEB.md`](../PRIVACY_POLICY_WEB.md) §4.5

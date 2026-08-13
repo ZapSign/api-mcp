@@ -176,6 +176,11 @@ export interface CreateSignerInput {
   external_id?: string;
 }
 
+export interface DocumentMetadataEntry {
+  key: string;
+  value: string;
+}
+
 export interface CreateDocumentRequest {
   name: string;
   url_pdf?: string;
@@ -187,6 +192,7 @@ export interface CreateDocumentRequest {
   folder_path?: string;
   external_id?: string;
   async?: boolean;
+  metadata?: DocumentMetadataEntry[];
 }
 
 export interface UpdateDocumentRequest {
@@ -294,6 +300,7 @@ export interface CreateFromTemplateApiBody {
   data: DeParaEntry[];
   send_automatic_email?: boolean;
   send_automatic_whatsapp?: boolean;
+  metadata?: DocumentMetadataEntry[];
 }
 
 export interface UpdateSignerRequest {
