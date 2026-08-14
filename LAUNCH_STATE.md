@@ -1,6 +1,6 @@
 # MCP Marketplace Dual Publication — Launch State
 
-**Last updated:** 2026-08-14 12:30 -03 — preflight green and synced; OpenAI business verification resumed to a fresh Persona inquiry, with the human identity gate still active.
+**Last updated:** 2026-08-14 13:55 -03 — preflight+specs done; fresh Persona **Individual** inquiry on “Continue on another device” (QR/camera); Claude Team/Enterprise still blocked; no submissions.
 
 **Decision locked:** Submit truthful **25-tool** inventory first. Gate remote marketplace surface to core 12 only after **both** listings are Live (Phase 4).  
 **Canonical server:** `https://mcp.zapsign.com.br/mcp`  
@@ -103,7 +103,7 @@ Merged from `docs/submission/openai-org-status.md`.
 - [ ] Support contact registered (support@zapsign.com.br) — listing form blocked until verify
 - [ ] Domain verification for `mcp.zapsign.com.br` (Worker route ready; token not issued yet)
 
-**HARD GATE (active 2026-08-14) — Persona / developer identity verification incomplete:** At 12:30 -03, the authenticated ZapSign org still showed both Individual and Business verification as available to start. Business verification was resumed and OpenAI issued a fresh Persona inquiry. Human email/company/identity steps remain required. Create plugin With MCP is still blocked until Persona finishes; **no OpenAI listing submission attempted**; no submission ID. Details: [`docs/submission/openai-org-status.md`](docs/submission/openai-org-status.md).
+**HARD GATE (active 2026-08-14 13:55) — Persona identity (camera / other device):** Started **Individual** verification (plugin create needs developer identity). New inquiry `inq_Ab5jmhWpKCzNqhgewMpETYB511QJLU`. Browser unlocked on Persona **Continue on another device** (QR / `perso.na` link / Send Email) — camera biometrics required on phone. Create plugin With MCP still blocked; **no OpenAI listing submission**; no submission ID. Details: [`docs/submission/openai-org-status.md`](docs/submission/openai-org-status.md).
 
 ### B. Technical compliance
 
@@ -149,8 +149,8 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | Demo/reviewer ZapSign API token (session) | CAO-147 (+148) | AWS SM `stress-testing` / session env | **Cleared (session)** 2026-08-13 |
 | Deploy `/privacy` | CAO-147 | `wrangler deploy` with Cloudflare account access | **Cleared** — privacy 200 |
 | OpenAI 2FA / org login | CAO-148 | Authenticated ZapSign Platform session | **Cleared** |
-| Persona email confirmation code | CAO-148 | 5-digit code to `andre@zapsign.com.br` on refreshed Persona tab (or complete manually) | **ACTIVE** — session refreshed; awaiting code |
-| OpenAI business verification docs | CAO-148 | CNPJ / legal package + biometrics in Persona (after email code) | Pending |
+| Persona Individual ID check (camera) | CAO-148 | Complete Persona on phone via QR on open tab (`inq_Ab5jmhWpKCzNqhgewMpETYB511QJLU`) | **ACTIVE** — Continue on another device |
+| OpenAI Business verification (optional after Individual) | CAO-148 | CNPJ / legal package + biometrics if apps require Business | Pending |
 | Claude Team/Enterprise org for directory portal | CAO-147 | Switch/login to ZapSign Team or Enterprise org with Directory access | **ACTIVE** |
 | DNS if well-known insufficient | CAO-148 | TXT/CNAME for domain verify | Pending (prefer Worker route) |
 
@@ -158,9 +158,9 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 
 ## Next steps
 
-1. Human: enter Persona 5-digit email code on open Persona tab → finish business ID/CNPJ/biometrics.
-2. After Persona: Create plugin With MCP → domain challenge secret → deploy → submit listing (`docs/submission/openai.md`).
-3. Human: Claude Team/Enterprise ZapSign org → `https://claude.ai/admin-settings/directory/submissions/new` → fill from `docs/submission/anthropic.md`.
+1. Human: scan Persona QR / open `perso.na` link on phone → finish camera ID check (tab left unlocked).
+2. After Persona clears: Create plugin With MCP → domain challenge secret → deploy → submit (`docs/submission/openai.md`).
+3. Human: Claude Team/Enterprise ZapSign org → directory submissions → fill from `docs/submission/anthropic.md`.
 4. Optional: MCP Inspector production pass for 25 tools with `title` + four hints.
 
 ---
@@ -178,3 +178,4 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | 2026-08-14 | Preflight: typecheck+lint green; measurement privacy-URL expect fixed; full-suite 15s cold-start timeouts pass in isolation; push marketplace commits; CAO-147 inventory locked at **25 tools** |
 | 2026-08-14 | Active specs committed (d4e1db3: docs/specs/mcp-marketplace-launch.md + core-12); preflight suite re-run green (typecheck/lint/359 tests); main == origin/main @ ee5708e |
 | 2026-08-14 | Auth-submit resume (12:30 -03): ZapSign OpenAI org remained unverified; Business verification generated a fresh Persona inquiry and stopped at the human identity gate. Anthropic Team/Enterprise gate remains active. No submission IDs; Phase 3/4 not started. |
+| 2026-08-14 | Auth-submit (13:55): started Persona **Individual** verify; inquiry `inq_Ab5jmhWpKCzNqhgewMpETYB511QJLU`; browser unlocked on **Continue on another device** (QR/camera). Claude Team/Enterprise still blocked. No submissions. |
