@@ -1,6 +1,6 @@
 # OpenAI org / verification status (Phase 2B)
 
-**Date:** 2026-08-13 (updated — continue after auth hard-stop)  
+**Date:** 2026-08-14 (gates unchanged — Persona/identity still incomplete; no listing submission; prior continue disconnected before docs/Jira)  
 **Ticket:** [CAO-148](https://truora.atlassian.net/browse/CAO-148)  
 **Canonical:** also mirrored in `LAUNCH_STATE.md` OPENAI track.
 
