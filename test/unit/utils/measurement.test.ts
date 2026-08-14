@@ -54,7 +54,7 @@ describe('renderMeasurementSnippets', () => {
     expect(html).toContain('G-TEST123');
     expect(html).toContain('clarity99');
     expect(html).toContain('analytics_storage');
-    expect(html).toContain('politica-de-privacidade');
+    expect(html).toContain('https://mcp.zapsign.com.br/privacy');
   });
 });
 
