@@ -1,6 +1,6 @@
 # MCP Marketplace Dual Publication — Launch State
 
-**Last updated:** 2026-08-14 10:40 -03 — light continue after prior agent disconnect; gates unchanged; no marketplace form submission attempted.
+**Last updated:** 2026-08-14 12:30 -03 — preflight green and synced; OpenAI business verification resumed to a fresh Persona inquiry, with the human identity gate still active.
 
 **Decision locked:** Submit truthful **25-tool** inventory first. Gate remote marketplace surface to core 12 only after **both** listings are Live (Phase 4).  
 **Canonical server:** `https://mcp.zapsign.com.br/mcp`  
@@ -103,7 +103,7 @@ Merged from `docs/submission/openai-org-status.md`.
 - [ ] Support contact registered (support@zapsign.com.br) — listing form blocked until verify
 - [ ] Domain verification for `mcp.zapsign.com.br` (Worker route ready; token not issued yet)
 
-**HARD GATE (active 2026-08-14) — Persona / developer identity verification incomplete:** Prior inquiry session expired; refreshed via OpenAI `PUT /v1/dashboard/organizations/verifications` (new one-time `code=` link). Browser left unlocked on “Confirm your email address” (5-digit code → `andre@zapsign.com.br`). Create plugin With MCP still blocked until Persona finishes. Last continue attempt disconnected before submit; **no OpenAI listing submission attempted**; no submission ID. Details: [`docs/submission/openai-org-status.md`](docs/submission/openai-org-status.md).
+**HARD GATE (active 2026-08-14) — Persona / developer identity verification incomplete:** At 12:30 -03, the authenticated ZapSign org still showed both Individual and Business verification as available to start. Business verification was resumed and OpenAI issued a fresh Persona inquiry. Human email/company/identity steps remain required. Create plugin With MCP is still blocked until Persona finishes; **no OpenAI listing submission attempted**; no submission ID. Details: [`docs/submission/openai-org-status.md`](docs/submission/openai-org-status.md).
 
 ### B. Technical compliance
 
@@ -176,3 +176,5 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | 2026-08-13 | Continue after auth hard-stop: expired Persona inquiry recovered via OpenAI refresh → new `code=` session; polled ~10 min; email OTP not entered; submission not started; Phase 2A still blocked on Team/Enterprise |
 | 2026-08-14 | Light continue after prior agent disconnect (before docs/Jira): Phase 2A still blocked (Claude Team/Enterprise); Phase 2B still hard-gated (Persona/identity incomplete); **no form submission attempted**; no submission IDs |
 | 2026-08-14 | Preflight: typecheck+lint green; measurement privacy-URL expect fixed; full-suite 15s cold-start timeouts pass in isolation; push marketplace commits; CAO-147 inventory locked at **25 tools** |
+| 2026-08-14 | Active specs committed (d4e1db3: docs/specs/mcp-marketplace-launch.md + core-12); preflight suite re-run green (typecheck/lint/359 tests); main == origin/main @ ee5708e |
+| 2026-08-14 | Auth-submit resume (12:30 -03): ZapSign OpenAI org remained unverified; Business verification generated a fresh Persona inquiry and stopped at the human identity gate. Anthropic Team/Enterprise gate remains active. No submission IDs; Phase 3/4 not started. |
