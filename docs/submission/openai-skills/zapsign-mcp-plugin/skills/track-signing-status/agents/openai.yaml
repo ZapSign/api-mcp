@@ -1,0 +1,16 @@
+interface:
+  display_name: "Track signing status"
+  short_description: "Check who still needs to sign"
+  default_prompt: "Summarize the signing status of my ZapSign document."
+policy:
+  products:
+    - CHAT
+    - CODEX
+  allow_implicit_invocation: true
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "zapsign"
+      description: "List ZapSign documents and retrieve signer status"
+      transport: "streamable_http"
+      url: "https://mcp.zapsign.com.br/mcp"

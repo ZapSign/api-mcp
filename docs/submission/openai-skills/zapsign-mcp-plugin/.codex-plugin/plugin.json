@@ -1,0 +1,34 @@
+{
+  "name": "zapsign-mcp-workflows",
+  "version": "1.0.0",
+  "description": "Reusable e-signature workflows powered by the ZapSign MCP server.",
+  "author": {
+    "name": "ZapSign",
+    "email": "support@zapsign.com.br",
+    "url": "https://zapsign.com.br"
+  },
+  "homepage": "https://mcp.zapsign.com.br/docs",
+  "repository": "https://github.com/ZapSign/api-mcp",
+  "license": "MIT",
+  "keywords": [
+    "electronic-signature",
+    "documents",
+    "templates",
+    "zapsign"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ZapSign",
+    "shortDescription": "Create and track signatures",
+    "longDescription": "Create signing requests from files or templates, manage signer delivery, and track signature status with ZapSign.",
+    "developerName": "ZapSign",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://zapsign.com.br",
+    "privacyPolicyURL": "https://mcp.zapsign.com.br/privacy",
+    "termsOfServiceURL": "https://zapsign.com.br/termos-de-uso"
+  }
+}

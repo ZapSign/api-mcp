@@ -1,0 +1,16 @@
+interface:
+  display_name: "Create from template"
+  short_description: "Fill and send a template"
+  default_prompt: "Create a ZapSign document from one of my templates."
+policy:
+  products:
+    - CHAT
+    - CODEX
+  allow_implicit_invocation: true
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "zapsign"
+      description: "List, inspect, and use ZapSign document templates"
+      transport: "streamable_http"
+      url: "https://mcp.zapsign.com.br/mcp"

@@ -1,0 +1,16 @@
+interface:
+  display_name: "Create signing request"
+  short_description: "Send a file for signature"
+  default_prompt: "Create a ZapSign signing request from my document."
+policy:
+  products:
+    - CHAT
+    - CODEX
+  allow_implicit_invocation: true
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "zapsign"
+      description: "Create and manage ZapSign electronic signature requests"
+      transport: "streamable_http"
+      url: "https://mcp.zapsign.com.br/mcp"
