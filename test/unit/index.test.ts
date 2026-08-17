@@ -33,6 +33,7 @@ type OAuthProviderOptions = {
   authorizeEndpoint?: string;
   tokenEndpoint?: string;
   clientRegistrationEndpoint?: string;
+  clientIdMetadataDocumentEnabled?: boolean;
   allowPlainPKCE?: boolean;
   scopesSupported?: string[];
   resourceMetadata?: {
@@ -111,6 +112,7 @@ describe('MCP CORS configuration', () => {
       expect(options.authorizeEndpoint).toBe('/authorize');
       expect(options.tokenEndpoint).toBe('/token');
       expect(options.clientRegistrationEndpoint).toBe('/register');
+      expect(options.clientIdMetadataDocumentEnabled).toBe(true);
       expect(options.allowPlainPKCE).toBe(false);
       expect(options.scopesSupported).toEqual([
         'documents:read',

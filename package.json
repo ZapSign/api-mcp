@@ -31,7 +31,7 @@
     "marketing:snapshot": "node scripts/marketing/take-snapshot.mjs"
   },
   "dependencies": {
-    "@cloudflare/workers-oauth-provider": "^0.2.3",
+    "@cloudflare/workers-oauth-provider": "^0.10.3",
     "@modelcontextprotocol/sdk": "^1.27.0",
     "agents": "0.6.0",
     "zod": "^3.23.0"

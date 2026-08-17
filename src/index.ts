@@ -126,6 +126,7 @@ const oauthProvider = new OAuthProvider<Env>({
   authorizeEndpoint: OAUTH_ROUTE_PATHS.Authorize,
   tokenEndpoint: OAUTH_ROUTE_PATHS.Token,
   clientRegistrationEndpoint: OAUTH_ROUTE_PATHS.Register,
+  clientIdMetadataDocumentEnabled: true,
   allowPlainPKCE: false,
   scopesSupported: [...DEFAULT_OAUTH_SCOPES],
   tokenExchangeCallback: handleTokenExchange,

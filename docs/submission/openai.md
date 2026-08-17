@@ -60,6 +60,11 @@ Same registry as Anthropic (`src/tools/registry.ts`):
 
 Partner tools require partner privileges; non-partner tokens get actionable API errors.
 
+The Platform draft requires a written justification for each tool's `readOnlyHint`, `openWorldHint`,
+and `destructiveHint` (75 fields for 25 tools). Frozen text lives in
+`openai-tool-annotations.md`; `scripts/submission/openai-fill-tool-justifications.js` re-applies it
+in the browser if the draft is reset.
+
 ## Starter prompts (3–5)
 
 1. “List my ZapSign documents that are still pending signature.”
