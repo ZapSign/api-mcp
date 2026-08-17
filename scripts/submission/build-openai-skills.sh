@@ -33,13 +33,23 @@ if command -v zip >/dev/null 2>&1; then
   )
 else
   windows_source_dir="$source_dir"
+  windows_output_dir="$output_dir"
   windows_output_zip="$output_zip"
   if command -v wslpath >/dev/null 2>&1; then
     windows_source_dir="$(wslpath -w "$source_dir")"
+    windows_output_dir="$(wslpath -w "$output_dir")"
     windows_output_zip="$(wslpath -w "$output_zip")"
   fi
   powershell.exe -NoProfile -Command \
-    "Compress-Archive -Path '$windows_source_dir' -DestinationPath '$windows_output_zip' -Force"
+    "Add-Type -AssemblyName System.IO.Compression; \
+    Add-Type -AssemblyName System.IO.Compression.FileSystem; \
+    \$archive = [System.IO.Compression.ZipFile]::Open('$windows_output_zip', [System.IO.Compression.ZipArchiveMode]::Create); \
+    try { \
+      Get-ChildItem -LiteralPath '$windows_source_dir' -Recurse -File | ForEach-Object { \
+        \$entryName = \$_.FullName.Substring('$windows_output_dir'.Length + 1).Replace('\', '/'); \
+        [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(\$archive, \$_.FullName, \$entryName, [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null \
+      } \
+    } finally { \$archive.Dispose() }"
 fi
 
 echo "Built $output_zip with ${#skill_manifests[@]} skills"
