@@ -1,6 +1,6 @@
 # MCP Marketplace Dual Publication — Launch State
 
-**Last updated:** 2026-08-17 15:32 -03 — **Both directories in review.** Anthropic Claude Connectors Directory submission **`zapsign`** accepted (**Em revisão**) under Team org **Zapsign CAO** after Team plan upgrade; portal `https://claude.ai/admin-settings/directory/submissions/zapsign`. OpenAI version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` remains **`Review`**. Phase 4 (gate to 12) still blocked until both Live.
+**Last updated:** 2026-08-17 16:24 -03 — **Both directories in review.** Anthropic slug **`zapsign`** still **Em revisão**; listing enhanced while in review (logo URL, permissions summary, starter use-cases, API snippet; docs/privacy/support already canonical). Evidence under `docs/submission/evidence/anthropic-enhanced-*`. OpenAI version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` remains **`Review`**. Phase 4 still blocked until both Live.
 
 **Decision locked:** Submit truthful **25-tool** inventory first. Gate remote marketplace surface to core 12 only after **both** listings are Live (Phase 4).  
 **Canonical server:** `https://mcp.zapsign.com.br/mcp`  
@@ -87,6 +87,7 @@ Mirrors Jira checklist. Update checkboxes as work completes.
 
 ### D. Follow-up until Live
 
+- [x] **Listing enhancement (in review, 2026-08-17 ~16:20 -03):** While **Em revisão**, **Editar servidor** remains editable (slug locked). Saved: logo URL `https://raw.githubusercontent.com/ZapSign/api-mcp/main/icon.svg`; permissions summary; Primary use cases (3 frozen prompts); Claude API copy snippet. Confirmed unchanged/correct: tagline, description, docs `https://mcp.zapsign.com.br/docs`, privacy `https://mcp.zapsign.com.br/privacy`, support `support@zapsign.com.br`, author ZapSign / `https://zapsign.com.br/`. Toast **Alterações salvas.** Evidence: `docs/submission/evidence/anthropic-enhanced-zapsign-2026-08-17.png` (+ logo/permissions/usecases field shots). Asset: `docs/submission/assets/zapsign-anthropic-logo.png`. Runner: `scripts/submission/enhance-anthropic-listing.cjs`. Carousel file upload UI not available (logo via URL). Categories left as submitted (Productivity + Legal).
 - [ ] Monitor support@zapsign.com.br; respond &lt; 48h
 - [ ] Weekly status; escalate mcp-review@anthropic.com after 3 weeks silence
 - [ ] On approval: listing screenshot + fresh install + OAuth + `list_documents`
@@ -171,8 +172,8 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 
 ## Next steps
 
-1. Monitor OpenAI review status for version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` (`Review` → approved/rejected); watch support@zapsign.com.br for reviewer questions and keep the demo token frozen.
-2. Monitor Anthropic review for slug **`zapsign`** (`Em revisão` → published); portal `https://claude.ai/admin-settings/directory/submissions/zapsign`; escalate mcp-review@anthropic.com after 3 weeks silence.
+1. Monitor Anthropic review for slug **`zapsign`** (`Em revisão` → published); portal `https://claude.ai/admin-settings/directory/submissions/zapsign`; escalate mcp-review@anthropic.com after 3 weeks silence.
+2. Monitor OpenAI review status for version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` (`Review` → approved/rejected); watch support@zapsign.com.br for reviewer questions and keep the demo token frozen.
 3. Optional: MCP Inspector production pass for 25 tools with `title` + four hints.
 4. After both listings are Live: log E1/E2 day-0 baselines, then start Phase 4 core-12 gate.
 
@@ -207,3 +208,5 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | 2026-08-17 | Auth-gate follow-up (~12:28): reopened submissions URL; `cursor-ide-browser` flickered (saw OpenAI Platform tab only) then dropped; could not lock/snapshot Claude directory form. **Still waiting on Team/Enterprise login; no submission.** |
 | 2026-08-17 | **OpenAI Submit for Review completed (~12:50 -03).** Human completed Google SSO in an agent-driven Chrome session; the Platform session defaulted to the **Personal** org (empty plugin list, `api.apps.read` denial on the draft), so the active org was switched to ZapSign (`org-zytAEIEHDhfBrgREh8gTiYUA`) and the draft reloaded. Verified Info (name/version/subtitle/description/category/identity/URLs), Testing (5 positive + 3 negative cases, reviewer credentials), Global (en-US + pt-BR, `BR MX CO US PT ES`), release notes, 7/7 policy attestations, and all-ages rating; no Skills upload was required. Clicked **Submit for Review** — portal now lists version `1.0.0` as **`Review`** (app `asdk_app_6a7f4a126ab88191a83a67cf744ca7da`, version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499`). OpenAI exposes no separate submission ID. |
 | 2026-08-17 | **Anthropic directory submitted (~15:27 -03).** User upgraded to Claude **Team**; org **Zapsign CAO**. Wizard filled from `docs/submission/anthropic.md`: OAuth to `https://mcp.zapsign.com.br/mcp`, **25 tools** captured, listing ZapSign / slug `zapsign`, categories Productivity+Legal, docs/support/privacy, use-case prompts, company ZapSign, `oauth_dcr`, first_party data handling. Confirmation **Servidor enviado para revisão**; portal status **Em revisão** at `https://claude.ai/admin-settings/directory/submissions/zapsign`. Post-submit **Salvar alterações** corrected Privacy Policy URL to `https://mcp.zapsign.com.br/privacy`. Evidence PNG under `docs/submission/evidence/`. Phase 4 still pending both Live. |
+| 2026-08-17 | **Listing enhance blocked on auth (~16:12 -03).** `cursor-ide-browser` unavailable/unstable; Playwright runner opened portal on `claude.ai/login`. Logo prepared: `docs/submission/assets/zapsign-anthropic-logo.png`. Evidence: `anthropic-auth-gate-2026-08-17.png`. |
+| 2026-08-17 | **Anthropic listing enhanced while Em revisão (~16:20 -03).** After Zapsign CAO login in automation profile: saved logo URL (GitHub `icon.svg`), permissions summary, 3 starter use-cases, Claude API snippet; confirmed docs/privacy/support/tagline/description. Slug locked; metrics locked until published. Toast **Alterações salvas.** Evidence `docs/submission/evidence/anthropic-enhanced-*.png`. OpenAI not touched. Phase 4 not started. |
