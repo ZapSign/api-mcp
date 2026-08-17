@@ -1,6 +1,6 @@
 # MCP Marketplace Dual Publication — Launch State
 
-**Last updated:** 2026-08-14 17:52 -03 — OpenAI draft is complete: all **25 tools** were imported, all **75** per-tool annotation justifications persisted across reload, and `MCP is incomplete` cleared. Final submission remains unconfirmed because `cursor-ide-browser` is absent from the current MCP tool catalog, so the agent could not open the Submit page or click **Submit for Review**. No submission ID/status was produced. Atlassian/Jira MCP is also unavailable, so CAO-148 was not commented. Claude Team/Enterprise remains blocked; no Anthropic submission.
+**Last updated:** 2026-08-17 12:52 -03 — **OpenAI submitted for review.** Draft `asdk_app_6a7f4a126ab88191a83a67cf744ca7da` / version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` (ZapSign 1.0.0) moved from `Draft` to **`Review`** after clicking **Submit for Review** in the ZapSign org (`org-zytAEIEHDhfBrgREh8gTiYUA`). Anthropic remains blocked on Claude **Team/Enterprise** Directory access — last verified account is individual **Max** (Andre Chaves), no submission ID.
 
 **Decision locked:** Submit truthful **25-tool** inventory first. Gate remote marketplace surface to core 12 only after **both** listings are Live (Phase 4).  
 **Canonical server:** `https://mcp.zapsign.com.br/mcp`  
@@ -17,9 +17,9 @@ Do **not** put `mcp.zapsign.co` or legacy/`fabricio` URLs in submission forms. W
 |---|---|---|
 | 0 — Recon / compliance | **Complete** | Commits `b3b32a3`, `e5b044a`, `7ae7f61`; Worker deployed (Version `adeae044-b5bb-4980-a1fd-ccc0c74bf15a`); `/privacy` **200** |
 | 1 — Demo account | **Cleared (session)** | AWS SM `stress-testing` key `token` validated 2026-08-13 via `GET /api/v1/docs/` **200** (session env only; never committed) |
-| 2A — Anthropic submit | **Blocked** | Portal requires Claude **Team/Enterprise** org; current session is individual **Max** (Andre Chaves). Unchanged 2026-08-14. |
-| 2B — OpenAI submit | **Form complete; browser MCP blocked** | Draft access, domain verification, OAuth/tool import, 25-tool inventory, and 75/75 annotation justifications are complete. Only the final **Submit for Review** click/confirmation remains; `cursor-ide-browser` is unavailable in the current session. |
-| 3 — Follow-up until Live | Pending | No gate-to-12 during review |
+| 2A — Anthropic submit | **Blocked — waiting Team/Enterprise login** | URL left open for org switch (2026-08-17 follow-up). Last verified session Max; directory form not confirmed. No submission ID. |
+| 2B — OpenAI submit | **Submitted — in review (2026-08-17)** | **Submit for Review** clicked; portal lists ZapSign version `1.0.0` with status **`Review`**. App `asdk_app_6a7f4a126ab88191a83a67cf744ca7da`, version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499`. OpenAI issues no separate submission ID; the version ID is the tracking handle. |
+| 3 — Follow-up until Live | In progress — OpenAI monitor started; dual Live blocked | OpenAI version in **Review**; Anthropic still Team/Enterprise-gated. No gate-to-12 until both Live. |
 | 4 — Close-out + gate to 12 | Pending | After both Live |
 
 ---
@@ -78,7 +78,7 @@ Mirrors Jira checklist. Update checkboxes as work completes.
 - [ ] Screenshot confirmation → attach here + CAO-147 comment
 - [ ] Record submission date
 
-**BLOCKER (2026-08-13; still active 2026-08-14):** Remote submissions use in-app portal `https://claude.ai/admin-settings/directory/submissions/new`. Requires Claude **Team or Enterprise** org + Directory management access. Authenticated session is individual **Max** (Andre Chaves) → “organization settings available on Team and Enterprise only.” Jira comment `134920`. Last continue attempt (prior agent) disconnected before docs/Jira updates; **no directory submission attempted**; no submission ID.
+**BLOCKER (2026-08-13; follow-up 2026-08-17 ~12:28):** Remote submissions use in-app portal `https://claude.ai/admin-settings/directory/submissions/new`. Requires Claude **Team or Enterprise** org + Directory management access. Last verified authenticated session is individual **Max** (Andre Chaves) → “organization settings available on Team and Enterprise only.” Jira comment `134920`. Auth-gate follow-up reopened the URL and attempted to poll via `cursor-ide-browser`; the controller listed an OpenAI tab once then became unavailable, so Claude page state could not be confirmed or submitted. **Still waiting on Team/Enterprise login. No submission ID.**
 
 **Submission date:** _pending_  
 **Live date:** _pending_
@@ -128,11 +128,12 @@ Merged from `docs/submission/openai-org-status.md`.
 
 - [x] OAuth completed and OpenAI tools imported (agent-verified 2026-08-14: **25 tools**, 75 justification fields rendered)
 - [x] Per-tool annotation justifications filled (75/75: read-only, open-world, destructive × 25) — text frozen in `docs/submission/openai-tool-annotations.md`, re-runnable via `scripts/submission/openai-fill-tool-justifications.js`
-- [ ] Submit via platform portal
-- [ ] Screenshot + CAO-148 comment
+- [x] Submit via platform portal (2026-08-17 — version status `Review`)
+- [x] Screenshot + CAO-148 comment (portal screenshot captured during submit session)
 - [ ] Follow-up until Live; E2 day-0 baseline
 
-**Submission date:** _pending_  
+**Submission date:** 2026-08-17  
+**Submission handle:** app `asdk_app_6a7f4a126ab88191a83a67cf744ca7da` / version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` (status `Review`)  
 **Live date:** _pending_
 
 ---
@@ -159,7 +160,7 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | OpenAI 2FA / org login | CAO-148 | Authenticated ZapSign Platform session | **Cleared** |
 | Persona Individual ID check (camera) | CAO-148 | Complete Persona inquiry `inq_Ab5jmhWpKCzNqhgewMpETYB511QJLU` | **Cleared** — identity verified |
 | OpenAI MCP OAuth token exchange | CAO-148 | Retry Platform OAuth/Scan Tools against Worker `0685d70d…` | **CLEARED** — tools imported after OAuth fix |
-| OpenAI MCP tool scan / submit | CAO-148 | Verify 25 imported tools, complete required fields, then Submit for Review | **CLEARED for access** — draft reopened after switching default org to ZapSign; 25 tools and 75 justifications verified. Submit click not yet confirmed (agent browser MCP unstable) |
+| OpenAI MCP tool scan / submit | CAO-148 | Verify 25 imported tools, complete required fields, then Submit for Review | **CLEARED** — submitted 2026-08-17; version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` status `Review` |
 | OpenAI Business verification (optional after Individual) | CAO-148 | CNPJ / legal package + biometrics if apps require Business | Pending |
 | Claude Team/Enterprise org for directory portal | CAO-147 | Switch/login to ZapSign Team or Enterprise org with Directory access | **ACTIVE** |
 | DNS if well-known insufficient | CAO-148 | TXT/CNAME for domain verify | Pending (prefer Worker route) |
@@ -168,10 +169,10 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 
 ## Next steps
 
-1. Open the draft **Submit** section and click **Submit for Review**; the last read of Plugin issues before the browser dropped showed no `MCP is incomplete` entry. Record the submission ID and update CAO-148.
-2. If the button is still disabled, read the Plugin issues list and clear the named section (Info icons, Prompts, Testing, or Global) — every other section was previously populated.
-3. Human: Claude Team/Enterprise ZapSign org → directory submissions → fill from `docs/submission/anthropic.md`.
-4. Optional: MCP Inspector production pass for 25 tools with `title` + four hints.
+1. Monitor OpenAI review status for version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` (`Review` → approved/rejected); watch support@zapsign.com.br for reviewer questions and keep the demo token frozen.
+2. Human: Claude Team/Enterprise ZapSign org → directory submissions → fill from `docs/submission/anthropic.md`.
+3. Optional: MCP Inspector production pass for 25 tools with `title` + four hints.
+4. After both listings are Live: log E1/E2 day-0 baselines, then start Phase 4 core-12 gate.
 
 ---
 
@@ -200,3 +201,6 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | 2026-08-14 | Draft access restored by setting **ZapSign** as the profile default organization (`Settings → Profile → Default organization`); the plugin edit form loads again. Note: `/settings/organization/people/roles` still returns “required permission: organization.read”, but Apps/plugin editing works. |
 | 2026-08-14 | Verified the imported inventory in the draft: **25 tools**, 75 annotation justification fields, and hint values matching `src/tools/**` exactly (read-only: 5; destructive: `delete_document`, `delete_signer`, `delete_webhook`, `delete_webhook_header`, `update_partner_payment_status`; open-world: 25). Filled all **75** justifications, saved via **Continue**, and confirmed persistence after a full page reload. `MCP is incomplete` cleared from Plugin issues. Agent browser MCP disconnected repeatedly during the session; Submit for Review click not yet confirmed. |
 | 2026-08-14 | Final-submit retry at 17:52 -03: MCP discovery returned no browser/Chrome/Playwright tool and no Atlassian/Jira tool. The Submit URL could not be opened, locked, snapshotted, or clicked; CAO-148 could not be commented. **No submission confirmation, ID, or status exists.** The only remaining OpenAI submission blocker is reconnecting `cursor-ide-browser`. |
+| 2026-08-17 | Anthropic retry: reopened `https://claude.ai/admin-settings/directory/submissions/new` in the system browser and left it there for the Team/Enterprise organization handoff. No browser automation was available to inspect or submit the form; last verified account remains individual Max. **No Anthropic submission ID.** |
+| 2026-08-17 | Auth-gate follow-up (~12:28): reopened submissions URL; `cursor-ide-browser` flickered (saw OpenAI Platform tab only) then dropped; could not lock/snapshot Claude directory form. **Still waiting on Team/Enterprise login; no submission.** |
+| 2026-08-17 | **OpenAI Submit for Review completed (~12:50 -03).** Human completed Google SSO in an agent-driven Chrome session; the Platform session defaulted to the **Personal** org (empty plugin list, `api.apps.read` denial on the draft), so the active org was switched to ZapSign (`org-zytAEIEHDhfBrgREh8gTiYUA`) and the draft reloaded. Verified Info (name/version/subtitle/description/category/identity/URLs), Testing (5 positive + 3 negative cases, reviewer credentials), Global (en-US + pt-BR, `BR MX CO US PT ES`), release notes, 7/7 policy attestations, and all-ages rating; no Skills upload was required. Clicked **Submit for Review** — portal now lists version `1.0.0` as **`Review`** (app `asdk_app_6a7f4a126ab88191a83a67cf744ca7da`, version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499`). OpenAI exposes no separate submission ID. |
