@@ -75,4 +75,10 @@ describe('MCP tool annotations', () => {
       });
     }
   });
+
+  it('should mark batch signing as destructive', () => {
+    const config = collectToolConfigs().get('sign_in_batch');
+
+    expect(config?.annotations.destructiveHint).toBe(true);
+  });
 });

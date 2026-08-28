@@ -15,7 +15,7 @@ Do **not** use `mcp.zapsign.co` or any legacy/`fabricio` repository URLs in the 
 |---|---|
 | Name | ZapSign |
 | Short description | Create, send, and track e-signatures in ChatGPT. |
-| Long description | Bring ZapSign’s e-signature workflow into ChatGPT. Create signing requests from a PDF URL or reusable template, add signers, deliver signing links by email or WhatsApp, track document status, configure webhooks, and (for partner accounts) provision partner companies—without leaving the conversation. |
+| Long description | Bring ZapSign’s e-signature workflow into ChatGPT. Create signing requests from a PDF URL or reusable template, add signers, deliver signing links by email or WhatsApp, track document status, configure webhooks, and manage partner accounts without leaving the conversation. |
 | Category | Productivity / Business |
 | Website | `https://zapsign.com.br` |
 | Documentation | `https://mcp.zapsign.com.br/docs` |
@@ -88,6 +88,24 @@ in the browser if the draft is reset.
 1. Call any tool without completing OAuth → authentication error instructing reconnect.
 2. `get_document` with a fabricated token → actionable not-found / API error.
 3. Partner tool (`create_partner_account`) with a non-partner demo token → actionable privilege error (not a crash).
+
+### Expected response contract for resubmission
+
+The MCP server returns only fields needed for the requested workflow. Document, signer, and
+template tokens remain opaque identifiers; internal IDs, external IDs, raw metadata, participant
+email and phone fields, government identifiers, biometric flags, geolocation, payment processor
+IDs, and free-form payment notes are removed before results reach ChatGPT.
+
+- `list_documents`: `count`, pagination links, and each document's `token`, `status`, `name`, and
+  signing-progress fields.
+- `create_document` / `create_from_template`: the created document `token`, `status`, `name`,
+  and signing-progress fields.
+- `get_document`: the requested document's `token`, `status`, `name`, and signing-progress fields.
+- `add_signer`: the new signer's opaque `token`, display `name`, `status`, and `sign_url`.
+- `get_template`: the template `token`, `name`, active state, and required template inputs.
+- `create_webhook`: the webhook identifier and configuration needed to confirm creation.
+- Invalid tokens or insufficient partner privileges: an actionable error without upstream response
+  bodies, credentials, or personal identifiers.
 
 ## CSP note
 

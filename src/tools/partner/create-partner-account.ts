@@ -9,7 +9,7 @@ export function registerCreatePartnerAccountTool(server: McpServer): void {
     {
       title: 'Create Partner Account',
       description:
-        'Creates a ZapSign partner account. Use only when the authenticated API token has partner-management privileges.',
+        'Creates a ZapSign partner account using name and contact details. Use only with partner-management privileges; never send government identifiers or payment credentials.',
       inputSchema: CreatePartnerAccountInputSchema.shape,
       annotations: {
         title: 'Create Partner Account',

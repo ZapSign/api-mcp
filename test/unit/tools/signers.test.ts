@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getMcpAuthContext } from 'agents/mcp';
 import { ZapSignClient } from '../../../src/api/client.js';
 import { ZapSignMcpError } from '../../../src/errors/base.js';
+import { sanitizeToolResult } from '../../../src/utils/tool-response.js';
 import {
   MOCK_AUTH_PROPS,
   MOCK_ADDED_SIGNER,
@@ -100,7 +101,7 @@ describe('add_signer', () => {
       email: 'ana@example.com',
     });
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_ADDED_SIGNER) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_ADDED_SIGNER)) }],
     });
   });
 
@@ -159,7 +160,10 @@ describe('get_signer', () => {
 
     expect(mockFn).toHaveBeenCalledWith('sig-tk');
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_SIGNER) }],
+      content: [{
+        type: 'text',
+        text: JSON.stringify(sanitizeToolResult(MOCK_SIGNER)),
+      }],
     });
   });
 
@@ -218,7 +222,7 @@ describe('update_signer', () => {
 
     expect(mockFn).toHaveBeenCalledWith('sig-tk', { name: 'Maria Santos' });
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_UPDATED_SIGNER) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_UPDATED_SIGNER)) }],
     });
   });
 
@@ -277,7 +281,7 @@ describe('delete_signer', () => {
 
     expect(mockFn).toHaveBeenCalledWith('sig-tk');
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_DELETE_RESPONSE) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_DELETE_RESPONSE)) }],
     });
   });
 

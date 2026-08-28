@@ -1,7 +1,7 @@
 # MCP marketplace dual launch
 
 **Status:** Active  
-**Last updated:** 2026-08-14  
+**Last updated:** 2026-08-28
 **Tracks:** [CAO-146](https://truora.atlassian.net/browse/CAO-146) · [CAO-147](https://truora.atlassian.net/browse/CAO-147) · [CAO-148](https://truora.atlassian.net/browse/CAO-148)  
 **Ops checklist:** [`LAUNCH_STATE.md`](../../LAUNCH_STATE.md)  
 **Frozen packs:** [`docs/submission/anthropic.md`](../submission/anthropic.md) · [`docs/submission/openai.md`](../submission/openai.md)
@@ -69,6 +69,16 @@ THEN E1 (Anthropic) and E2 (OpenAI) day-0 baselines are logged on CAO-146 (and m
 
 WHEN submission artifacts are reviewed before send  
 THEN they contain no secret values and no `mcp.zapsign.co` / legacy host as the canonical server URL.
+
+WHEN a tool returns ZapSign data to an MCP host
+THEN the response contains only workflow fields and omits unnecessary identifiers, contact fields,
+government identifiers, biometric fields, geolocation, payment processor data, and raw metadata.
+
+WHEN partner or payment tools validate input
+THEN they reject government identifiers, processor IDs, free-form payment notes, and payment credentials.
+
+WHEN OpenAI scans tool annotations
+THEN every annotation is explicit and matches behavior, including `destructiveHint: true` for batch signing.
 
 ## Out of scope
 

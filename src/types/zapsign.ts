@@ -279,18 +279,13 @@ export interface CreatePartnerAccountRequest {
   name: string;
   email: string;
   phone?: string;
-  cpf?: string;
-  cnpj?: string;
   company_name?: string;
-  external_id?: string;
 }
 
 export interface UpdatePartnerPaymentStatusRequest {
   partner_token: string;
   payment_status: string;
   payment_method: string;
-  transaction_id?: string;
-  notes?: string;
 }
 
 export interface CreateFromTemplateApiBody {

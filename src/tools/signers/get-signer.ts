@@ -20,7 +20,7 @@ export function registerGetSignerTool(server: McpServer): void {
     {
       title: 'Get Signer',
       description:
-        'Retrieves detailed information about a specific signer, including signing status, authentication mode, number of views, and geographic coordinates if available.',
+        'Retrieves workflow information about a specific signer, including signing status, authentication mode, number of views, and signing link when available. Contact and geographic fields are omitted.',
       inputSchema: GetSignerInputSchema.shape,
       annotations: {
         title: 'Get Signer',

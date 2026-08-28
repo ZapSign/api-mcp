@@ -9,7 +9,7 @@ export function registerUpdatePartnerPaymentStatusTool(server: McpServer): void 
     {
       title: 'Update Partner Payment Status',
       description:
-        'Updates payment status for a partner account. Destructive to billing state — confirm the partner_token and status before calling.',
+        'Updates a partner account payment status using a method category. Never provide card numbers, payment credentials, processor IDs, or free-form payment notes.',
       inputSchema: UpdatePartnerPaymentStatusInputSchema.shape,
       annotations: {
         title: 'Update Partner Payment Status',

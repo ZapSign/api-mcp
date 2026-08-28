@@ -119,10 +119,10 @@ A per-tool wording is still supplied below so no field is left blank.
 - **idempotentHint = false:** Only the first call succeeds; afterwards the token no longer resolves, and ZapSign also refuses removal when the signer has signed or is the document's last signer.
 - **openWorldHint = true:** The removal affects a real participant in the customer's external ZapSign account and depends on that document's live signing state.
 
-### 15. `sign_in_batch` — write, non-destructive, non-idempotent, open-world
+### 15. `sign_in_batch` — write, destructive, non-idempotent, open-world
 
 - **readOnlyHint = false:** Executes signatures for multiple documents in a single request using a `user_token` and a list of signer tokens; requires `signers:write`.
-- **destructiveHint = false:** Signing advances the workflow and adds signatures; it does not delete documents or signer records.
+- **destructiveHint = true:** Signing records legally meaningful signatures on multiple documents; this action cannot be undone by the connector even though it does not delete documents or signer records.
 - **idempotentHint = false:** The first call records the signatures and changes document status; repeat calls are rejected or act on a different set of pending documents.
 - **openWorldHint = true:** Signatures are registered on the external ZapSign platform and are legally meaningful actions on real documents.
 

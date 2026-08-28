@@ -9,12 +9,12 @@ export function registerSignInBatchTool(server: McpServer): void {
     {
       title: 'Sign In Batch',
       description:
-        'Signs multiple documents in one request using a user_token and signer_tokens list. Use only when the account is authorized for batch signing.',
+        'Signs multiple documents in one request using a user_token and signer_tokens list. This is an irreversible action; use only when the account is authorized for batch signing and the user has confirmed the documents.',
       inputSchema: SignInBatchInputSchema.shape,
       annotations: {
         title: 'Sign In Batch',
         readOnlyHint: false,
-        destructiveHint: false,
+        destructiveHint: true,
         idempotentHint: false,
         openWorldHint: true,
       },

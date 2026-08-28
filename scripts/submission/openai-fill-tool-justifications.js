@@ -126,7 +126,7 @@ const TOOL_JUSTIFICATIONS = {
     open_world_justification:
       'Signatures are registered on the external ZapSign platform and are legally meaningful actions on real documents.',
     destructive_justification:
-      'Signing advances the workflow and adds signatures; it deletes no documents and no signer records.',
+      'Signing records legally meaningful signatures on multiple documents; this action cannot be undone by the connector even though it does not delete documents or signer records.',
   },
   list_templates: {
     read_only_justification:

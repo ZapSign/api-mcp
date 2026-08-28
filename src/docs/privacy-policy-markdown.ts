@@ -5,17 +5,19 @@
 export const PRIVACY_POLICY_MARKDOWN = `# Privacy Policy — ZapSign MCP Connector
 
 **Canonical URL:** https://mcp.zapsign.com.br/privacy  
-**Last updated:** July 31, 2026
+**Last updated:** August 28, 2026
 
 This document describes how the ZapSign MCP Connector ("the Connector") collects, stores, and processes data when used through Claude AI (Anthropic) or ChatGPT (OpenAI) via the Model Context Protocol (MCP).
 
 ## Data Collected
 
-The Connector collects a single piece of information during the authorization flow:
+The Connector collects a single credential during the authorization flow:
 
 - **ZapSign API Token**: Provided by the user during the OAuth authorization wizard. The user copies this token from their [ZapSign Dashboard > Integrations](https://app.zapsign.com.br/conta/integracoes) page and pastes it into the Connector's authorization form.
 
-The Connector does **not** collect emails, passwords, names, or any other personal information. A SHA-256 hash prefix of the API token is used as an anonymous session identifier — the original token cannot be derived from this hash.
+The MCP request and response pass-through may contain **document names and statuses** and **signer names and contact details** because they are required to create and track signing workflows. These values are forwarded to the user's ZapSign account and the MCP host only for the requested operation; they are not persisted by this Connector. A SHA-256 hash prefix of the API token is used as an anonymous session identifier — the original token cannot be derived from this hash.
+
+The Connector does **not** request or return CPF, CNPJ, payment-card data, health data, or biometric data. It also removes internal IDs, external IDs, raw metadata, processor IDs, and other unnecessary identifiers from ZapSign responses before returning them to the MCP host.
 
 ## Data Stored
 
@@ -28,11 +30,12 @@ The Connector does **not** collect emails, passwords, names, or any other person
 The Connector does **not** store, cache, or log:
 
 - Documents, PDFs, or document content
-- Signer information (names, emails, phone numbers)
+- Signer contact details and document participant data
 - Template content or field values
 - Webhook payloads or event data
 - API request or response bodies
 - Chat messages from Claude or ChatGPT
+- CPF, CNPJ, payment-card data, health data, or biometric data
 
 The Connector operates as a pass-through proxy: it forwards requests from the MCP client (Claude, ChatGPT, or another compatible client) to ZapSign's API and returns the responses. No ZapSign business data is persisted on the Connector's infrastructure.
 

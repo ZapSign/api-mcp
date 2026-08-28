@@ -20,7 +20,7 @@ export function registerGetDocumentTool(server: McpServer): void {
     {
       title: 'Get Document',
       description:
-        'Retrieves full details of a single document by its doc_token, including all signers and their signing status. File URLs (original_file, signed_file) in the response expire after 60 minutes.',
+        'Retrieves workflow details of a single document by doc_token, including signer names and signing status. File URLs in the response expire after 60 minutes; unnecessary contact and internal identifier fields are omitted.',
       inputSchema: GetDocumentInputSchema.shape,
       annotations: {
         title: 'Get Document',

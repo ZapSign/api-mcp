@@ -20,7 +20,7 @@ export function registerGetTemplateTool(server: McpServer): void {
     {
       title: 'Get Template',
       description:
-        'Retrieves full details of a template including all dynamic fields (inputs) and their configuration. Use this to discover which variables need to be filled when creating a document from this template.',
+        'Retrieves a template definition including dynamic fields (inputs) and their configuration. Use this to discover which variables need to be filled when creating a document; participant contact and internal identifier fields are omitted.',
       inputSchema: GetTemplateInputSchema.shape,
       annotations: {
         title: 'Get Template',

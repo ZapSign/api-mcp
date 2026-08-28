@@ -3,6 +3,7 @@ import { getMcpAuthContext } from 'agents/mcp';
 import { ZapSignClient } from '../../../src/api/client.js';
 import { ZapSignMcpError } from '../../../src/errors/base.js';
 import { logError, logToolError } from '../../../src/utils/logger.js';
+import { sanitizeToolResult } from '../../../src/utils/tool-response.js';
 import {
   MOCK_AUTH_PROPS,
   MOCK_TEMPLATE_LIST,
@@ -121,7 +122,7 @@ describe('list_templates', () => {
 
     expect(mockFn).toHaveBeenCalledWith({ page: 1 });
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_TEMPLATE_LIST) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_TEMPLATE_LIST)) }],
     });
   });
 
@@ -180,7 +181,7 @@ describe('get_template', () => {
 
     expect(mockFn).toHaveBeenCalledWith('tpl-tk');
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_TEMPLATE) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_TEMPLATE)) }],
     });
   });
 
@@ -261,7 +262,7 @@ describe('create_from_template', () => {
     expect(createFromTemplate).toHaveBeenCalledWith(templateArgs);
     expect(updateDocument).not.toHaveBeenCalled();
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_CREATED_DOCUMENT) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_CREATED_DOCUMENT)) }],
     });
   });
 
@@ -278,7 +279,7 @@ describe('create_from_template', () => {
       name: 'Custom Contract',
     });
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_UPDATED_DOCUMENT) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_UPDATED_DOCUMENT)) }],
     });
   });
 

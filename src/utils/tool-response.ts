@@ -11,8 +11,50 @@ type JsonListResponse = JsonRecord & {
   results: unknown[];
 };
 
+const REDACTED_RESULT_KEYS = new Set([
+  'open_id',
+  'external_id',
+  'created_by',
+  'email',
+  'phone',
+  'phone_country',
+  'phone_number',
+  'cpf',
+  'cnpj',
+  'geo_latitude',
+  'geo_longitude',
+  'require_selfie_photo',
+  'require_document_photo',
+  'selfie_validation_type',
+  'payment_method',
+  'transaction_id',
+  'notes',
+  'metadata',
+]);
+
 export interface ToolResponseOptions {
   truncationNotice?: string;
+}
+
+/**
+ * Removes fields that are not required for the MCP signing workflow.
+ * @param value - Upstream ZapSign response value.
+ * @returns A response value without unnecessary personal or restricted fields.
+ */
+export function sanitizeToolResult(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(sanitizeToolResult);
+  }
+
+  if (!isJsonRecord(value)) {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !REDACTED_RESULT_KEYS.has(key.toLowerCase()))
+      .map(([key, nestedValue]) => [key, sanitizeToolResult(nestedValue)]),
+  );
 }
 
 /**
@@ -23,15 +65,25 @@ export interface ToolResponseOptions {
  * @returns MCP-compliant success content block
  */
 export function formatToolSuccess(text: string, options: ToolResponseOptions = {}) {
-  if (text.length <= MAX_RESPONSE_CHARS) {
-    return { content: [{ type: 'text' as const, text }] };
+  const safeText = sanitizeResponseText(text);
+  if (safeText.length <= MAX_RESPONSE_CHARS) {
+    return { content: [{ type: 'text' as const, text: safeText }] };
   }
 
   const notice = getTruncationNotice(options.truncationNotice);
-  const truncatedJson = truncateJsonListResponse(text, notice);
-  const responseText = truncatedJson ?? truncatePlainText(text, notice);
+  const truncatedJson = truncateJsonListResponse(safeText, notice);
+  const responseText = truncatedJson ?? truncatePlainText(safeText, notice);
 
   return { content: [{ type: 'text' as const, text: responseText }] };
+}
+
+function sanitizeResponseText(text: string): string {
+  const value = parseJson(text);
+  if (value instanceof Error) {
+    return text;
+  }
+
+  return JSON.stringify(sanitizeToolResult(value)) ?? text;
 }
 
 function getTruncationNotice(notice: string | undefined): string {

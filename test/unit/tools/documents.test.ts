@@ -15,6 +15,7 @@ import { registerGetDocumentTool } from '../../../src/tools/documents/get-docume
 import { registerCreateDocumentTool } from '../../../src/tools/documents/create-document.js';
 import { registerUpdateDocumentTool } from '../../../src/tools/documents/update-document.js';
 import { registerDeleteDocumentTool } from '../../../src/tools/documents/delete-document.js';
+import { sanitizeToolResult } from '../../../src/utils/tool-response.js';
 
 vi.mock('agents/mcp', () => ({
   getMcpAuthContext: vi.fn(),
@@ -94,7 +95,7 @@ describe('list_documents', () => {
 
     expect(mockFn).toHaveBeenCalledWith({ page: 1 });
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_DOCUMENT_LIST) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_DOCUMENT_LIST)) }],
     });
   });
 
@@ -172,7 +173,7 @@ describe('get_document', () => {
 
     expect(mockFn).toHaveBeenCalledWith('abc-token');
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_DOCUMENT) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_DOCUMENT)) }],
     });
   });
 
@@ -236,7 +237,7 @@ describe('create_document', () => {
 
     expect(mockFn).toHaveBeenCalledWith(createArgs);
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_CREATED_DOCUMENT) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_CREATED_DOCUMENT)) }],
     });
   });
 
@@ -322,7 +323,7 @@ describe('update_document', () => {
       extra_docs: [{ token: 'extra-123', name: 'Updated attachment' }],
     });
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_UPDATED_DOCUMENT) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_UPDATED_DOCUMENT)) }],
     });
   });
 
@@ -396,7 +397,7 @@ describe('delete_document', () => {
 
     expect(mockFn).toHaveBeenCalledWith('abc-token');
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(MOCK_DELETE_RESPONSE) }],
+      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_DELETE_RESPONSE)) }],
     });
   });
 
