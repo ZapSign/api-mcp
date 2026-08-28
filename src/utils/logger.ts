@@ -6,7 +6,7 @@ export const LogLevel = {
   Error: 'error',
 } as const;
 
-const SENSITIVE_METADATA_KEY = /token|authorization|password|secret|name|email|phone|body/i;
+const SENSITIVE_METADATA_KEY = /token|authorization|password|secret|name|email|phone|body|verifier|^state$|^code$/i;
 const UNKNOWN_ERROR_CLASS = 'unknown_error';
 
 type LogLevelValue = (typeof LogLevel)[keyof typeof LogLevel];

@@ -1,10 +1,18 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const testState = vi.hoisted(() => ({
   apiHandler: undefined,
   createMcpHandler: vi.fn(),
   oauthProviderOptions: undefined,
   oauthProviderFetch: vi.fn(),
+}));
+
+vi.mock('../../src/id/bridge.js', () => ({
+  handleIdBridgeRequest: vi.fn(async () => new Response('id-bridge', { status: 501 })),
+}));
+
+vi.mock('../../src/server.js', () => ({
+  createServer: vi.fn(() => ({})),
 }));
 
 vi.mock('@cloudflare/workers-oauth-provider', () => ({
@@ -70,20 +78,21 @@ function createMockMcpHandler(
 }
 
 describe('MCP CORS configuration', () => {
+  let worker: WorkerHandler;
+
+  beforeAll(async () => {
+    testState.createMcpHandler.mockImplementation(createMockMcpHandler);
+    testState.oauthProviderFetch.mockResolvedValue(new Response('ok'));
+    worker = (await import('../../src/index.js')).default as WorkerHandler;
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.resetModules();
-    testState.apiHandler = undefined;
-    testState.oauthProviderOptions = undefined;
     testState.createMcpHandler.mockImplementation(createMockMcpHandler);
     testState.oauthProviderFetch.mockResolvedValue(new Response('ok'));
   });
 
-  it(
-    'does not advertise session headers from the stateless handler',
-    async () => {
-      await import('../../src/index.js');
-
+  it('does not advertise session headers from the stateless handler', async () => {
       if (!isApiHandler(testState.apiHandler)) {
         throw new Error('Expected the OAuth provider to receive the MCP handler');
       }
@@ -97,15 +106,9 @@ describe('MCP CORS configuration', () => {
 
       expect(testState.createMcpHandler).toHaveBeenCalledWith(expect.anything());
       expect(exposedHeaders).toBeNull();
-    },
-    15_000,
-  );
+  });
 
-  it(
-    'configures canonical OAuth metadata and S256-only PKCE',
-    async () => {
-      await import('../../src/index.js');
-
+  it('configures canonical OAuth metadata and S256-only PKCE', () => {
       const options = testState.oauthProviderOptions as OAuthProviderOptions;
 
       expect(options.apiRoute).toBe('/mcp');
@@ -133,9 +136,7 @@ describe('MCP CORS configuration', () => {
         ],
         scopes_supported: options.scopesSupported,
       });
-    },
-    15_000,
-  );
+  });
 
   it('rejects a root audience for the canonical MCP resource', async () => {
     const token = 'user:grant:secret';
@@ -150,8 +151,6 @@ describe('MCP CORS configuration', () => {
           : null)),
       },
     };
-    const worker = (await import('../../src/index.js')).default as WorkerHandler;
-
     const response = await worker.fetch(
       new Request('https://mcp.zapsign.com.br/mcp', {
         headers: { Authorization: `Bearer ${token}` },
@@ -177,8 +176,6 @@ describe('MCP CORS configuration', () => {
           : null)),
       },
     };
-    const worker = (await import('../../src/index.js')).default as WorkerHandler;
-
     const response = await worker.fetch(
       new Request('https://mcp.zapsign.com.br/mcp', {
         headers: { Authorization: `Bearer ${token}` },

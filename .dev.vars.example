@@ -3,6 +3,7 @@
 # (gitignored `.dev.vars` only — never commit the token).
 ZAPSIGN_API_URL=https://sandbox.api.zapsign.com.br
 COOKIE_ENCRYPTION_KEY=
+ID_TOKEN_ENCRYPTION_KEY=
 ENVIRONMENT=sandbox
 # Public marketing analytics (optional). Leave empty to disable snippets.
 GA4_MEASUREMENT_ID=

@@ -1,8 +1,16 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const testState = vi.hoisted(() => ({
   oauthProviderFetch: vi.fn(),
   createMcpHandler: vi.fn(),
+}));
+
+vi.mock('../../src/id/bridge.js', () => ({
+  handleIdBridgeRequest: vi.fn(async () => new Response('id-bridge', { status: 501 })),
+}));
+
+vi.mock('../../src/server.js', () => ({
+  createServer: vi.fn(() => ({})),
 }));
 
 vi.mock('@cloudflare/workers-oauth-provider', () => ({
@@ -22,20 +30,25 @@ type WorkerHandler = {
 };
 
 describe('browser GET /mcp', () => {
+  let worker: WorkerHandler;
+
+  beforeAll(async () => {
+    testState.oauthProviderFetch.mockResolvedValue(
+      new Response(JSON.stringify({ error: 'invalid_token' }), { status: 401 }),
+    );
+    testState.createMcpHandler.mockReturnValue(async () => new Response(null));
+    worker = (await import('../../src/index.js')).default as WorkerHandler;
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.resetModules();
     testState.oauthProviderFetch.mockResolvedValue(
       new Response(JSON.stringify({ error: 'invalid_token' }), { status: 401 }),
     );
     testState.createMcpHandler.mockReturnValue(async () => new Response(null));
   });
 
-  it(
-    'returns an HTML connect page for browser navigations without a bearer token',
-    async () => {
-      const worker = (await import('../../src/index.js')).default as WorkerHandler;
-
+  it('returns an HTML connect page for browser navigations without a bearer token', async () => {
       const response = await worker.fetch(
         new Request('https://mcp.zapsign.com.br/mcp', {
           headers: {
@@ -70,15 +83,9 @@ describe('browser GET /mcp', () => {
       expect(html).not.toContain('tutoriais/claude.html');
       expect(html).not.toContain('<script');
       expect(testState.oauthProviderFetch).not.toHaveBeenCalled();
-    },
-    15_000,
-  );
+  });
 
-  it(
-    'injects consent analytics on the landing page when measurement IDs are set',
-    async () => {
-      const worker = (await import('../../src/index.js')).default as WorkerHandler;
-
+  it('injects consent analytics on the landing page when measurement IDs are set', async () => {
       const response = await worker.fetch(
         new Request('https://mcp.zapsign.com.br/mcp', {
           headers: {
@@ -98,15 +105,9 @@ describe('browser GET /mcp', () => {
       expect(html).toContain('zs-consent');
       expect(html).toContain('G-LANDING1');
       expect(html).toContain('landingclarity');
-    },
-    15_000,
-  );
+  });
 
-  it(
-    'localizes the connect page from Accept-Language pt-BR',
-    async () => {
-      const worker = (await import('../../src/index.js')).default as WorkerHandler;
-
+  it('localizes the connect page from Accept-Language pt-BR', async () => {
       const response = await worker.fetch(
         new Request('https://mcp.zapsign.com.br/mcp', {
           headers: {
@@ -123,15 +124,9 @@ describe('browser GET /mcp', () => {
       const html = await response.text();
       expect(html).toContain('Conectar ao ZapSign');
       expect(html).toContain('lang="pt-BR"');
-    },
-    15_000,
-  );
+  });
 
-  it(
-    'honors ?lang=es over Accept-Language',
-    async () => {
-      const worker = (await import('../../src/index.js')).default as WorkerHandler;
-
+  it('honors ?lang=es over Accept-Language', async () => {
       const response = await worker.fetch(
         new Request('https://mcp.zapsign.com.br/mcp?lang=es', {
           headers: {
@@ -147,15 +142,9 @@ describe('browser GET /mcp', () => {
       expect(response.headers.get('Content-Language')).toBe('es');
       const html = await response.text();
       expect(html).toContain('Conectar a ZapSign');
-    },
-    15_000,
-  );
+  });
 
-  it(
-    'does not intercept MCP protocol requests that accept event-stream',
-    async () => {
-      const worker = (await import('../../src/index.js')).default as WorkerHandler;
-
+  it('does not intercept MCP protocol requests that accept event-stream', async () => {
       await worker.fetch(
         new Request('https://mcp.zapsign.com.br/mcp', {
           headers: {
@@ -167,7 +156,5 @@ describe('browser GET /mcp', () => {
       );
 
       expect(testState.oauthProviderFetch).toHaveBeenCalledOnce();
-    },
-    15_000,
-  );
+  });
 });

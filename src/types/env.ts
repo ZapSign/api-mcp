@@ -12,4 +12,6 @@ export interface Env {
   CLARITY_PROJECT_ID: string;
   /** OpenAI Apps domain-verification challenge token (plain text at well-known URL) */
   OPENAI_APPS_CHALLENGE_TOKEN?: string;
+  /** AES-256-GCM key (base64, 32 bytes) for ZapSign ID OAuth token storage */
+  ID_TOKEN_ENCRYPTION_KEY: string;
 }

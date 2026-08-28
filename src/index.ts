@@ -140,6 +140,12 @@ const oauthProvider = new OAuthProvider<Env>({
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const pathname = new URL(request.url).pathname;
+    if (pathname === '/mcp/id' || pathname.startsWith('/mcp/id/')) {
+      const { handleIdBridgeRequest } = await import('./id/bridge.js');
+      return handleIdBridgeRequest(request, env, ctx);
+    }
+
     if (isBrowserMcpNavigation(request)) {
       return handleMcpBrowserLanding(request, env);
     }
