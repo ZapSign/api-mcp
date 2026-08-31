@@ -8,7 +8,7 @@ This directory contains the source and reproducible ZIP for the skills uploaded 
 - Upload artifact: `zapsign-mcp-skills.zip`
 - Build command: `bash scripts/submission/build-openai-skills.sh`
 
-The archive contains one plugin root with `.codex-plugin/plugin.json` and three immediate skill directories under `skills/`. Each skill has a required `SKILL.md` and OpenAI-specific MCP dependency metadata in `agents/openai.yaml`.
+The archive contains one `skills/` directory with three skill roots. Each skill has a required `SKILL.md` and OpenAI-specific MCP dependency metadata in `agents/openai.yaml`; the plugin manifest is intentionally excluded because this is uploaded through the draft's Skills section.
 
 ## Included workflows
 
