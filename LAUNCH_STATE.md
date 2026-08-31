@@ -1,6 +1,6 @@
 # MCP Marketplace Dual Publication — Launch State
 
-**Last updated:** 2026-08-28 19:18 -03 — Anthropic slug **`zapsign`** remains **Em revisão**; OpenAI version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` is **Rejected** and corrective draft `1.0.1` is pending MCP rescan. OpenAI sent authoritative feedback by email; Phase 4 remains blocked until both Live.
+**Last updated:** 2026-08-31 08:45 -03 — Anthropic slug **`zapsign`** remains **Em revisão**; OpenAI corrective version `1.0.1` is **Review**. OpenAI sent authoritative feedback by email, the corrected Skills bundle was submitted, and Phase 4 remains blocked until both Live.
 
 **Decision locked:** Submit truthful **25-tool** inventory first. Gate remote marketplace surface to core 12 only after **both** listings are Live (Phase 4).  
 **Canonical server:** `https://mcp.zapsign.com.br/mcp`  
@@ -18,8 +18,8 @@ Do **not** put `mcp.zapsign.co` or legacy/`fabricio` URLs in submission forms. W
 | 0 — Recon / compliance | **Complete** | Commits `b3b32a3`, `e5b044a`, `7ae7f61`; Worker deployed (Version `adeae044-b5bb-4980-a1fd-ccc0c74bf15a`); `/privacy` **200** |
 | 1 — Demo account | **Cleared (session)** | AWS SM `stress-testing` key `token` validated 2026-08-13 via `GET /api/v1/docs/` **200** (session env only; never committed) |
 | 2A — Anthropic submit | **Submitted — in review (2026-08-17)** | Team org **Zapsign CAO**; OAuth connected; **25 tools** captured; **Enviar para revisão** confirmed. Slug/ID **`zapsign`**; status **Em revisão**. Portal: `https://claude.ai/admin-settings/directory/submissions/zapsign`. Evidence: `docs/submission/evidence/anthropic-submitted-zapsign-2026-08-17.png`. |
-| 2B — OpenAI submit | **Rejected — corrective draft pending rescan (2026-08-28)** | Version `1.0.0` was rejected. Corrective version `1.0.1` is saved as a draft; the rejected version remains immutable. |
-| 3 — Follow-up until Live | In progress — Anthropic in review, OpenAI resubmission pending | OpenAI corrective work is underway; Anthropic remains **Em revisão**. No gate-to-12 until both Live. |
+| 2B — OpenAI submit | **Corrective version in review (2026-08-31)** | Version `1.0.0` was rejected. Corrective version `1.0.1` was submitted after the Skills bundle correction; the rejected version remains immutable. |
+| 3 — Follow-up until Live | In progress — both in review | OpenAI version `1.0.1` is **Review**; Anthropic remains **Em revisão**. No gate-to-12 until both Live. |
 | 4 — Close-out + gate to 12 | Pending | After both Live |
 
 ---
@@ -137,6 +137,7 @@ Merged from `docs/submission/openai-org-status.md`.
 
 **Submission date:** 2026-08-17  
 **Submission handle:** app `asdk_app_6a7f4a126ab88191a83a67cf744ca7da` / version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` (status `Rejected`)
+**Corrective submission:** version `1.0.1` (status `Review`, same app handle)
 **Live date:** _pending_
 
 ### E. Rejection recovery (2026-08-28)
@@ -147,7 +148,7 @@ Merged from `docs/submission/openai-org-status.md`.
 - [x] **Local correction:** successful tool responses now remove unnecessary identifiers, contact fields, government/biometric/geolocation fields, raw metadata, and payment processor details; partner/payment schemas reject restricted fields; batch signing is marked destructive; privacy policy and OpenAI response expectations were updated.
 - [x] **Correction deployed:** production health, privacy, docs, OAuth metadata, protected MCP response, and public docs tool count rechecked on 2026-08-28 without a real ZapSign API call.
 - [x] **Corrective draft created:** OpenAI version `1.0.1` is editable at the same app handle; canonical URL remains `https://mcp.zapsign.com.br/mcp`.
-- [ ] Complete the MCP rescan with the reviewer API token, verify 25 tools and all 75 annotation justifications, then submit version `1.0.1` for review.
+- [x] Complete the MCP rescan, verify 25 tools and all 75 annotation justifications, upload the corrected Skills bundle, and submit version `1.0.1` for review.
 
 ---
 
@@ -173,7 +174,7 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | OpenAI 2FA / org login | CAO-148 | Authenticated ZapSign Platform session | **Cleared** |
 | Persona Individual ID check (camera) | CAO-148 | Complete Persona inquiry `inq_Ab5jmhWpKCzNqhgewMpETYB511QJLU` | **Cleared** — identity verified |
 | OpenAI MCP OAuth token exchange | CAO-148 | Retry Platform OAuth/Scan Tools against Worker `0685d70d…` | **CLEARED** — tools imported after OAuth fix |
-| OpenAI MCP tool scan / submit | CAO-148 | Verify 25 imported tools, complete required fields, then Submit for Review | **Pending reviewer token** — draft `1.0.1` saved; scan OAuth form is open |
+| OpenAI MCP tool scan / submit | CAO-148 | Verify 25 imported tools, complete required fields, then Submit for Review | **CLEARED** — corrected Skills bundle uploaded; version `1.0.1` submitted and shows `Review` |
 | OpenAI Business verification (optional after Individual) | CAO-148 | CNPJ / legal package + biometrics if apps require Business | Pending |
 | Claude Team/Enterprise org for directory portal | CAO-147 | Switch/login to ZapSign Team or Enterprise org with Directory access | **CLEARED** — Team org **Zapsign CAO**; submission `zapsign` in review 2026-08-17 |
 | DNS if well-known insufficient | CAO-148 | TXT/CNAME for domain verify | Pending (prefer Worker route) |
@@ -183,7 +184,7 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 ## Next steps
 
 1. Monitor Anthropic review for slug **`zapsign`** (`Em revisão` → published); portal `https://claude.ai/admin-settings/directory/submissions/zapsign`; escalate mcp-review@anthropic.com after 3 weeks silence.
-2. Complete the OpenAI reviewer-token OAuth rescan and submit draft `1.0.1`; keep version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` as the immutable rejected baseline and keep the demo token frozen.
+2. Monitor OpenAI version `1.0.1` through approval/Live; keep version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` as the immutable rejected baseline and keep the demo token frozen.
 3. Optional: MCP Inspector production pass for 25 tools with `title` + four hints.
 4. After both listings are Live: log E1/E2 day-0 baselines, then start Phase 4 core-12 gate.
 
@@ -223,3 +224,4 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | 2026-08-28 | **OpenAI rejection feedback obtained by email.** Version `1.0.0` was rejected for incorrect test-case results, restricted-data requests (health/biometric/CPF/payment-card), unnecessary personal identifiers, incomplete privacy disclosure, and annotation mismatch/justification. Evidence captured as `docs/submission/evidence/openai-rejected-email-2026-08-28.png`; local corrective tests are green for the focused suite. |
 | 2026-08-28 | **Anthropic status request sent.** Emailed `mcp-review@anthropic.com` for the `zapsign` submission after approximately two weeks in review; Gmail confirmed delivery. |
 | 2026-08-28 | **OpenAI corrective draft prepared.** Privacy-minimizing response and input corrections were deployed; production preflight returned health/privacy/docs/OAuth **200**, protected MCP **401** as expected, and public docs exposed 25 tool references. Draft `1.0.1` is saved; MCP rescan is waiting for reviewer API token entry. |
+| 2026-08-31 | **OpenAI corrective version submitted.** The Skills ZIP was rebuilt with `skills/` as its single root directory, uploaded to version `1.0.1`, and the OpenAI portal now shows status `Review`. |
