@@ -28,6 +28,16 @@ describe('renderPrivacyPage', () => {
     expect(html).toContain('Cloudflare');
     expect(html).toContain('support@zapsign.com.br');
   });
+
+  it('should render the field-level disclosure table and withheld heading', () => {
+    const html = renderPrivacyPage('en');
+    expect(html).toContain('<table>');
+    expect(html).toContain('<th>Data returned</th>');
+    expect(html).toContain('<th>Purpose</th>');
+    expect(html).toContain('<th>Source</th>');
+    expect(html).toContain('We do not expose via MCP');
+    expect(html).toContain('CPF / CNPJ');
+  });
 });
 
 describe('handlePrivacy', () => {

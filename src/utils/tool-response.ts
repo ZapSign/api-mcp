@@ -15,7 +15,6 @@ const REDACTED_RESULT_KEYS = new Set([
   'open_id',
   'external_id',
   'created_by',
-  'email',
   'phone',
   'phone_country',
   'phone_number',

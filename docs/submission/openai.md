@@ -15,7 +15,7 @@ Do **not** use `mcp.zapsign.co` or any legacy/`fabricio` repository URLs in the 
 |---|---|
 | Name | ZapSign |
 | Short description | Create, send, and track e-signatures in ChatGPT. |
-| Long description | Bring ZapSign’s e-signature workflow into ChatGPT. Create signing requests from a PDF URL or reusable template, add signers, deliver signing links by email or WhatsApp, track document status, configure webhooks, and manage partner accounts without leaving the conversation. |
+| Long description | Bring ZapSign’s e-signature workflow into ChatGPT. Create signing requests from a PDF URL or reusable template, add signers, deliver signing links by email or WhatsApp, track document status, configure webhooks, and manage partner accounts without leaving the conversation. MCP tool responses use a privacy allowlist: government IDs, biometrics, ID photos, geolocation, IP, certificates, and signing links on reads are never returned. |
 | Category | Productivity / Business |
 | Website | `https://zapsign.com.br` |
 | Documentation | `https://mcp.zapsign.com.br/docs` |
@@ -89,23 +89,92 @@ in the browser if the draft is reset.
 2. `get_document` with a fabricated token → actionable not-found / API error.
 3. Partner tool (`create_partner_account`) with a non-partner demo token → actionable privilege error (not a crash).
 
-### Expected response contract for resubmission
+### Expected response contract for resubmission (allowlist)
 
-The MCP server returns only fields needed for the requested workflow. Document, signer, and
-template tokens remain opaque identifiers; internal IDs, external IDs, raw metadata, participant
-email and phone fields, government identifiers, biometric flags, geolocation, payment processor
-IDs, and free-form payment notes are removed before results reach ChatGPT.
+The MCP server uses a **response allowlist** (not a blocklist). Only explicitly permitted fields
+reach ChatGPT. Document, signer, and template tokens remain opaque identifiers.
 
-- `list_documents`: `count`, pagination links, and each document's `token`, `status`, `name`, and
-  signing-progress fields.
-- `create_document` / `create_from_template`: the created document `token`, `status`, `name`,
-  and signing-progress fields.
-- `get_document`: the requested document's `token`, `status`, `name`, and signing-progress fields.
-- `add_signer`: the new signer's opaque `token`, display `name`, `status`, and `sign_url`.
-- `get_template`: the template `token`, `name`, active state, and required template inputs.
-- `create_webhook`: the webhook identifier and configuration needed to confirm creation.
-- Invalid tokens or insufficient partner privileges: an actionable error without upstream response
-  bodies, credentials, or personal identifiers.
+Canonical published disclosure (field-level table + withheld list):
+[`docs/PRIVACY_POLICY.md`](../PRIVACY_POLICY.md) → live at `https://mcp.zapsign.com.br/privacy`.
+
+#### Document allowlist (`get_document`, `list_documents` items)
+
+| Allowed | Notes |
+|---|---|
+| `token` | Opaque document identifier |
+| `name` / `title` | Workflow label |
+| `status` | Signing lifecycle |
+| `created_at` / `created_date` | Ordering / age |
+| `signed_count` (or equivalent progress) | How many have signed |
+| `signers[]` | Each entry filtered through the **signer allowlist** |
+
+Create responses (`create_document`, `create_from_template`) return the same document allowlist
+plus any newly created signer objects (see `sign_url` rule below).
+
+#### Signer allowlist (`get_signer`, nested `signers[]` on reads)
+
+| Allowed | Notes |
+|---|---|
+| `token` | Opaque signer identifier (when present) |
+| `name` | Display name |
+| `status`, `status_code` | Signing state |
+| `signed_at` | Completion time when signed |
+| `qualification` | Role/qualification label |
+| `auth_mode` | Auth method label (not biometric payloads) |
+| `email` | **Conditional** — only when the caller is the document owner / verified ownership |
+
+#### Template allowlist (`get_template`, `list_templates` items)
+
+| Allowed | Notes |
+|---|---|
+| `token` | Opaque template identifier |
+| `name` | Template label |
+| Active / enabled flag | Whether the template can be used |
+| Input **names** / variable keys | So the model can request fill values |
+| `answers_count`, `answers_filled[]`, `metadata_count`, `metadata_filled[]` | Fast path — see below |
+
+#### `answers` / `metadata` fast path
+
+MCP **does not** return raw `answers` or `metadata` **values**.
+
+Instead (when relevant):
+
+- `answers_count` / `metadata_count`: number of answer or metadata fields
+- `answers_filled` / `metadata_filled`: `[{ name: "<field>", filled: true|false }, …]` — **no values**
+
+Long-term (not required for this resubmission): template `sensitivity` tags with per-field
+redaction for `health` / `financial` / `biometric`.
+
+#### `sign_url` / `signing_link` rule
+
+| Tool | `sign_url` / `signing_link` |
+|---|---|
+| `create_document` | Allowed in the create response for new signers |
+| `add_signer` | Allowed in the create response for the new signer |
+| `create_from_template` | Allowed in the create response for new signers |
+| `get_document`, `get_signer`, `list_documents`, and all other reads | **Never** returned |
+
+#### Explicitly withheld (never returned to ChatGPT via MCP)
+
+- CPF / CNPJ and other government identifiers
+- Biometric photos and liveness captures (`selfie_photo_url`, `selfie_photo_url2`, `liveness_photo_url`, related flags)
+- ID / document photos (`document_photo_url`, `document_verse_photo_url`, …)
+- Precise geolocation (`geo_latitude`, `geo_longitude`)
+- IP addresses
+- Digital certificates and signature/visto images
+- `sign_url` / `signing_link` on **read** tools
+- Raw `answers` / `metadata` values
+- Internal/debug fields (e.g. `uploaded_files`, `resend_attempts`, `sandbox`, `original_file_hash`, `deleted_at`, payment processor IDs, free-form payment notes)
+
+#### Tool-shaped summary
+
+- `list_documents` / `get_document`: document allowlist + nested signer allowlist (no `sign_url`).
+- `create_document` / `create_from_template`: document allowlist; `sign_url` only for newly created signers in that response.
+- `add_signer`: signer allowlist **including** `sign_url` for the new signer.
+- `get_signer`: signer allowlist **without** `sign_url`.
+- `get_template` / `list_templates`: template allowlist; inputs as names only; answers/metadata via counts/filled flags.
+- `create_webhook`: webhook identifier + configuration needed to confirm creation.
+- Errors: actionable message only — no upstream bodies, credentials, or personal identifiers.
 
 ## CSP note
 

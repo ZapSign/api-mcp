@@ -8,6 +8,10 @@ import { ValidationError } from '../../errors/validation-error.js';
 import { log, logToolError } from '../../utils/logger.js';
 import { requireScope } from '../../utils/scope.js';
 import {
+  filterDocument,
+  OWNER_READ_OPTIONS,
+} from '../../utils/response-filter.js';
+import {
   formatToolError,
   formatToolSuccess,
   formatUnexpectedToolError,
@@ -43,7 +47,9 @@ export function registerGetDocumentTool(server: McpServer): void {
         const result = await client.getDocument(parsed.doc_token);
         log('document_retrieved');
 
-        return formatToolSuccess(JSON.stringify(result));
+        return formatToolSuccess(
+          JSON.stringify(filterDocument(result, OWNER_READ_OPTIONS)),
+        );
       } catch (error) {
         const errorId = logToolError('get_document', error);
         if (error instanceof ZodError) {

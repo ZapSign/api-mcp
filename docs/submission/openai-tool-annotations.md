@@ -13,6 +13,21 @@ ZapSign REST API (`https://api.zapsign.com.br/api/v1`) over the public internet 
 `ZapSignClient`; results depend on live account state that this app does not own or control.
 A per-tool wording is still supplied below so no field is left blank.
 
+## Response allowlist (applies to all tools)
+
+Tool results are filtered through a **response allowlist** before they reach ChatGPT. Full field
+tables, the `answers`/`metadata` fast path (counts/filled only), the `sign_url` create-only rule,
+and the withheld categories (CPF/CNPJ, biometric/ID photos, geolocation, IP, digital certificates,
+`sign_url` on reads) are documented in:
+
+- [`openai.md`](./openai.md) § Expected response contract for resubmission (allowlist)
+- [`docs/PRIVACY_POLICY.md`](../PRIVACY_POLICY.md) (published at `https://mcp.zapsign.com.br/privacy`)
+
+When justifying read tools (`get_document`, `get_signer`, `list_documents`, `get_template`,
+`list_templates`), reviewers should assume those responses never include withheld categories or
+raw answer/metadata values. When justifying create tools (`create_document`, `add_signer`,
+`create_from_template`), `sign_url` may appear only in that create response.
+
 ---
 
 ## Documents

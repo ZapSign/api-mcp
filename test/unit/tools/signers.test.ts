@@ -4,6 +4,11 @@ import { ZapSignClient } from '../../../src/api/client.js';
 import { ZapSignMcpError } from '../../../src/errors/base.js';
 import { sanitizeToolResult } from '../../../src/utils/tool-response.js';
 import {
+  filterSigner,
+  OWNER_CREATE_OPTIONS,
+  OWNER_READ_OPTIONS,
+} from '../../../src/utils/response-filter.js';
+import {
   MOCK_AUTH_PROPS,
   MOCK_ADDED_SIGNER,
   MOCK_SIGNER,
@@ -101,7 +106,12 @@ describe('add_signer', () => {
       email: 'ana@example.com',
     });
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_ADDED_SIGNER)) }],
+      content: [{
+        type: 'text',
+        text: JSON.stringify(
+          sanitizeToolResult(filterSigner(MOCK_ADDED_SIGNER, OWNER_CREATE_OPTIONS)),
+        ),
+      }],
     });
   });
 
@@ -162,7 +172,9 @@ describe('get_signer', () => {
     expect(result).toEqual({
       content: [{
         type: 'text',
-        text: JSON.stringify(sanitizeToolResult(MOCK_SIGNER)),
+        text: JSON.stringify(
+          sanitizeToolResult(filterSigner(MOCK_SIGNER, OWNER_READ_OPTIONS)),
+        ),
       }],
     });
   });

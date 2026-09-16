@@ -119,6 +119,15 @@ The Connector explicitly does **not** collect, store, cache, or log:
 - **Analytics or tracking data on authorization pages** — The OAuth `/authorize` flow does not load cookies, fingerprinting, pixel trackers, session replay, or behavioral analytics scripts
 - **API request/response bodies** — Document content and signer data pass through in transit but are never written to storage or logs
 
+### 5.1 MCP response allowlist (ChatGPT / Claude)
+
+In addition to not *storing* business data, the Connector applies a **response allowlist** so MCP hosts only receive workflow fields. The published field-level table (Data returned / Purpose / Source) and the “we do not expose” list live in the canonical policy:
+
+- Markdown source: [`docs/PRIVACY_POLICY.md`](./PRIVACY_POLICY.md)
+- Live URL for OpenAI / Anthropic listings: https://mcp.zapsign.com.br/privacy
+
+Explicitly withheld from MCP responses include CPF/CNPJ, biometric and ID photos, precise geolocation, IP addresses, digital certificates, raw `answers`/`metadata` values, and `sign_url` on read tools. Signing links are returned only on `create_document`, `add_signer`, and `create_from_template`.
+
 ### 4.5 Marketing Analytics (Documentation Pages Only)
 
 Public marketing pages (`/docs` and the human-readable `/mcp` browser landing) may load **Google Analytics 4** and **Microsoft Clarity** only after you accept a consent banner. Until you accept, Consent Mode defaults keep analytics storage denied and Clarity is not loaded. Rejecting consent keeps analytics off. Authorization pages never include these scripts.

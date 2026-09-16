@@ -18,6 +18,6 @@ if (existsSync(envPath)) {
 
 export default defineConfig({
   test: {
-    include: ['test/integration/sandbox.test.ts'],
+    include: ['test/integration/sandbox.test.ts', 'test/integration/privacy-smoke.test.ts'],
   },
 });

@@ -5,9 +5,11 @@
 export const PRIVACY_POLICY_MARKDOWN = `# Privacy Policy — ZapSign MCP Connector
 
 **Canonical URL:** https://mcp.zapsign.com.br/privacy  
-**Last updated:** August 28, 2026
+**Last updated:** September 16, 2026
 
 This document describes how the ZapSign MCP Connector ("the Connector") collects, stores, and processes data when used through Claude AI (Anthropic) or ChatGPT (OpenAI) via the Model Context Protocol (MCP).
+
+This page is the privacy policy linked from the OpenAI Apps / ChatGPT listing (\`https://mcp.zapsign.com.br/privacy\`).
 
 ## Data Collected
 
@@ -15,9 +17,40 @@ The Connector collects a single credential during the authorization flow:
 
 - **ZapSign API Token**: Provided by the user during the OAuth authorization wizard. The user copies this token from their [ZapSign Dashboard > Integrations](https://app.zapsign.com.br/conta/integracoes) page and pastes it into the Connector's authorization form.
 
-The MCP request and response pass-through may contain **document names and statuses** and **signer names and contact details** because they are required to create and track signing workflows. These values are forwarded to the user's ZapSign account and the MCP host only for the requested operation; they are not persisted by this Connector. A SHA-256 hash prefix of the API token is used as an anonymous session identifier — the original token cannot be derived from this hash.
+A SHA-256 hash prefix of the API token is used as an anonymous session identifier — the original token cannot be derived from this hash.
 
-The Connector does **not** request or return CPF, CNPJ, payment-card data, health data, or biometric data. It also removes internal IDs, external IDs, raw metadata, processor IDs, and other unnecessary identifiers from ZapSign responses before returning them to the MCP host.
+## MCP response field disclosure (ChatGPT / Claude)
+
+Tool results returned to the MCP host are filtered with a **response allowlist**. Only the fields below are eligible to reach ChatGPT or Claude. Everything else from the upstream ZapSign API is dropped before the MCP \`tools/call\` result is returned.
+
+### Data returned / Purpose / Source
+
+| Data returned | Purpose | Source |
+|---|---|---|
+| Document \`token\`, \`name\`/\`title\`, \`status\`, \`created_at\` (or \`created_date\`), \`signed_count\` / signing progress | Create and track e-signature workflows | ZapSign document API (allowlisted fields only) |
+| Nested signer \`token\`, \`name\`, \`status\`, \`status_code\`, \`signed_at\`, \`qualification\`, \`auth_mode\` | Show who must sign and current status | ZapSign signer objects on documents (allowlisted) |
+| Signer \`email\` (owner-gated) | Identify participants when the caller owns the document | ZapSign signer API (only when ownership is verified) |
+| Template \`token\`, \`name\`, active flag, input **names**/variable keys | Select templates and request fill values | ZapSign template API (allowlisted; no secret payloads) |
+| \`answers_count\` / \`answers_filled\` and \`metadata_count\` / \`metadata_filled\` (\`name\` + \`filled\` boolean only) | Know whether template/document fields were filled **without** reading values | Derived from ZapSign \`answers\`/\`metadata\` (values withheld) |
+| \`sign_url\` / signing link | Deliver the signing link **at creation time** | Returned only from \`create_document\`, \`add_signer\`, or \`create_from_template\` responses |
+| Webhook id / configuration echoed on create | Confirm webhook setup | ZapSign webhooks API (configuration needed to confirm) |
+| ZapSign API token (OAuth wizard only) | Authenticate subsequent API calls on the user's behalf | User paste from ZapSign Dashboard → Integrations |
+
+### We do not expose via MCP
+
+The Connector does **not** return the following categories to ChatGPT, Claude, or any MCP host:
+
+- CPF / CNPJ or other government identity numbers
+- Biometric photos, selfie captures, or liveness images (\`selfie_photo_url\`, \`liveness_photo_url\`, related validation payloads)
+- ID / document photos (\`document_photo_url\`, \`document_verse_photo_url\`, and equivalents)
+- Precise geolocation (\`geo_latitude\`, \`geo_longitude\`)
+- IP addresses
+- Digital certificates, signature images, or visto images
+- \`sign_url\` / \`signing_link\` on **read** tools (\`get_document\`, \`get_signer\`, \`list_documents\`, and similar)
+- Raw \`answers\` or \`metadata\` **values** (fast path: counts and filled flags only)
+- Phone numbers on read responses, internal/debug fields (\`uploaded_files\`, \`resend_attempts\`, \`sandbox\`, hashes, payment processor IDs, free-form payment notes)
+
+Submission-facing allowlist detail for reviewers: OpenAI submission pack \`docs/submission/openai.md\` (Expected response contract for resubmission).
 
 ## Data Stored
 
@@ -37,7 +70,7 @@ The Connector does **not** store, cache, or log:
 - Chat messages from Claude or ChatGPT
 - CPF, CNPJ, payment-card data, health data, or biometric data
 
-The Connector operates as a pass-through proxy: it forwards requests from the MCP client (Claude, ChatGPT, or another compatible client) to ZapSign's API and returns the responses. No ZapSign business data is persisted on the Connector's infrastructure.
+The Connector operates as a pass-through proxy with response minimization: it forwards requests from the MCP client (Claude, ChatGPT, or another compatible client) to ZapSign's API and returns **allowlisted** responses only. No ZapSign business data is persisted on the Connector's infrastructure.
 
 ## Data Retention
 
@@ -49,7 +82,7 @@ The Connector operates as a pass-through proxy: it forwards requests from the MC
 
 - **ZapSign (zapsign.com.br)**: API calls are made to ZapSign on the user's behalf using their API token. This is the sole purpose of the Connector.
 - **Cloudflare**: The Connector runs on Cloudflare Workers. Cloudflare processes requests and stores encrypted KV data as the infrastructure provider.
-- **Anthropic (Claude) / OpenAI (ChatGPT)**: The MCP host receives tool results returned by the Connector. How those hosts process conversations is governed by their own privacy policies.
+- **Anthropic (Claude) / OpenAI (ChatGPT)**: The MCP host receives allowlisted tool results returned by the Connector. How those hosts process conversations is governed by their own privacy policies.
 - **No other third parties**: No data is sold to or made available to any other third party for marketing purposes.
 
 Optional marketing analytics (Google Analytics 4 and Microsoft Clarity) may run on public documentation pages (\`/docs\`, browser landing for \`/mcp\`, and \`/privacy\`) only after the user consents via the on-page banner. Authorization pages (\`/authorize\`) are never instrumented.
