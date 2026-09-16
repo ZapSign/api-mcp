@@ -1,0 +1,36 @@
+name: Deploy (Cloudflare Workers)
+
+# Manual, prompt-gated deploy — matches "deploy on prompt only" discipline.
+# Requires a one-time repo secret: CLOUDFLARE_API_TOKEN (Workers Scripts:Edit
+# on the ZapSign Cloudflare account). No `wrangler login` needed: wrangler
+# reads CLOUDFLARE_API_TOKEN from the environment and skips interactive auth.
+# https://developers.cloudflare.com/workers/wrangler/ci-cd/
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    name: wrangler deploy
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm run lint
+
+      - run: npm test
+
+      - name: wrangler deploy
+        run: npm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
