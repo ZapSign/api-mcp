@@ -8,6 +8,10 @@ import { ValidationError } from '../../errors/validation-error.js';
 import { log, logToolError } from '../../utils/logger.js';
 import { requireScope } from '../../utils/scope.js';
 import {
+  filterTemplateList,
+  OWNER_READ_OPTIONS,
+} from '../../utils/response-filter.js';
+import {
   formatToolError,
   formatToolSuccess,
   formatUnexpectedToolError,
@@ -43,7 +47,9 @@ export function registerListTemplatesTool(server: McpServer): void {
         const result = await client.listTemplates({ page: parsed.page });
         log('templates_listed', { page: parsed.page });
 
-        return formatToolSuccess(JSON.stringify(result));
+        return formatToolSuccess(
+          JSON.stringify(filterTemplateList(result, OWNER_READ_OPTIONS)),
+        );
       } catch (error) {
         const errorId = logToolError('list_templates', error);
         if (error instanceof ZodError) {

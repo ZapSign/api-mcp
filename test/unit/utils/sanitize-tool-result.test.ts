@@ -31,6 +31,7 @@ describe('sanitizeToolResult', () => {
         {
           token: 'signer-token',
           name: 'Signer',
+          email: 'signer@example.com',
           sign_url: 'https://example.com/sign',
           status: 'new',
         },
@@ -53,7 +54,7 @@ describe('sanitizeToolResult', () => {
     expect(result).toEqual({
       template: {
         token: 'template-token',
-        signers: [{ name: 'Signer' }],
+        signers: [{ name: 'Signer', email: 'signer@example.com' }],
       },
       status: 'paid',
     });

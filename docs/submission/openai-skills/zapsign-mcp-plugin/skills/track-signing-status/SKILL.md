@@ -23,7 +23,7 @@ Use this skill when the user asks whether a ZapSign document is pending, signed,
 ## Rules
 
 - Do not infer that a signer completed signing from message history or notification delivery. Use the latest tool response.
-- Do not expose signer email addresses, phone numbers, document tokens, or signing links unless they are needed for the user's request.
-- File URLs in `get_document` responses expire after 60 minutes. Mention this when returning `original_file` or `signed_file`.
+- Do not expose signer email addresses, phone numbers, or signing links unless they are present in the allowlisted tool response and needed for the user's request. Read tools never return `sign_url`.
+- Do not expect CPF/CNPJ, biometric/ID photos, geolocation, IP, digital certificates, or raw `answers`/`metadata` values — MCP strips them. Template/document answers arrive only as counts/filled flags when present.
 - If the token is invalid or not found, ask the user to verify it or search with `list_documents`; do not fabricate a result.
 - This workflow is read-only. Never call update, delete, create, or notification tools unless the user separately requests that action.

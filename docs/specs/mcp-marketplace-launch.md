@@ -71,8 +71,14 @@ WHEN submission artifacts are reviewed before send
 THEN they contain no secret values and no `mcp.zapsign.co` / legacy host as the canonical server URL.
 
 WHEN a tool returns ZapSign data to an MCP host
-THEN the response contains only workflow fields and omits unnecessary identifiers, contact fields,
-government identifiers, biometric fields, geolocation, payment processor data, and raw metadata.
+THEN the response contains only allowlisted workflow fields for document/signer/template objects,
+omits CPF/CNPJ, biometric and ID photos, precise geolocation, IP, digital certificates, and
+`sign_url` on reads; returns `answers`/`metadata` only as counts/filled flags (no values); and
+may include `sign_url` only on `create_document`, `add_signer`, or `create_from_template`.
+
+WHEN OpenAI reviewers open the app privacy policy URL
+THEN `https://mcp.zapsign.com.br/privacy` shows a field-level Data returned / Purpose / Source
+table and an explicit “we do not expose” list matching the allowlist contract.
 
 WHEN partner or payment tools validate input
 THEN they reject government identifiers, processor IDs, free-form payment notes, and payment credentials.

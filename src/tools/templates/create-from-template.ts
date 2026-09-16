@@ -9,6 +9,10 @@ import type { CreateFromTemplateRequest } from '../../types/zapsign.js';
 import { log, logError, logToolError } from '../../utils/logger.js';
 import { requireScope } from '../../utils/scope.js';
 import {
+  filterDocument,
+  OWNER_CREATE_OPTIONS,
+} from '../../utils/response-filter.js';
+import {
   formatToolError,
   formatToolSuccess,
   formatUnexpectedToolError,
@@ -80,12 +84,16 @@ export function registerCreateFromTemplateTool(server: McpServer): void {
         );
         log('document_from_template_created');
         if (!name) {
-          return formatToolSuccess(JSON.stringify(result));
+          return formatToolSuccess(
+            JSON.stringify(filterDocument(result, OWNER_CREATE_OPTIONS)),
+          );
         }
 
         const updatedDocument = await updateCreatedDocumentName(client, result.token, name);
         if (updatedDocument) {
-          return formatToolSuccess(JSON.stringify(updatedDocument));
+          return formatToolSuccess(
+            JSON.stringify(filterDocument(updatedDocument, OWNER_CREATE_OPTIONS)),
+          );
         }
 
         return formatToolError(

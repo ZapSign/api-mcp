@@ -38,12 +38,52 @@ function renderListItem(line: string): string {
   return `<li>${formatInlineMarkdown(line.slice(2))}</li>`;
 }
 
+function isTableBlock(block: string): boolean {
+  const lines = block.split('\n').map((line) => line.trim()).filter((line) => line.length > 0);
+  if (lines.length < 2) {
+    return false;
+  }
+  return lines.every((line) => line.startsWith('|') && line.endsWith('|'));
+}
+
+function splitTableCells(line: string): string[] {
+  return line
+    .slice(1, -1)
+    .split('|')
+    .map((cell) => cell.trim());
+}
+
+function isTableSeparatorRow(cells: string[]): boolean {
+  return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+}
+
+function renderMarkdownTable(block: string): string {
+  const lines = block.split('\n').map((line) => line.trim()).filter((line) => line.length > 0);
+  const rows = lines.map(splitTableCells).filter((cells) => !isTableSeparatorRow(cells));
+  if (rows.length === 0) {
+    return '';
+  }
+
+  const [header, ...body] = rows;
+  const thead = `<thead><tr>${header.map((cell) => `<th>${formatInlineMarkdown(cell)}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${body
+    .map((row) => `<tr>${row.map((cell) => `<td>${formatInlineMarkdown(cell)}</td>`).join('')}</tr>`)
+    .join('')}</tbody>`;
+  return `<div class="table-wrap"><table>${thead}${tbody}</table></div>`;
+}
+
 function renderMarkdownBlock(block: string): string {
   if (block.startsWith('# ')) {
     return `<h1>${formatInlineMarkdown(block.slice(2))}</h1>`;
   }
   if (block.startsWith('## ')) {
     return `<h2>${formatInlineMarkdown(block.slice(3))}</h2>`;
+  }
+  if (block.startsWith('### ')) {
+    return `<h3>${formatInlineMarkdown(block.slice(4))}</h3>`;
+  }
+  if (isTableBlock(block)) {
+    return renderMarkdownTable(block);
   }
   if (block.startsWith('- ')) {
     const items = block.split('\n').filter((line) => line.startsWith('- '));
@@ -114,6 +154,7 @@ export function renderPrivacyPage(lang: SupportedLanguage, measurementHtml = '')
     }
     .content h1 { font-size: 28px; margin-bottom: 12px; letter-spacing: -0.02em; }
     .content h2 { font-size: 18px; margin: 28px 0 10px; letter-spacing: -0.01em; }
+    .content h3 { font-size: 16px; margin: 20px 0 8px; letter-spacing: -0.01em; }
     .content p { margin-bottom: 12px; color: ${COLORS.neutral600}; font-size: 15px; }
     .content ul { margin: 0 0 12px 20px; color: ${COLORS.neutral600}; font-size: 15px; }
     .content li { margin-bottom: 6px; }
@@ -124,6 +165,24 @@ export function renderPrivacyPage(lang: SupportedLanguage, measurementHtml = '')
       background: ${COLORS.neutral0};
       padding: 2px 6px;
       border-radius: 4px;
+    }
+    .content .table-wrap { overflow-x: auto; margin: 0 0 16px; }
+    .content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      color: ${COLORS.neutral600};
+    }
+    .content th, .content td {
+      border: 1px solid ${COLORS.neutral200};
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .content th {
+      background: ${COLORS.neutral0};
+      color: ${COLORS.neutral950};
+      font-weight: 600;
     }
     .footer {
       margin-top: 28px;

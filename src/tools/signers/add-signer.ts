@@ -9,6 +9,10 @@ import type { CreateSignerInput } from '../../types/zapsign.js';
 import { log, logToolError } from '../../utils/logger.js';
 import { requireScope } from '../../utils/scope.js';
 import {
+  filterSigner,
+  OWNER_CREATE_OPTIONS,
+} from '../../utils/response-filter.js';
+import {
   formatToolError,
   formatToolSuccess,
   formatUnexpectedToolError,
@@ -53,7 +57,9 @@ export function registerAddSignerTool(server: McpServer): void {
         );
         log('signer_added');
 
-        return formatToolSuccess(JSON.stringify(result));
+        return formatToolSuccess(
+          JSON.stringify(filterSigner(result, OWNER_CREATE_OPTIONS)),
+        );
       } catch (error) {
         const errorId = logToolError('add_signer', error);
         if (error instanceof ZodError) {

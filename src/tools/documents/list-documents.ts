@@ -9,6 +9,10 @@ import type { ListDocumentsParams } from '../../types/zapsign.js';
 import { log, logToolError } from '../../utils/logger.js';
 import { requireScope } from '../../utils/scope.js';
 import {
+  filterDocumentList,
+  OWNER_READ_OPTIONS,
+} from '../../utils/response-filter.js';
+import {
   formatToolError,
   formatToolSuccess,
   formatUnexpectedToolError,
@@ -44,7 +48,9 @@ export function registerListDocumentsTool(server: McpServer): void {
         const result = await client.listDocuments(parsed as unknown as ListDocumentsParams);
         log('documents_listed', { page: parsed.page });
 
-        return formatToolSuccess(JSON.stringify(result));
+        return formatToolSuccess(
+          JSON.stringify(filterDocumentList(result, OWNER_READ_OPTIONS)),
+        );
       } catch (error) {
         const errorId = logToolError('list_documents', error);
         if (error instanceof ZodError) {

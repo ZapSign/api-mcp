@@ -9,6 +9,10 @@ import type { CreateDocumentRequest } from '../../types/zapsign.js';
 import { log, logToolError } from '../../utils/logger.js';
 import { requireScope } from '../../utils/scope.js';
 import {
+  filterDocument,
+  OWNER_CREATE_OPTIONS,
+} from '../../utils/response-filter.js';
+import {
   formatToolError,
   formatToolSuccess,
   formatUnexpectedToolError,
@@ -45,7 +49,9 @@ export function registerCreateDocumentTool(server: McpServer): void {
         const result = await client.createDocument(parsed as unknown as CreateDocumentRequest);
         log('document_created');
 
-        return formatToolSuccess(JSON.stringify(result));
+        return formatToolSuccess(
+          JSON.stringify(filterDocument(result, OWNER_CREATE_OPTIONS)),
+        );
       } catch (error) {
         const errorId = logToolError('create_document', error);
         if (error instanceof ZodError) {

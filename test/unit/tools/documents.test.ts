@@ -16,6 +16,12 @@ import { registerCreateDocumentTool } from '../../../src/tools/documents/create-
 import { registerUpdateDocumentTool } from '../../../src/tools/documents/update-document.js';
 import { registerDeleteDocumentTool } from '../../../src/tools/documents/delete-document.js';
 import { sanitizeToolResult } from '../../../src/utils/tool-response.js';
+import {
+  filterDocument,
+  filterDocumentList,
+  OWNER_CREATE_OPTIONS,
+  OWNER_READ_OPTIONS,
+} from '../../../src/utils/response-filter.js';
 
 vi.mock('agents/mcp', () => ({
   getMcpAuthContext: vi.fn(),
@@ -95,7 +101,12 @@ describe('list_documents', () => {
 
     expect(mockFn).toHaveBeenCalledWith({ page: 1 });
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_DOCUMENT_LIST)) }],
+      content: [{
+        type: 'text',
+        text: JSON.stringify(
+          sanitizeToolResult(filterDocumentList(MOCK_DOCUMENT_LIST, OWNER_READ_OPTIONS)),
+        ),
+      }],
     });
   });
 
@@ -173,7 +184,12 @@ describe('get_document', () => {
 
     expect(mockFn).toHaveBeenCalledWith('abc-token');
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_DOCUMENT)) }],
+      content: [{
+        type: 'text',
+        text: JSON.stringify(
+          sanitizeToolResult(filterDocument(MOCK_DOCUMENT, OWNER_READ_OPTIONS)),
+        ),
+      }],
     });
   });
 
@@ -237,7 +253,12 @@ describe('create_document', () => {
 
     expect(mockFn).toHaveBeenCalledWith(createArgs);
     expect(result).toEqual({
-      content: [{ type: 'text', text: JSON.stringify(sanitizeToolResult(MOCK_CREATED_DOCUMENT)) }],
+      content: [{
+        type: 'text',
+        text: JSON.stringify(
+          sanitizeToolResult(filterDocument(MOCK_CREATED_DOCUMENT, OWNER_CREATE_OPTIONS)),
+        ),
+      }],
     });
   });
 

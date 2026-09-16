@@ -1,7 +1,7 @@
 {
   "name": "zapsign-mcp-workflows",
   "version": "1.0.0",
-  "description": "Reusable e-signature workflows powered by the ZapSign MCP server.",
+  "description": "Reusable e-signature workflows powered by the ZapSign MCP server, with privacy-minimized allowlisted tool responses.",
   "author": {
     "name": "ZapSign",
     "email": "support@zapsign.com.br",
@@ -20,7 +20,7 @@
   "interface": {
     "displayName": "ZapSign",
     "shortDescription": "Create and track signatures",
-    "longDescription": "Create signing requests from files or templates, manage signer delivery, and track signature status with ZapSign.",
+    "longDescription": "Create signing requests from files or templates, manage signer delivery, and track signature status with ZapSign. MCP responses use a field allowlist and omit government IDs, biometrics, geolocation, IP, certificates, and signing links on reads.",
     "developerName": "ZapSign",
     "category": "Productivity",
     "capabilities": [
