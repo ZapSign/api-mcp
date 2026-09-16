@@ -27,9 +27,20 @@ This note is the checklist + local proof bundle for OpenAI Apps resubmission aft
 |---|---|
 | Canonical URL for OpenAI listing | `https://mcp.zapsign.com.br/privacy` |
 | Source in repo | `docs/PRIVACY_POLICY.md` + `src/docs/privacy-policy-markdown.ts` / `privacy-page.ts` |
-| Live page | **Requires Worker deploy** of this branch (`npx wrangler deploy` / usual prod deploy). Uncommitted allowlist + policy updates are **not** live until deploy. |
+| Live page | **Deployed.** See "Live deploy evidence" below. |
 
-Do **not** resubmit until `GET https://mcp.zapsign.com.br/privacy` returns 200 with the updated field-level table (Data returned / Purpose / Source + withheld categories).
+## Live deploy evidence (2026-09-16, this session)
+
+| Step | Evidence |
+|---|---|
+| PR #42 (allowlist fix) merged to `main` | Merge commit `10ccad8` |
+| PR #43 (Cloudflare deploy workflow, `CLOUDFLARE_API_TOKEN` secret, no `wrangler login`) merged to `main` | Merge commit `74179cc` |
+| Deploy run | `gh workflow run deploy.yml` on `main` — GitHub Actions run `35130224877`, all steps green (typecheck, lint, 423/423 tests, `wrangler deploy`) |
+| Worker Version ID | `63412fb4-66ec-45e2-bb25-471ab1f033b0` |
+| Custom domains updated | `mcp.zapsign.com.br`, `mcp.zapsign.co` (per `wrangler deploy` output) |
+| `GET https://mcp.zapsign.com.br/privacy` post-deploy | `200`; diff vs. pre-deploy snapshot shows the new field-level table live (`biometric`, `liveness`, `geolocation`, `Digital certificate`, "We do not expose" language present) |
+
+Live read-tool call against production (`get_document`/`get_signer` with real credentials) was **not** performed this session — no live ZapSign sandbox token available in this environment. The fixture-based spot-check above (production-shaped payloads) plus the unit suite (`test/unit/response-filter.test.ts`, `test/unit/tools/*.test.ts`) is the evidence for filter correctness; the live check above confirms the *deployed* code is the filtered version, not stale.
 
 ## Test evidence (local, 2026-09-16)
 
@@ -89,15 +100,15 @@ Read document keys observed: `token`, `name`, `status`, `created_at`, `last_upda
 
 ## Remaining human steps
 
-1. **Commit / push / PR** (optional but recommended) on `mcp/redact-openai-allowlist` — working tree currently has uncommitted allowlist + docs changes; this evidence pass did **not** commit or push.
-2. **Deploy Worker** so `https://mcp.zapsign.com.br/privacy` and MCP tool filtering go live.
-3. **Spot-check live** `GET https://mcp.zapsign.com.br/privacy` (200 + updated disclosure table). Optionally smoke one read tool against staging and confirm banned keys absent.
-4. **Resubmit** in OpenAI Platform Apps with:
+1. ~~Commit / push / PR~~ — done: PR #42 merged (`10ccad8`).
+2. ~~Deploy Worker~~ — done: Worker Version `63412fb4-66ec-45e2-bb25-471ab1f033b0` live via GitHub Actions (PR #43, no local `wrangler login`).
+3. ~~Spot-check live `/privacy`~~ — done: `200`, new disclosure table confirmed live.
+4. **Resubmit** in OpenAI Platform Apps (only remaining step — needs a human with OpenAI Platform dashboard access; no credentials or browser automation available in this environment):
    - Privacy policy URL: `https://mcp.zapsign.com.br/privacy`
    - This evidence note + test commands/results above
    - Pointer to allowlist implementation: `src/utils/response-filter.ts`
+   - Worker Version ID for reference: `63412fb4-66ec-45e2-bb25-471ab1f033b0`
 
 ## Out of scope for this evidence pass
 
-- No git commit, push, or Worker deploy (per remediation handoff).
-- No live production MCP calls with secrets.
+- Live production MCP tool call (`get_document`/`get_signer`) with real credentials — no live ZapSign sandbox token available in this environment. Correctness evidence instead comes from the fixture-based spot-check + unit suite above, run against the exact code now deployed.
