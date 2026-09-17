@@ -1,6 +1,6 @@
 # MCP Marketplace Dual Publication — Launch State
 
-**Last updated:** 2026-08-31 08:45 -03 — Anthropic slug **`zapsign`** remains **Em revisão**; OpenAI corrective version `1.0.1` is **Review**. OpenAI sent authoritative feedback by email, the corrected Skills bundle was submitted, and Phase 4 remains blocked until both Live.
+**Last updated:** 2026-09-17 08:20 UTC — Anthropic slug **`zapsign`** remains **Em revisão**; OpenAI version `1.0.1` shows **Rejected** in the portal (observed live 2026-09-17; no new rejection email retrieved this session — reason not independently confirmed for this specific version). Before resubmitting, found and fixed a stale `get_signer` tool-justification that still described returning geolocation after the response-allowlist fix (PR #42) removed it. Corrective version **`1.0.2`** was submitted 2026-09-17 with the allowlist fix live, the corrected justification, and a fresh MCP tool scan against the deployed Worker. Phase 4 remains blocked until both Live.
 
 **Decision locked:** Submit truthful **25-tool** inventory first. Gate remote marketplace surface to core 12 only after **both** listings are Live (Phase 4).  
 **Canonical server:** `https://mcp.zapsign.com.br/mcp`  
@@ -18,8 +18,8 @@ Do **not** put `mcp.zapsign.co` or legacy/`fabricio` URLs in submission forms. W
 | 0 — Recon / compliance | **Complete** | Commits `b3b32a3`, `e5b044a`, `7ae7f61`; Worker deployed (Version `adeae044-b5bb-4980-a1fd-ccc0c74bf15a`); `/privacy` **200** |
 | 1 — Demo account | **Cleared (session)** | AWS SM `stress-testing` key `token` validated 2026-08-13 via `GET /api/v1/docs/` **200** (session env only; never committed) |
 | 2A — Anthropic submit | **Submitted — in review (2026-08-17)** | Team org **Zapsign CAO**; OAuth connected; **25 tools** captured; **Enviar para revisão** confirmed. Slug/ID **`zapsign`**; status **Em revisão**. Portal: `https://claude.ai/admin-settings/directory/submissions/zapsign`. Evidence: `docs/submission/evidence/anthropic-submitted-zapsign-2026-08-17.png`. |
-| 2B — OpenAI submit | **Corrective version in review (2026-08-31)** | Version `1.0.0` was rejected. Corrective version `1.0.1` was submitted after the Skills bundle correction; the rejected version remains immutable. |
-| 3 — Follow-up until Live | In progress — both in review | OpenAI version `1.0.1` is **Review**; Anthropic remains **Em revisão**. No gate-to-12 until both Live. |
+| 2B — OpenAI submit | **Second corrective version in review (2026-09-17)** | Version `1.0.0` was rejected; corrective `1.0.1` also shows **Rejected** in the portal. Response-allowlist fix (PR #42) deployed, `get_signer` justification corrected, MCP rescanned; version `1.0.2` submitted and shows `Review`. Both rejected versions remain immutable. |
+| 3 — Follow-up until Live | In progress — both in review | OpenAI version `1.0.2` is **Review**; Anthropic remains **Em revisão**. No gate-to-12 until both Live. |
 | 4 — Close-out + gate to 12 | Pending | After both Live |
 
 ---
@@ -133,11 +133,14 @@ Merged from `docs/submission/openai-org-status.md`.
 - [x] Per-tool annotation justifications filled (75/75: read-only, open-world, destructive × 25) — text frozen in `docs/submission/openai-tool-annotations.md`, re-runnable via `scripts/submission/openai-fill-tool-justifications.js`
 - [x] Submit via platform portal (2026-08-17 — version status `Review`)
 - [x] Screenshot + CAO-148 comment (portal screenshot captured during submit session)
+- [x] Corrective version `1.0.1` also came back **Rejected** (observed live 2026-09-17)
+- [x] Second corrective version `1.0.2` submitted 2026-09-17 with the response-allowlist fix (PR #42/#43/#44 on `ZapSign/api-mcp`), corrected `get_signer` justification, and fresh MCP tool scan; status `Review`
 - [ ] Follow-up until Live; E2 day-0 baseline
 
 **Submission date:** 2026-08-17  
 **Submission handle:** app `asdk_app_6a7f4a126ab88191a83a67cf744ca7da` / version `asdk_app_v_6a7f4a136fb08191abc40efc7e45c499` (status `Rejected`)
-**Corrective submission:** version `1.0.1` (status `Review`, same app handle)
+**Corrective submission:** version `1.0.1` (status `Rejected`, same app handle)
+**Second corrective submission:** version `1.0.2` (status `Review`, submitted 2026-09-17; see `docs/submission/openai-resubmission-evidence.md`)
 **Live date:** _pending_
 
 ### E. Rejection recovery (2026-08-28)
@@ -149,6 +152,17 @@ Merged from `docs/submission/openai-org-status.md`.
 - [x] **Correction deployed:** production health, privacy, docs, OAuth metadata, protected MCP response, and public docs tool count rechecked on 2026-08-28 without a real ZapSign API call.
 - [x] **Corrective draft created:** OpenAI version `1.0.1` is editable at the same app handle; canonical URL remains `https://mcp.zapsign.com.br/mcp`.
 - [x] Complete the MCP rescan, verify 25 tools and all 75 annotation justifications, upload the corrected Skills bundle, and submit version `1.0.1` for review.
+
+### F. Second rejection recovery (2026-09-17)
+
+- [x] **Verified live, not assumed:** confirmed PR #42 (`mcp/redact-openai-allowlist`) was still unmerged on `origin/main` with the allowlist fix, unit suite 423/423 green, `src/utils/response-filter.ts` matches the documented allowlist.
+- [x] **Deploy blocker resolved without recurring Cloudflare login:** added `.github/workflows/deploy.yml` (PR #43) — `workflow_dispatch` + `CLOUDFLARE_API_TOKEN` repo secret, no `wrangler login`. Merged #43, then #42, then dispatched the deploy — Worker Version `63412fb4-66ec-45e2-bb25-471ab1f033b0` live; both custom domains updated.
+- [x] **Live verification:** `GET https://mcp.zapsign.com.br/privacy` diffed before/after deploy — new field-level disclosure table (biometric, liveness, geolocation, "We do not expose") confirmed live.
+- [x] **Portal review before resubmit:** opened version `1.0.1` in the OpenAI Plugins portal — found it already **Rejected**. Used "Edit" to fork an editable draft, bumped to `1.0.2`, re-selected Developer Identity (reset on fork).
+- [x] **Found and fixed a real annotation/behavior mismatch:** `get_signer`'s "Read Only" justification still said it returns "optional geolocation" (and a nonexistent "view count") — stale from before the allowlist fix. Corrected to list only the fields actually returned (`token, name, status, status_code, signed_at, qualification, auth_mode`, +email for account owners).
+- [x] **Re-scanned tools live:** ran "Scan Tools" against the deployed Worker via OAuth (ZapSign API token entered directly by the account owner in-browser, never shared with the agent) — 0 console errors, all 25 tools + justifications intact post-scan.
+- [x] **Skills, Testing, Global tabs reviewed:** all 3 skills already `Passed`; 5 test cases + 3 negative cases still accurate against the new response shape; countries/translations unchanged from `docs/submission/openai.md`.
+- [x] **Submitted:** version `1.0.2` for review with release notes describing the allowlist fix; portal confirms status `Review`, locked (View/Download/Cancel only — no further Edit).
 
 ---
 
@@ -225,3 +239,5 @@ See `docs/marketing/STATUS.md` (2026-07-31 entry) and `docs/marketing/snapshots/
 | 2026-08-28 | **Anthropic status request sent.** Emailed `mcp-review@anthropic.com` for the `zapsign` submission after approximately two weeks in review; Gmail confirmed delivery. |
 | 2026-08-28 | **OpenAI corrective draft prepared.** Privacy-minimizing response and input corrections were deployed; production preflight returned health/privacy/docs/OAuth **200**, protected MCP **401** as expected, and public docs exposed 25 tool references. Draft `1.0.1` is saved; MCP rescan is waiting for reviewer API token entry. |
 | 2026-08-31 | **OpenAI corrective version submitted.** The Skills ZIP was rebuilt with `skills/` as its single root directory, uploaded to version `1.0.1`, and the OpenAI portal now shows status `Review`. |
+| 2026-09-17 | **PR #42 merged + deployed via new GitHub Actions workflow (agent-driven, browser MCP for the portal work).** Verified PR #42 (`mcp/redact-openai-allowlist`, response-allowlist fix) was still open and unmerged, unit suite 423/423 green. Added `.github/workflows/deploy.yml` (PR #43) so `wrangler deploy` runs in CI via a `CLOUDFLARE_API_TOKEN` repo secret instead of interactive `wrangler login`. Merged #43 then #42 to `main`; dispatched the deploy — Worker Version `63412fb4-66ec-45e2-bb25-471ab1f033b0` live, both custom domains updated. `GET /privacy` diffed before/after: new field-level disclosure table confirmed live. Filed PR #44 updating `docs/submission/openai-resubmission-evidence.md` with this evidence. |
+| 2026-09-17 | **OpenAI version `1.0.1` found Rejected; second corrective version `1.0.2` submitted.** Opened the Plugins portal (ZapSign org) — `1.0.1` showed **Rejected** (no fresh rejection email retrieved this session). Forked an editable draft via "Edit", bumped version to `1.0.2`, re-selected Developer Identity (reset on fork). Found `get_signer`'s "Read Only" tool justification still claimed to return "optional geolocation" (and a nonexistent "view count") — stale from before the allowlist fix; corrected the text to the actual returned fields. Ran "Scan Tools" against the live Worker (ZapSign OAuth; account owner entered their own ZapSign API token directly in-browser, never shared with the agent) — 0 console errors, 25 tools + justifications intact. Skills (3, all `Passed`), Testing (5 + 3 negative cases), and Global tabs reviewed with no changes needed. Updated release notes to describe the allowlist fix and clicked **Submit for Review**. Portal confirms version `1.0.2` status `Review`, locked to View/Download/Cancel only. |
