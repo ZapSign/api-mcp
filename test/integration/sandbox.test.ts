@@ -1,6 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { ZapSignClient } from '../../src/api/client.js';
-import type { ZapSignDocument, ZapSignSigner, ZapSignTemplate } from '../../src/types/zapsign.js';
+import { SortOrder } from '../../src/types/zapsign.js';
+import type {
+  ZapSignDocument,
+  ZapSignPaginatedResponse,
+  ZapSignSigner,
+  ZapSignTemplate,
+} from '../../src/types/zapsign.js';
 import {
   getSandboxPreflightErrors,
   readSandboxIntegrationConfig,
@@ -15,6 +21,40 @@ const integrationReady = hasConfiguredIntegration && preflightErrors.length === 
 const hasTemplateCredentials = integrationReady && Boolean(config.templateToken);
 
 const TEST_PREFIX = '[MCP-TEST]';
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * GET /documents defaults to ascending order when `sort_order` is omitted
+ * (confirmed live, 2026-09-17, sandbox account with 60+ existing documents):
+ * page 1 showed the *oldest* documents, never the one just created, while
+ * every other by-token operation (GET/PUT/DELETE/add-signer) on that same
+ * document succeeded immediately — ruling out eventual-consistency lag.
+ * Pass `sort_order: 'desc'` explicitly so the newest document is on page 1;
+ * still poll a few times as cheap insurance against genuine indexing lag.
+ */
+async function waitForDocumentInList(
+  client: ZapSignClient,
+  token: string,
+  attempts = 5,
+  delayMs = 500,
+): Promise<{ list: ZapSignPaginatedResponse<ZapSignDocument>; found: ZapSignDocument | undefined }> {
+  let list: ZapSignPaginatedResponse<ZapSignDocument> | undefined;
+  let found: ZapSignDocument | undefined;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    list = await client.listDocuments({ page: 1, sort_order: SortOrder.Descending });
+    found = list.results.find((d) => d.token === token);
+    if (found || attempt === attempts) {
+      break;
+    }
+    await sleep(delayMs);
+  }
+
+  return { list: list as ZapSignPaginatedResponse<ZapSignDocument>, found };
+}
 
 describe.skipIf(!hasConfiguredIntegration)('ZapSign Sandbox Integration preflight', () => {
   it('requires owned sandbox fixtures before sending requests', () => {
@@ -77,13 +117,11 @@ describe.skipIf(!integrationReady)('ZapSign Sandbox Integration — CRUD Cycle',
   });
 
   it('lists documents and finds the created one', async () => {
-    const list = await client.listDocuments({ page: 1 });
+    const { list, found } = await waitForDocumentInList(client, createdDoc.token);
 
     expect(typeof list.count).toBe('number');
     expect(Array.isArray(list.results)).toBe(true);
     expect(list.count).toBeGreaterThanOrEqual(1);
-
-    const found = list.results.find((d) => d.token === createdDoc.token);
     expect(found).toBeDefined();
   });
 
