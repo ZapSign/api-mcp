@@ -1,6 +1,6 @@
 {
   "name": "mcp-server-zapsign",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Official ZapSign MCP server — remote OAuth (Cloudflare Workers) and local STDIO via npx",
   "private": false,
   "type": "module",
