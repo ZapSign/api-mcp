@@ -103,11 +103,11 @@ Read document keys observed: `token`, `name`, `status`, `created_at`, `last_upda
 1. ~~Commit / push / PR~~ — done: PR #42 merged (`10ccad8`).
 2. ~~Deploy Worker~~ — done: Worker Version `63412fb4-66ec-45e2-bb25-471ab1f033b0` live via GitHub Actions (PR #43, no local `wrangler login`).
 3. ~~Spot-check live `/privacy`~~ — done: `200`, new disclosure table confirmed live.
-4. **Resubmit** in OpenAI Platform Apps (only remaining step — needs a human with OpenAI Platform dashboard access; no credentials or browser automation available in this environment):
-   - Privacy policy URL: `https://mcp.zapsign.com.br/privacy`
-   - This evidence note + test commands/results above
-   - Pointer to allowlist implementation: `src/utils/response-filter.ts`
-   - Worker Version ID for reference: `63412fb4-66ec-45e2-bb25-471ab1f033b0`
+4. ~~Resubmit in OpenAI Platform Apps~~ — done 2026-09-17. `1.0.1` was found **Rejected** in the portal; forked to `1.0.2`, fixed a stale `get_signer` justification (still described "geolocation" after the allowlist removed it), re-ran "Scan Tools" against the live Worker (0 console errors, 25 tools intact), reviewed Skills/Testing/Global (no changes needed), and submitted. Portal shows version `1.0.2` status `Review`, locked to View/Download/Cancel.
+
+## Next step
+
+Monitor `https://platform.openai.com/plugins` (ZapSign org, app `asdk_app_6a7f4a126ab88191a83a67cf744ca7da`) for version `1.0.2` to move from `Review` to `Live` or a new rejection. No further action possible until OpenAI responds.
 
 ## Out of scope for this evidence pass
 
