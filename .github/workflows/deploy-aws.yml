@@ -58,7 +58,6 @@ jobs:
     outputs:
       image_tag: ${{ steps.release.outputs.image_tag }}
       rollback_digest: ${{ steps.release.outputs.rollback_digest }}
-      repository_url: ${{ steps.bootstrap.outputs.repository_url }}
 
     steps:
       - uses: actions/checkout@v4
@@ -143,14 +142,12 @@ jobs:
             -backend-config="encrypt=true"
 
       - name: Preflight state-owned ECR repository
-        id: bootstrap
         run: |
           set -euo pipefail
           if ! terraform -chdir=terraform state show -no-color aws_ecr_repository.this >/dev/null; then
             echo "FAIL: api-mcp-prod must exist and already be imported as aws_ecr_repository.this in the configured Terraform state. Complete the documented one-time bootstrap before deploying."
             exit 1
           fi
-          REPOSITORY_URL=$(terraform -chdir=terraform output -raw ecr_repository_url)
           STATE_REPOSITORY=$(terraform -chdir=terraform output -raw ecr_repository_name)
           if [[ "${STATE_REPOSITORY}" != "${ECR_REPOSITORY}" ]]; then
             echo "FAIL: Terraform state owns ECR repository ${STATE_REPOSITORY}, expected ${ECR_REPOSITORY}."
@@ -161,7 +158,6 @@ jobs:
             echo "FAIL: ${ECR_REPOSITORY} must use immutable image tags before deployment."
             exit 1
           fi
-          echo "repository_url=${REPOSITORY_URL}" >> "${GITHUB_OUTPUT}"
 
       - name: Preflight supplied ACM certificate
         env:
@@ -281,9 +277,16 @@ jobs:
         if: inputs.deployment_mode == 'release'
         env:
           IMAGE_TAG: ${{ needs.preflight.outputs.image_tag }}
-          REPOSITORY_URL: ${{ needs.preflight.outputs.repository_url }}
         run: |
           set -euo pipefail
+          # REPOSITORY_URL is resolved and consumed within this single step
+          # (never written to GITHUB_OUTPUT) because it embeds AWS_ACCOUNT_ID:
+          # GitHub Actions silently blanks any step/job output whose value
+          # contains a registered secret substring.
+          REPOSITORY_URL=$(aws ecr describe-repositories \
+            --repository-names "${ECR_REPOSITORY}" \
+            --query 'repositories[0].repositoryUri' \
+            --output text)
           docker build \
             --tag "${REPOSITORY_URL}:${IMAGE_TAG}" \
             --label "git.sha=${GITHUB_SHA}" \
