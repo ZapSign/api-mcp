@@ -148,6 +148,11 @@ data "aws_iam_policy_document" "compute" {
     actions = [
       "ecs:CreateCluster",
       "ecs:CreateService",
+      # DeregisterTaskDefinition does not support resource-level scoping in
+      # IAM (AWS evaluates it against Resource "*" regardless of the ARN
+      # supplied); confirmed via a real AccessDeniedException naming
+      # "resource: *" even though a task-definition ARN was requested.
+      "ecs:DeregisterTaskDefinition",
       "ecs:DescribeTaskDefinition",
       "ecs:DescribeCapacityProviders",
       "ecs:ListAccountSettings",
@@ -178,7 +183,6 @@ data "aws_iam_policy_document" "compute" {
   statement {
     sid = "EcsTaskDefinitions"
     actions = [
-      "ecs:DeregisterTaskDefinition",
       "ecs:DescribeTaskDefinition",
       "ecs:ListTagsForResource",
       "ecs:TagResource",
