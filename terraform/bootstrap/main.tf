@@ -17,7 +17,7 @@ locals {
   state_object_arn = "${local.state_bucket_arn}/${var.tf_state_key}"
   state_lock_arn   = "arn:${local.partition}:dynamodb:${var.tf_state_region}:${local.account_id}:table/${var.tf_state_lock_table}"
   app_table_arn    = "arn:${local.partition}:dynamodb:${var.aws_region}:${local.account_id}:table/${var.dynamo_table_name}"
-  log_group_arn    = "arn:${local.partition}:logs:${var.aws_region}:${local.account_id}:log-group:/api-mcp/prod"
+  log_group_arn    = "arn:${local.partition}:logs:${var.aws_region}:${local.account_id}:log-group:/api-mcp/prod:*"
   secret_arns = [
     "arn:${local.partition}:secretsmanager:${var.aws_region}:${local.account_id}:secret:${var.secret_prefix}/COOKIE_ENCRYPTION_KEY-*",
     "arn:${local.partition}:secretsmanager:${var.aws_region}:${local.account_id}:secret:${var.secret_prefix}/ID_TOKEN_ENCRYPTION_KEY-*",
@@ -190,6 +190,7 @@ data "aws_iam_policy_document" "compute" {
       "elasticloadbalancing:CreateLoadBalancer",
       "elasticloadbalancing:CreateTargetGroup",
       "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeListenerAttributes",
       "elasticloadbalancing:DescribeListenerCertificates",
       "elasticloadbalancing:DescribeLoadBalancerAttributes",
       "elasticloadbalancing:DescribeLoadBalancers",
