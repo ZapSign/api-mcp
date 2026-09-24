@@ -227,6 +227,7 @@ data "aws_iam_policy_document" "compute" {
       "ec2:DescribeSecurityGroups",
       "ec2:DescribeSecurityGroupRules",
       "ec2:DescribeSubnets",
+      "ec2:DescribeVpcAttribute",
       "ec2:DescribeVpcs",
     ]
     resources = ["*"]
