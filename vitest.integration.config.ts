@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 const envPath = './test/.env.test';
 const CLOUDFLARE_TEST_MODULES: Readonly<Record<string, string>> = {
-  'cloudflare:email': fileURLToPath(new URL('./test/mocks/cloudflare-email.ts', import.meta.url)),
-  'cloudflare:workers': fileURLToPath(new URL('./test/mocks/cloudflare-workers.ts', import.meta.url)),
+  'cloudflare:email': fileURLToPath(new URL('./test/mocks/cloudflare-email.mjs', import.meta.url)),
+  'cloudflare:workers': fileURLToPath(new URL('./test/mocks/cloudflare-workers.mjs', import.meta.url)),
 };
 
 if (existsSync(envPath)) {

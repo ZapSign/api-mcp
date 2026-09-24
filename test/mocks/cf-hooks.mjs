@@ -6,8 +6,8 @@
 import { fileURLToPath } from 'node:url';
 
 const STUBS = {
-  'cloudflare:workers': new URL('./cloudflare-workers.ts', import.meta.url).href,
-  'cloudflare:email': new URL('./cloudflare-email.ts', import.meta.url).href,
+  'cloudflare:workers': new URL('./cloudflare-workers.mjs', import.meta.url).href,
+  'cloudflare:email': new URL('./cloudflare-email.mjs', import.meta.url).href,
 };
 
 export function resolve(specifier, context, nextResolve) {

@@ -1,4 +1,4 @@
 export class WorkerEntrypoint {}
 export class WorkflowEntrypoint {}
 export class DurableObject {}
-export const env: Record<string, unknown> = {};
+export const env = {};
