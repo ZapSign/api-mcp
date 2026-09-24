@@ -36,6 +36,8 @@ import type { Env } from '../types/env.js';
 import { OAuthStore } from './oauth/store.js';
 import { log, logError } from '../utils/logger.js';
 import { createIdServer } from '../id/server.js';
+import { configureToolCallTelemetryRecorder } from '../telemetry/tool-call-recorder.js';
+import { DynamoToolCallTelemetryRecorder, buildWeeklyToolCallsResponse } from '../telemetry/weekly-store.js';
 
 const VERSION = process.env['VERSION'] ?? 'dev';
 const DEFAULT_PORT = parseInt(process.env['PORT'] ?? '8080', 10);
@@ -436,6 +438,9 @@ async function dispatch(
   if (pathname === '/version') {
     return Response.json({ version: VERSION });
   }
+  if (pathname === '/telemetry/tool-calls/weekly') {
+    return Response.json(await buildWeeklyToolCallsResponse(kv));
+  }
   if (isIdRoute(pathname)) {
     return dispatchIdRequest(request, idProvider, idEnv);
   }
@@ -515,6 +520,7 @@ function sendWebResponse(webRes: Response, res: ServerResponse): void {
 
 export function createNodeServer(): http.Server {
   const dynamoKv = buildKvStore();
+  configureToolCallTelemetryRecorder(new DynamoToolCallTelemetryRecorder(dynamoKv));
   const kvAdapter = new KvNamespaceAdapter(dynamoKv);
   const kvAdapterAsKvStore = kvAdapter as unknown as KvStore;
 

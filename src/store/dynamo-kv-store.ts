@@ -15,6 +15,7 @@ const KEY_NAMESPACES = [
   { keyPrefix: 'id-oauth-state:', partitionPrefix: 'IDSTATE#' },
   { keyPrefix: 'id-tokens:', partitionPrefix: 'IDTOK#' },
   { keyPrefix: 'id-refresh-lock:', partitionPrefix: 'IDLOCK#' },
+  { keyPrefix: 'telemetry:week:', partitionPrefix: 'TELEM#' },
 ] as const;
 
 type DynamoClient = Pick<DynamoDBClient, 'send'>;
