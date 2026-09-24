@@ -458,7 +458,7 @@ async function dispatch(
 
 function nodeRequestToWebRequest(req: IncomingMessage, bodyBuf: Uint8Array): Request {
   const host = req.headers['host'] ?? 'localhost';
-  const proto = (req.socket as unknown as Record<string, unknown>)['encrypted'] ? 'https' : 'http';
+  const proto = resolveRequestProtocol(req);
   const url = `${proto}://${host}${req.url ?? '/'}`;
 
   const headers = new Headers();
@@ -475,6 +475,21 @@ function nodeRequestToWebRequest(req: IncomingMessage, bodyBuf: Uint8Array): Req
     headers,
     body: bodyBuf.length > 0 ? bodyBuf : undefined,
   });
+}
+
+// The ALB terminates TLS and forwards plain HTTP to this container, so
+// req.socket is never encrypted even for a real HTTPS client request.
+// Trust X-Forwarded-Proto from the ALB (the only ingress path per the
+// security group) before falling back to the raw socket for local/direct
+// testing without a proxy in front.
+export function resolveRequestProtocol(req: IncomingMessage): 'http' | 'https' {
+  const forwarded = req.headers['x-forwarded-proto'];
+  const forwardedValue = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+  const firstHop = forwardedValue?.split(',')[0]?.trim().toLowerCase();
+  if (firstHop === 'https' || firstHop === 'http') {
+    return firstHop;
+  }
+  return (req.socket as unknown as Record<string, unknown>)['encrypted'] ? 'https' : 'http';
 }
 
 async function readBody(req: IncomingMessage): Promise<Uint8Array> {
