@@ -1,0 +1,126 @@
+# task-6-mcp-aws-migration — AWS infra as code + prompt-gated GitHub Actions deploy
+# CAO-320 / feat/CAO-320-aws-migration
+# Date: 2026-09-24
+
+## Scope
+
+terraform/ (app stack, requires manual production env approval to apply) +
+terraform/bootstrap/ (operator-only root, owns the deployment IAM role) +
+.github/workflows/deploy-aws.yml (manual workflow_dispatch, never auto-deploys
+on merge) + Dockerfile. No `terraform apply` was run against AWS in this
+task — apply/cutover is a separately-authorized operator step per the plan's
+explicit guardrail.
+
+## Review history (three full passes, each closing real blockers)
+
+Pass 1 (initial build) surfaced and fixed:
+- Ephemeral Terraform state (no remote backend) -> S3 backend + DynamoDB
+  lock table, `-backend-config` supplied by CI secrets.
+- First-deploy ECR ordering (push before the repo exists) -> explicit
+  preflight that fails the workflow before any build/push unless the backend
+  and state-owned ECR repository already exist (one-time operator bootstrap,
+  never a repeated `-target` apply).
+- Destructive "rollback" that rebuilt and overwrote the tag it claimed to
+  restore -> split `release` (immutable `sha-<GITHUB_SHA>`, refuses to
+  overwrite an existing tag) and `rollback` (skips build/push, resolves and
+  redeploys an existing tag's digest) modes.
+- Missing version provenance -> `VERSION` env var on the ECS task set to the
+  exact release identifier; smoke asserts exact JSON equality, not substring
+  match.
+- No ECS rollback on a bad deploy -> `deployment_circuit_breaker { enable =
+  true rollback = true }`.
+- Unenforced "2 tasks across AZs" claim -> `desired_count >= 2` variable
+  validation, subnet/AZ-count preconditions on the ALB, removed the
+  `ignore_changes` that let desired_count silently drift.
+- Unsafe full-parent-zone DNS migration -> isolated Route53 child hosted
+  zones for exactly `mcp.zapsign.com.br` and `mcp.zapsign.co`; parent zones
+  (Cloudflare-authoritative, confirmed via live DoH lookup) are delegated
+  only via their child zones' NS records in a future, separately-approved
+  todo 7 — never a registrar-level full-zone move.
+- Floating toolchain versions -> Terraform pinned to exactly 1.9.8 (workflow
+  and locally), AWS provider constrained to `~> 6.66.0` matching the
+  committed `.terraform.lock.hcl`.
+- ECR tag/lifecycle mismatch, redundant task-role CloudWatch permissions,
+  missing pre-DNS TLS/SNI parity for the secondary domain -> fixed.
+
+Pass 2 (Oracle re-review) found the GitHub Actions deployment role could
+escalate itself: it was included in its own `managed_role_arns` and granted
+unrestricted `iam:AttachRolePolicy`/`PutRolePolicy`/`UpdateAssumeRolePolicy`
+on that list. Fixed by moving the role and all its policies into a separate
+`terraform/bootstrap/` root module, applied only under privileged operator
+credentials with its own state key:
+- The bootstrap-owned role's identity-management permissions target only the
+  two application task role ARNs — never its own ARN.
+- It may create/manage those task roles but only with a fixed permissions
+  boundary ARN, enforced via the `iam:PermissionsBoundary` condition key on
+  `CreateRole`/`PutRolePermissionsBoundary`.
+- It has no `iam:DeleteRolePermissionsBoundary` permission, so it cannot
+  strip a boundary once set.
+- The app stack requires `task_role_permissions_boundary_arn` (validated,
+  non-empty ARN) and sets `permissions_boundary` on both
+  `aws_iam_role.task` and `aws_iam_role.task_execution`, with a Terraform
+  lifecycle postcondition asserting the boundary stuck.
+
+Pass 3 (final confirmation) verified the pass-2 fix end-to-end by direct
+inspection of terraform/bootstrap/main.tf and terraform/main.tf (Oracle's
+automated final-confirmation session was unavailable due to sustained
+provider/model outages across every configured fallback; the same trace was
+performed manually and is recorded here for audit).
+
+## Static validation (literal command output, this session)
+
+Terraform 1.9.8 obtained via checksum-verified download
+(sha256sum -c against the official HashiCorp SHA256SUMS) to
+/tmp/opencode/terraform-1.9.8/ since no Terraform binary is installed in this
+environment.
+
+```
+$ terraform fmt -check -recursive .        # from terraform/
+(exit 0, no output)
+
+$ terraform init -backend=false -input=false   # terraform/
+Terraform has been successfully initialized!
+
+$ terraform validate                            # terraform/
+Success! The configuration is valid.
+
+$ terraform init -backend=false -input=false   # terraform/bootstrap/
+Terraform has been successfully initialized!
+
+$ terraform validate                            # terraform/bootstrap/
+Success! The configuration is valid.
+
+$ go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 .github/workflows/deploy-aws.yml
+(exit 0, no output)
+
+$ git diff --check
+(exit 0, no output — no whitespace errors)
+```
+
+Both Terraform roots validate independently with disjoint state keys; the
+workflow passes actionlint's static YAML/shell analysis.
+
+## What was NOT verified (explicitly out of scope for this todo)
+
+- `terraform plan`/`apply` against real AWS credentials (requires
+  `ecs:*`/`route53:*`/`iam:*` permissions the current session's AWS role does
+  not hold, and apply itself is a separately-authorized operator step per
+  the plan).
+- Live ACM certificate issuance/validation via Cloudflare CNAME (operator
+  action, documented in terraform/variables.tf).
+- End-to-end GitHub Actions run (requires the one-time bootstrap: OIDC
+  provider, S3 state bucket, DynamoDB lock table, the three Secrets Manager
+  values, and terraform/bootstrap applied under privileged credentials —
+  all explicit operator prerequisites documented in
+  .github/workflows/deploy-aws.yml's header comment).
+
+## Files
+
+- `terraform/main.tf`, `variables.tf`, `outputs.tf`, `versions.tf`,
+  `.terraform.lock.hcl` — application stack (ECR, DynamoDB, ALB, ACM
+  reuse, ECS Fargate, Route53 child zones).
+- `terraform/bootstrap/main.tf`, `variables.tf`, `outputs.tf`, `versions.tf`,
+  `.terraform.lock.hcl` — operator-only GitHub Actions IAM role/policies.
+- `.github/workflows/deploy-aws.yml` — manual `workflow_dispatch`,
+  `environment: production`, release/rollback modes, dual-domain SNI smoke.
+- `Dockerfile` — two-stage Node 20 build, non-root runtime user.
