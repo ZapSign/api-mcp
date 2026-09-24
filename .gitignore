@@ -11,3 +11,9 @@ test/.env.test
 .wrangler/
 *.swp
 *.swo
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log

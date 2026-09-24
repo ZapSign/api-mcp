@@ -1,5 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { createMockKv } from './id/test-helpers.js';
+
 const testState = vi.hoisted(() => ({
   apiHandler: undefined,
   createMcpHandler: vi.fn(),
@@ -145,11 +147,9 @@ describe('MCP CORS configuration', () => {
       .map((byte) => byte.toString(16).padStart(2, '0'))
       .join('');
     const env = {
-      OAUTH_KV: {
-        get: vi.fn(async (key: string) => (key === `token:user:grant:${tokenId}`
-          ? { audience: 'https://mcp.zapsign.com.br' }
-          : null)),
-      },
+      OAUTH_KV: createMockKv({
+        [`token:user:grant:${tokenId}`]: JSON.stringify({ audience: 'https://mcp.zapsign.com.br' }),
+      }),
     };
     const response = await worker.fetch(
       new Request('https://mcp.zapsign.com.br/mcp', {
@@ -170,11 +170,9 @@ describe('MCP CORS configuration', () => {
       .map((byte) => byte.toString(16).padStart(2, '0'))
       .join('');
     const env = {
-      OAUTH_KV: {
-        get: vi.fn(async (key: string) => (key === `token:user:grant:${tokenId}`
-          ? { audience: 'https://mcp.zapsign.com.br/mcp' }
-          : null)),
-      },
+      OAUTH_KV: createMockKv({
+        [`token:user:grant:${tokenId}`]: JSON.stringify({ audience: 'https://mcp.zapsign.com.br/mcp' }),
+      }),
     };
     const response = await worker.fetch(
       new Request('https://mcp.zapsign.com.br/mcp', {

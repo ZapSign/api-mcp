@@ -1,0 +1,459 @@
+name: Deploy to AWS (ECS Fargate)
+
+# Manual production deployment only. Route53 writes are always disabled here.
+#
+# One-time bootstrap prerequisite (never repeated by this workflow):
+#   1. Create the versioned state backend, account-wide GitHub OIDC provider,
+#      and application task-role permissions boundary.
+#   2. Apply terraform/bootstrap with privileged operator credentials and a
+#      backend key distinct from the application TF_STATE_KEY.
+#   3. Create api-mcp-prod in ECR with immutable tags, initialize the application
+#      backend, and import it as aws_ecr_repository.this.
+# terraform/bootstrap owns the GitHub role permanently. That role can access
+# only the application state object and cannot alter itself or bootstrap state.
+# Normal deploys never use targeted applies.
+#
+# Required production secrets:
+#   AWS_ACCOUNT_ID, AWS_REGION, AWS_TASK_ROLE_PERMISSIONS_BOUNDARY_ARN
+#   TF_ACM_CERTIFICATE_ARN, TF_STATE_BUCKET, TF_STATE_KEY (application only),
+#   TF_STATE_REGION, TF_STATE_DYNAMODB_TABLE
+# The supplied ACM certificate must be ISSUED in AWS_REGION and contain exact
+# SANs for mcp.zapsign.com.br and mcp.zapsign.co.
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_mode:
+        description: "Release current main or roll back to an existing immutable image"
+        required: true
+        default: release
+        type: choice
+        options:
+          - release
+          - rollback
+      rollback_image_tag:
+        description: "Rollback only: existing sha-<40 lowercase hex> ECR tag"
+        required: false
+        default: ""
+        type: string
+
+concurrency:
+  group: api-mcp-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  ECR_REPOSITORY: api-mcp-prod
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  preflight:
+    name: Production and bootstrap preflight
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 15
+    outputs:
+      image_tag: ${{ steps.release.outputs.image_tag }}
+      rollback_digest: ${{ steps.release.outputs.rollback_digest }}
+      repository_url: ${{ steps.bootstrap.outputs.repository_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require current main
+        env:
+          DEPLOY_REF: ${{ github.ref }}
+          DEPLOY_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${DEPLOY_REF}" != "refs/heads/main" ]]; then
+            echo "FAIL: production deployments must be dispatched from refs/heads/main."
+            exit 1
+          fi
+          git fetch --no-tags origin main
+          CURRENT_MAIN=$(git rev-parse origin/main)
+          if [[ "${DEPLOY_SHA}" != "${CURRENT_MAIN}" ]]; then
+            echo "FAIL: dispatched SHA is not current main. Re-run from the latest main commit."
+            exit 1
+          fi
+
+      - name: Validate required configuration
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          TASK_ROLE_PERMISSIONS_BOUNDARY_ARN: ${{ secrets.AWS_TASK_ROLE_PERMISSIONS_BOUNDARY_ARN }}
+          CERTIFICATE_ARN: ${{ secrets.TF_ACM_CERTIFICATE_ARN }}
+          TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
+          TF_STATE_KEY: ${{ secrets.TF_STATE_KEY }}
+          TF_STATE_REGION: ${{ secrets.TF_STATE_REGION }}
+          TF_STATE_DYNAMODB_TABLE: ${{ secrets.TF_STATE_DYNAMODB_TABLE }}
+        run: |
+          set -euo pipefail
+          for NAME in AWS_ACCOUNT_ID AWS_REGION TASK_ROLE_PERMISSIONS_BOUNDARY_ARN CERTIFICATE_ARN TF_STATE_BUCKET TF_STATE_KEY TF_STATE_REGION TF_STATE_DYNAMODB_TABLE; do
+            if [[ -z "${!NAME}" ]]; then
+              echo "FAIL: required production secret ${NAME} is empty."
+              exit 1
+            fi
+          done
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/api-mcp-github-actions
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+          terraform_wrapper: false
+
+      - name: Preflight remote state backend
+        env:
+          TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
+          TF_STATE_KEY: ${{ secrets.TF_STATE_KEY }}
+          TF_STATE_REGION: ${{ secrets.TF_STATE_REGION }}
+          TF_STATE_DYNAMODB_TABLE: ${{ secrets.TF_STATE_DYNAMODB_TABLE }}
+        run: |
+          set -euo pipefail
+          if ! aws s3api head-bucket --bucket "${TF_STATE_BUCKET}" --region "${TF_STATE_REGION}"; then
+            echo "FAIL: the Terraform S3 backend must exist before this workflow runs."
+            exit 1
+          fi
+          VERSIONING=$(aws s3api get-bucket-versioning --bucket "${TF_STATE_BUCKET}" --region "${TF_STATE_REGION}" --query Status --output text)
+          if [[ "${VERSIONING}" != "Enabled" ]]; then
+            echo "FAIL: Terraform state bucket versioning must be enabled for durable recovery."
+            exit 1
+          fi
+          LOCK_STATUS=$(aws dynamodb describe-table --table-name "${TF_STATE_DYNAMODB_TABLE}" --region "${TF_STATE_REGION}" --query 'Table.TableStatus' --output text 2>/dev/null || true)
+          if [[ "${LOCK_STATUS}" != "ACTIVE" ]]; then
+            echo "FAIL: the Terraform DynamoDB lock table must exist and be ACTIVE before this workflow runs."
+            exit 1
+          fi
+          terraform -chdir=terraform init -input=false \
+            -backend-config="bucket=${TF_STATE_BUCKET}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${TF_STATE_REGION}" \
+            -backend-config="dynamodb_table=${TF_STATE_DYNAMODB_TABLE}" \
+            -backend-config="encrypt=true"
+
+      - name: Preflight state-owned ECR repository
+        id: bootstrap
+        run: |
+          set -euo pipefail
+          if ! terraform -chdir=terraform state show -no-color aws_ecr_repository.this >/dev/null; then
+            echo "FAIL: api-mcp-prod must exist and already be imported as aws_ecr_repository.this in the configured Terraform state. Complete the documented one-time bootstrap before deploying."
+            exit 1
+          fi
+          REPOSITORY_URL=$(terraform -chdir=terraform output -raw ecr_repository_url)
+          STATE_REPOSITORY=$(terraform -chdir=terraform output -raw ecr_repository_name)
+          if [[ "${STATE_REPOSITORY}" != "${ECR_REPOSITORY}" ]]; then
+            echo "FAIL: Terraform state owns ECR repository ${STATE_REPOSITORY}, expected ${ECR_REPOSITORY}."
+            exit 1
+          fi
+          MUTABILITY=$(aws ecr describe-repositories --repository-names "${ECR_REPOSITORY}" --query 'repositories[0].imageTagMutability' --output text)
+          if [[ "${MUTABILITY}" != "IMMUTABLE" ]]; then
+            echo "FAIL: ${ECR_REPOSITORY} must use immutable image tags before deployment."
+            exit 1
+          fi
+          echo "repository_url=${REPOSITORY_URL}" >> "${GITHUB_OUTPUT}"
+
+      - name: Preflight supplied ACM certificate
+        env:
+          CERTIFICATE_ARN: ${{ secrets.TF_ACM_CERTIFICATE_ARN }}
+          DEPLOY_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          set -euo pipefail
+          CERTIFICATE_REGION=$(cut -d: -f4 <<< "${CERTIFICATE_ARN}")
+          if [[ "${CERTIFICATE_REGION}" != "${DEPLOY_REGION}" ]]; then
+            echo "FAIL: supplied ACM certificate must be in ${DEPLOY_REGION}; found ${CERTIFICATE_REGION}."
+            exit 1
+          fi
+          CERTIFICATE=$(aws acm describe-certificate --certificate-arn "${CERTIFICATE_ARN}" --region "${DEPLOY_REGION}" --output json)
+          if ! jq -e '.Certificate.Status == "ISSUED"' <<< "${CERTIFICATE}" >/dev/null; then
+            echo "FAIL: supplied ACM certificate is not ISSUED."
+            exit 1
+          fi
+          for DOMAIN in mcp.zapsign.com.br mcp.zapsign.co; do
+            if ! jq -e --arg domain "${DOMAIN}" '([.Certificate.DomainName] + (.Certificate.SubjectAlternativeNames // [])) | index($domain) != null' <<< "${CERTIFICATE}" >/dev/null; then
+              echo "FAIL: supplied ACM certificate does not include exact SAN ${DOMAIN}."
+              exit 1
+            fi
+          done
+
+      - name: Resolve release mode
+        id: release
+        env:
+          DEPLOYMENT_MODE: ${{ inputs.deployment_mode }}
+          ROLLBACK_IMAGE_TAG: ${{ inputs.rollback_image_tag }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${DEPLOYMENT_MODE}" == "release" ]]; then
+            if [[ -n "${ROLLBACK_IMAGE_TAG}" ]]; then
+              echo "FAIL: rollback_image_tag must be empty for a release."
+              exit 1
+            fi
+            IMAGE_TAG="sha-${RELEASE_SHA}"
+            set +e
+            LOOKUP=$(aws ecr describe-images --repository-name "${ECR_REPOSITORY}" --image-ids imageTag="${IMAGE_TAG}" 2>&1)
+            LOOKUP_STATUS=$?
+            set -e
+            if [[ ${LOOKUP_STATUS} -eq 0 ]]; then
+              echo "FAIL: immutable release ${IMAGE_TAG} already exists and will not be overwritten."
+              exit 1
+            fi
+            if [[ "${LOOKUP}" != *"ImageNotFoundException"* ]]; then
+              echo "FAIL: unable to verify that ${IMAGE_TAG} is absent from ECR."
+              exit 1
+            fi
+            echo "image_tag=${IMAGE_TAG}" >> "${GITHUB_OUTPUT}"
+            echo "rollback_digest=" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          if [[ ! "${ROLLBACK_IMAGE_TAG}" =~ ^sha-[0-9a-f]{40}$ ]]; then
+            echo "FAIL: rollback_image_tag must match sha-<40 lowercase hex characters>."
+            exit 1
+          fi
+          IMAGE_DIGEST=$(aws ecr describe-images \
+            --repository-name "${ECR_REPOSITORY}" \
+            --image-ids imageTag="${ROLLBACK_IMAGE_TAG}" \
+            --query 'imageDetails[0].imageDigest' \
+            --output text)
+          if [[ ! "${IMAGE_DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "FAIL: rollback image ${ROLLBACK_IMAGE_TAG} does not resolve to a valid ECR digest."
+            exit 1
+          fi
+          echo "image_tag=${ROLLBACK_IMAGE_TAG}" >> "${GITHUB_OUTPUT}"
+          echo "rollback_digest=${IMAGE_DIGEST}" >> "${GITHUB_OUTPUT}"
+
+  image:
+    name: Resolve immutable deployment image
+    needs: preflight
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    outputs:
+      image_digest: ${{ steps.result.outputs.image_digest }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        if: inputs.deployment_mode == 'release'
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        if: inputs.deployment_mode == 'release'
+        run: npm ci
+
+      - name: Typecheck
+        if: inputs.deployment_mode == 'release'
+        run: npm run typecheck
+
+      - name: Lint
+        if: inputs.deployment_mode == 'release'
+        run: npm run lint
+
+      - name: Test
+        if: inputs.deployment_mode == 'release'
+        run: npm test
+
+      - name: Configure AWS credentials
+        if: inputs.deployment_mode == 'release'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/api-mcp-github-actions
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR
+        if: inputs.deployment_mode == 'release'
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build immutable release image
+        if: inputs.deployment_mode == 'release'
+        env:
+          IMAGE_TAG: ${{ needs.preflight.outputs.image_tag }}
+          REPOSITORY_URL: ${{ needs.preflight.outputs.repository_url }}
+        run: |
+          set -euo pipefail
+          docker build \
+            --tag "${REPOSITORY_URL}:${IMAGE_TAG}" \
+            --label "git.sha=${GITHUB_SHA}" \
+            --label "git.ref=${GITHUB_REF}" \
+            .
+          docker push "${REPOSITORY_URL}:${IMAGE_TAG}"
+
+      - name: Resolve pushed release digest
+        id: release_digest
+        if: inputs.deployment_mode == 'release'
+        env:
+          IMAGE_TAG: ${{ needs.preflight.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          IMAGE_DIGEST=$(aws ecr describe-images \
+            --repository-name "${ECR_REPOSITORY}" \
+            --image-ids imageTag="${IMAGE_TAG}" \
+            --query 'imageDetails[0].imageDigest' \
+            --output text)
+          if [[ ! "${IMAGE_DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "FAIL: pushed image did not resolve to a valid ECR digest."
+            exit 1
+          fi
+          echo "image_digest=${IMAGE_DIGEST}" >> "${GITHUB_OUTPUT}"
+
+      - name: Select deployment digest
+        id: result
+        env:
+          DEPLOYMENT_MODE: ${{ inputs.deployment_mode }}
+          RELEASE_DIGEST: ${{ steps.release_digest.outputs.image_digest }}
+          ROLLBACK_DIGEST: ${{ needs.preflight.outputs.rollback_digest }}
+        run: |
+          set -euo pipefail
+          if [[ "${DEPLOYMENT_MODE}" == "release" ]]; then
+            IMAGE_DIGEST="${RELEASE_DIGEST}"
+          else
+            IMAGE_DIGEST="${ROLLBACK_DIGEST}"
+          fi
+          if [[ ! "${IMAGE_DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "FAIL: deployment image digest is invalid."
+            exit 1
+          fi
+          echo "image_digest=${IMAGE_DIGEST}" >> "${GITHUB_OUTPUT}"
+
+  deploy:
+    name: Terraform apply and dual-domain smoke
+    needs:
+      - preflight
+      - image
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/api-mcp-github-actions
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+          terraform_wrapper: false
+
+      - name: Terraform init and validate
+        env:
+          TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
+          TF_STATE_KEY: ${{ secrets.TF_STATE_KEY }}
+          TF_STATE_REGION: ${{ secrets.TF_STATE_REGION }}
+          TF_STATE_DYNAMODB_TABLE: ${{ secrets.TF_STATE_DYNAMODB_TABLE }}
+        run: |
+          set -euo pipefail
+          terraform -chdir=terraform init -input=false \
+            -backend-config="bucket=${TF_STATE_BUCKET}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${TF_STATE_REGION}" \
+            -backend-config="dynamodb_table=${TF_STATE_DYNAMODB_TABLE}" \
+            -backend-config="encrypt=true"
+          terraform -chdir=terraform validate
+
+      - name: Terraform plan
+        env:
+          TF_VAR_IMAGE_TAG: ${{ needs.preflight.outputs.image_tag }}
+          TF_VAR_IMAGE_DIGEST: ${{ needs.image.outputs.image_digest }}
+          TF_VAR_AWS_REGION: ${{ secrets.AWS_REGION }}
+          TF_VAR_TASK_ROLE_PERMISSIONS_BOUNDARY_ARN: ${{ secrets.AWS_TASK_ROLE_PERMISSIONS_BOUNDARY_ARN }}
+          TF_VAR_ACM_CERTIFICATE_ARN: ${{ secrets.TF_ACM_CERTIFICATE_ARN }}
+        run: |
+          set -euo pipefail
+          terraform -chdir=terraform plan \
+            -input=false \
+            -lock-timeout=5m \
+            -var="image_tag=${TF_VAR_IMAGE_TAG}" \
+            -var="image_digest=${TF_VAR_IMAGE_DIGEST}" \
+            -var="aws_region=${TF_VAR_AWS_REGION}" \
+            -var="task_role_permissions_boundary_arn=${TF_VAR_TASK_ROLE_PERMISSIONS_BOUNDARY_ARN}" \
+            -var="acm_certificate_arn=${TF_VAR_ACM_CERTIFICATE_ARN}" \
+            -var="manage_route53=false" \
+            -out=tfplan
+
+      - name: Terraform apply
+        run: terraform -chdir=terraform apply -input=false -auto-approve tfplan
+
+      - name: Wait for ECS deployment
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          set -euo pipefail
+          aws ecs wait services-stable \
+            --cluster api-mcp-prod \
+            --services api-mcp-prod \
+            --region "${AWS_REGION}"
+
+      - name: Resolve ALB hostname
+        id: alb
+        run: |
+          set -euo pipefail
+          ALB_DNS=$(terraform -chdir=terraform output -raw alb_dns_name)
+          echo "dns=${ALB_DNS}" >> "${GITHUB_OUTPUT}"
+
+      - name: Smoke both domains through ALB SNI
+        env:
+          ALB_DNS: ${{ steps.alb.outputs.dns }}
+          EXPECTED_VERSION: ${{ needs.preflight.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          mapfile -t ALB_IPS < <(dig +short A "${ALB_DNS}")
+          if [[ ${#ALB_IPS[@]} -eq 0 ]]; then
+            echo "FAIL: no IPv4 addresses resolved for ${ALB_DNS}."
+            exit 1
+          fi
+
+          probe_health() {
+            local domain=$1
+            for attempt in $(seq 1 10); do
+              for alb_ip in "${ALB_IPS[@]}"; do
+                status=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 \
+                  --resolve "${domain}:443:${alb_ip}" "https://${domain}/healthz" 2>/dev/null || true)
+                if [[ "${status}" == "200" ]]; then
+                  return 0
+                fi
+              done
+              sleep 10
+            done
+            echo "FAIL: https://${domain}/healthz did not return HTTP 200."
+            return 1
+          }
+
+          probe_version() {
+            local domain=$1
+            for attempt in $(seq 1 10); do
+              for alb_ip in "${ALB_IPS[@]}"; do
+                response=$(curl -fsS --max-time 15 \
+                  --resolve "${domain}:443:${alb_ip}" "https://${domain}/version" 2>/dev/null || true)
+                if jq -e --arg expected "${EXPECTED_VERSION}" 'type == "object" and .version == $expected' <<< "${response}" >/dev/null 2>&1; then
+                  return 0
+                fi
+              done
+              sleep 10
+            done
+            echo "FAIL: https://${domain}/version did not return JSON with version exactly ${EXPECTED_VERSION}."
+            return 1
+          }
+
+          for domain in mcp.zapsign.com.br mcp.zapsign.co; do
+            probe_health "${domain}"
+            probe_version "${domain}"
+            echo "PASS: ${domain} health and exact version smoke succeeded through ALB SNI."
+          done

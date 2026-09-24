@@ -4,6 +4,7 @@ import { ZapSignClient } from '../api/client.js';
 import { getAuthProps } from '../auth/get-auth-props.js';
 import { ZapSignMcpError } from '../errors/base.js';
 import { ValidationError } from '../errors/validation-error.js';
+import { recordToolCallTelemetry } from '../telemetry/tool-call-recorder.js';
 import { log, logToolError } from '../utils/logger.js';
 import { requireScope } from '../utils/scope.js';
 import {
@@ -17,6 +18,16 @@ type ToolContentResult = {
   isError?: boolean;
 };
 
+function errorCodeFor(error: unknown): string {
+  if (error instanceof ZodError) {
+    return 'ValidationError';
+  }
+  if (error instanceof ZapSignMcpError) {
+    return error.code;
+  }
+  return 'unknown_error';
+}
+
 export async function runAuthenticatedTool<TArgs>(options: {
   toolName: string;
   requiredScopes: string[];
@@ -25,6 +36,7 @@ export async function runAuthenticatedTool<TArgs>(options: {
   logEvent: string;
   execute: (client: ZapSignClient, args: TArgs) => Promise<unknown>;
 }): Promise<ToolContentResult> {
+  const startedAt = Date.now();
   try {
     const props = getAuthProps();
     if (!props) {
@@ -41,9 +53,25 @@ export async function runAuthenticatedTool<TArgs>(options: {
     const client = new ZapSignClient(props.zapSignApiUrl, props.zapSignApiToken);
     const result = await options.execute(client, parsed);
     log(options.logEvent);
+    await recordToolCallTelemetry({
+      tool: options.toolName,
+      resultClass: 'ok',
+      durationMs: Date.now() - startedAt,
+      rawToken: props.zapSignApiToken,
+    });
     return formatToolSuccess(JSON.stringify(result));
   } catch (error) {
     const errorId = logToolError(options.toolName, error);
+    const authProps = getAuthProps();
+    if (authProps) {
+      await recordToolCallTelemetry({
+        tool: options.toolName,
+        resultClass: 'error',
+        errorCode: errorCodeFor(error),
+        durationMs: Date.now() - startedAt,
+        rawToken: authProps.zapSignApiToken,
+      });
+    }
     if (error instanceof ZodError) {
       return formatToolError(ValidationError.fromZodError(error).message);
     }

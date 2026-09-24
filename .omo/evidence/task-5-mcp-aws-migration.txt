@@ -1,0 +1,181 @@
+# task-5-mcp-aws-migration — Per-tool-call telemetry + weekly aggregate endpoint
+# CAO-320 / feat/CAO-320-aws-migration
+# Date: 2026-09-24
+
+## Design decisions
+
+### Choke point: src/tools/run-authenticated-tool.ts (shared, not Workers-specific)
+
+Every registered tool handler calls `runAuthenticatedTool` exactly once. That
+file has zero Workers-only imports (only zod, api/client, auth/get-auth-props,
+errors/*, utils/*) and `getAuthProps()` is already transport-agnostic
+(Workers via `getMcpAuthContext()`, STDIO via `configureStdioAuth()`). Wiring
+telemetry there means both the legacy Workers deployment and the new Node
+deployment get identical instrumentation with zero duplicated logic and zero
+changes to any individual tool file under src/tools/**.
+
+### Ambient recorder, not a threaded parameter
+
+`runAuthenticatedTool` has no `env`/KvStore parameter today and none of the
+~20 tool call sites pass one. Adding a parameter would mean touching every
+tool file (forbidden) or plumbing env through server.ts. Instead,
+`src/telemetry/tool-call-recorder.ts` exposes an ambient singleton
+(`configureToolCallTelemetryRecorder` / used internally by
+`recordToolCallTelemetry`) — the exact same pattern already used for STDIO
+auth (`configureStdioAuth`). Only `src/node/main.ts` calls
+`configureToolCallTelemetryRecorder(new DynamoToolCallTelemetryRecorder(kv))`
+at boot. STDIO and the (soon-decommissioned) Workers path never call it, so
+the recorder stays `null` there — the JSON event still emits to stdout (cheap,
+no AWS dependency), but nothing is persisted. This satisfies "must not add a
+KvStore/AWS dependency to STDIO" while still sharing the emission code.
+
+### Weekly aggregate: DynamoDB via the existing KvStore, no new AWS service
+
+The only persistent substrate already wired into the Node deployment is
+DynamoDB via `KvStore`/`DynamoKvStore` (used for OAuth state). Reusing it for
+telemetry avoids introducing Kinesis, CloudWatch Logs Insights queries, or a
+second table. Added one new key-namespace prefix to
+`src/store/dynamo-kv-store.ts`: `telemetry:week:<YYYY-MM-DD>` → `TELEM#<hash>`
+partition key — same table, same schema pattern (PK/value/expiresAt), no
+terraform change needed since the table itself already exists.
+
+Counter scheme (`src/telemetry/weekly-store.ts`):
+- Key: `telemetry:week:<ISO-Monday-UTC date>`
+- Value (JSON): `{ reads: number, writes: number, accounts: string[] }`
+- `accounts` holds distinct `account_hash` values seen that week;
+  `distinctAccounts = accounts.length`.
+- TTL: 26 weeks (well past the 14-week response window) — DynamoDB TTL is
+  cleanup-only, consistent with the existing `dynamo-kv-store.ts` comment.
+
+**Known limitation (documented in code):** this is a non-atomic
+read-modify-write. Under concurrent Fargate tasks (desired_count=2) a rare
+race can undercount a read/write or drop a distinct-account addition. This is
+acceptable for approximate adoption analytics (gepeto's own consumer is
+fail-soft and treats this as best-effort adoption signal, not billing or
+security data) but is not a strictly-consistent counter. If exact counts are
+ever required, this would need DynamoDB atomic `ADD`/conditional-update
+expressions, which the current minimal `KvStore` interface does not expose.
+
+### Classification
+
+`list_*` and `get_*` tool names → read; every other tool name → write, per
+the plan's explicit rule.
+
+### account_hash
+
+SHA-256 hex of the caller's raw ZapSign API token (`crypto.subtle.digest`),
+computed inside `recordToolCallTelemetry` — the raw token is never passed to
+`console.log`, never persisted, and is out of scope by the time the hash
+leaves that function.
+
+### duration_ms
+
+Wall-clock time of the *entire* `runAuthenticatedTool` try block: from
+function entry (before `getAuthProps()`) to just before the return in both
+the success and catch paths. This includes auth prop resolution, scope
+checks, schema parsing, and the ZapSign API call — i.e. the full cost of
+handling the tool call as observed by the caller, not just the upstream HTTP
+call.
+
+### Public endpoint
+
+`GET /telemetry/tool-calls/weekly` is wired in `src/node/main.ts` `dispatch()`
+before the OAuth/MCP routing and before `isIdRoute`, so it is never gated by
+a bearer token — it only ever returns aggregate counts, never account
+identifiers or tool arguments.
+
+## Files changed/added
+
+- `src/telemetry/tool-call-recorder.ts` (new) — event emission, ambient
+  recorder singleton, `classifyToolCall`, `hashAccountToken`, fail-soft
+  `recordToolCallTelemetry`.
+- `src/telemetry/weekly-store.ts` (new) — ISO-Monday-UTC week math,
+  `DynamoToolCallTelemetryRecorder`, `buildWeeklyToolCallsResponse` (fail-soft
+  per-week reads).
+- `src/store/dynamo-kv-store.ts` — added `telemetry:week:` → `TELEM#` key
+  namespace (one line).
+- `src/tools/run-authenticated-tool.ts` — wired `recordToolCallTelemetry` on
+  both the success and catch paths; added `errorCodeFor()` helper
+  (ZodError → `ValidationError`; `ZapSignMcpError` → `error.code`; else
+  `unknown_error`).
+- `src/node/main.ts` — configure the DynamoDB-backed recorder at server boot;
+  added the `GET /telemetry/tool-calls/weekly` route to `dispatch()`.
+- `test/unit/telemetry/tool-call-recorder.test.ts` (new, 9 tests)
+- `test/unit/telemetry/weekly-store.test.ts` (new, 9 tests)
+- `test/unit/tools/run-authenticated-tool-telemetry.test.ts` (new, 4 tests)
+
+## Gate results (literal command output)
+
+```
+$ npm run typecheck
+> mcp-server-zapsign@2.1.1 typecheck
+> tsc --noEmit
+(exit 0, no output)
+
+$ npm run lint
+> mcp-server-zapsign@2.1.1 lint
+> eslint src/
+(exit 0, no output)
+
+$ npm test
+ Test Files  48 passed (48)
+      Tests  476 passed (476)
+   Duration  10.98s
+```
+
+Baseline before this change: 45 files / 454 tests, all passing.
+Delta: +3 test files, +22 tests, 0 regressions, 0 modified/removed
+assertions in pre-existing tests.
+
+## Build
+
+```
+$ npm run build:node
+ESM dist/node/main.js     257.54 KB
+ESM dist/node/main.js.map 494.03 KB
+ESM ⚡️ Build success in 94ms
+```
+
+## Boot + curl evidence (real process, no AWS credentials)
+
+```
+$ AWS_REGION=us-east-1 DYNAMO_TABLE_NAME=api-mcp-kv-verify \
+  COOKIE_ENCRYPTION_KEY=<random> ID_TOKEN_ENCRYPTION_KEY=<random> PORT=18100 \
+  node --import ./src/node/cf-shim.mjs dist/node/main.js
+{"event":"server_started","level":"info","port":18100,"version":"dev","ts":"2026-09-24T16:05:36.468Z"}
+[mcp-server-zapsign] listening on http://localhost:18100
+
+$ curl -s -w '\nHTTP %{http_code}\n' http://localhost:18100/healthz
+{"status":"ok","version":"dev","timestamp":"2026-09-24T16:05:36.526Z"}
+HTTP 200
+
+$ curl -s -w '\nHTTP %{http_code}\n' http://localhost:18100/telemetry/tool-calls/weekly
+{"weeks":[{"week":"2026-06-22","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-06-29","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-07-06","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-07-13","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-07-20","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-07-27","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-08-03","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-08-10","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-08-17","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-08-24","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-08-31","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-09-07","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-09-14","reads":0,"writes":0,"distinctAccounts":0},{"week":"2026-09-21","reads":0,"writes":0,"distinctAccounts":0}]}
+HTTP 200
+
+$ curl -s -w '\nHTTP %{http_code}\n' http://localhost:18100/.well-known/oauth-protected-resource
+{"resource":"https://mcp.zapsign.com.br/mcp","authorization_servers":["https://mcp.zapsign.com.br","https://mcp.zapsign.co"],"scopes_supported":[...]}
+HTTP 200   <- OAuth port from todo 4 unaffected (regression check)
+```
+
+Server log during the /telemetry/tool-calls/weekly call (no real AWS creds —
+each of the 14 weekly reads hits DynamoDB, gets rejected, and is dropped
+fail-soft rather than crashing the request):
+
+```
+{"event":"telemetry_drop","level":"warn","phase":"read","error_class":"AccessDeniedException","ts":"2026-09-24T16:05:37.008Z"}
+... (14 total, one per week, as expected)
+```
+
+This confirms the fail-soft read path: the endpoint still returned HTTP 200
+with the exact `{"weeks":[...]}` shape gepeto's
+`internal/okrsmetrics/tool_calls.go` `FetchToolCallsWeekly` expects, even
+though every underlying DynamoDB call failed.
+
+## Contract match with gepeto consumer
+
+`internal/okrsmetrics/tool_calls.go:34-76` parses `week` with Go layout
+`"2006-01-02"` and reads `reads`/`writes`/`distinctAccounts` as `int64`. The
+endpoint's JSON field names, types, and date format match exactly; verified
+by direct comparison against the file content, not by running the Go
+consumer (no live gepeto instance in this task's scope).

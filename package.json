@@ -21,6 +21,7 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "build:stdio": "tsup src/stdio/main.ts --format esm --target node20 --outDir dist/stdio --clean --sourcemap",
+    "build:node": "tsup src/node/main.ts --format esm --target node20 --outDir dist/node --clean --sourcemap --external @cloudflare/workers-oauth-provider --external agents",
     "prepublishOnly": "npm run typecheck && npm run lint && npm test && npm run build:stdio",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
@@ -31,6 +32,7 @@
     "marketing:snapshot": "node scripts/marketing/take-snapshot.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1139.0",
     "@cloudflare/workers-oauth-provider": "^0.10.3",
     "@modelcontextprotocol/sdk": "^1.27.0",
     "agents": "0.6.0",
