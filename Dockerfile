@@ -43,6 +43,14 @@ RUN npm ci --omit=dev --ignore-scripts
 
 COPY --from=builder /app/dist/node/ ./dist/node/
 
+# cf-shim.mjs is a Node ESM loader hook (registered via --import below) that
+# stubs the cloudflare: protocol imports still pulled in transitively by
+# agents/mcp. It must ship alongside the compiled output, not just exist in
+# the source tree, or the container exits immediately with
+# ERR_UNSUPPORTED_ESM_URL_SCHEME.
+COPY --from=builder /app/src/node/cf-shim.mjs ./src/node/cf-shim.mjs
+COPY --from=builder /app/src/node/cf-shim-hooks.mjs ./src/node/cf-shim-hooks.mjs
+
 USER appuser
 
 # PORT is read by the Node server at startup (default 8080).
@@ -61,4 +69,4 @@ EXPOSE 8080
 #   Without them the ECS service will not stabilize and the deploy workflow
 #   smoke step will fail.
 
-ENTRYPOINT ["node", "dist/node/main.js"]
+ENTRYPOINT ["node", "--import", "./src/node/cf-shim.mjs", "dist/node/main.js"]

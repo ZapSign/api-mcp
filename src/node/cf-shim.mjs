@@ -3,7 +3,7 @@
  * Intercepts `cloudflare:*` protocol imports from `agents` and stubs them
  * with no-op classes so the server boots without a Cloudflare runtime.
  *
- * Usage: node --import ./dist/node/cf-shim.mjs dist/node/main.js
+ * Usage: node --import ./src/node/cf-shim.mjs dist/node/main.js
  */
 import { register } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
