@@ -69,4 +69,8 @@ EXPOSE 8080
 #   Without them the ECS service will not stabilize and the deploy workflow
 #   smoke step will fail.
 
-ENTRYPOINT ["node", "--import", "./src/node/cf-shim.mjs", "dist/node/main.js"]
+# --experimental-websocket is required on Node 20 (unflagged only in
+# Node 22+): agents/partyserver reference the global WebSocket constructor
+# at module load time. Confirmed via a real container crash-loop
+# (ReferenceError: WebSocket is not defined) without this flag.
+ENTRYPOINT ["node", "--import", "./src/node/cf-shim.mjs", "--experimental-websocket", "dist/node/main.js"]
