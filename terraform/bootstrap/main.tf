@@ -298,8 +298,11 @@ data "aws_iam_policy_document" "data_observability" {
   }
 
   statement {
-    sid       = "SecretMetadata"
-    actions   = ["secretsmanager:DescribeSecret"]
+    sid = "SecretMetadata"
+    actions = [
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:GetResourcePolicy",
+    ]
     resources = local.secret_arns
   }
 }
