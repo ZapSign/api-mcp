@@ -14,7 +14,13 @@ export function createMockKv(initial: Record<string, string> = {}): KVNamespace 
   );
 
   return {
-    get: vi.fn(async (key: string) => store.get(key)?.value ?? null),
+    get: vi.fn(async (key: string, options?: { type?: string }) => {
+      const value = store.get(key)?.value;
+      if (value === undefined) {
+        return null;
+      }
+      return options?.type === 'json' ? JSON.parse(value) : value;
+    }),
     put: vi.fn(async (key: string, value: string) => {
       store.set(key, { value });
     }),
