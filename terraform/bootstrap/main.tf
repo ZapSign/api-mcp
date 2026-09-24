@@ -17,7 +17,11 @@ locals {
   state_object_arn = "${local.state_bucket_arn}/${var.tf_state_key}"
   state_lock_arn   = "arn:${local.partition}:dynamodb:${var.tf_state_region}:${local.account_id}:table/${var.tf_state_lock_table}"
   app_table_arn    = "arn:${local.partition}:dynamodb:${var.aws_region}:${local.account_id}:table/${var.dynamo_table_name}"
-  log_group_arn    = "arn:${local.partition}:logs:${var.aws_region}:${local.account_id}:log-group:/api-mcp/prod:*"
+  log_group_arn    = "arn:${local.partition}:logs:${var.aws_region}:${local.account_id}:log-group:/api-mcp/prod"
+  log_group_arns = [
+    local.log_group_arn,
+    "${local.log_group_arn}:*",
+  ]
   secret_arns = [
     "arn:${local.partition}:secretsmanager:${var.aws_region}:${local.account_id}:secret:${var.secret_prefix}/COOKIE_ENCRYPTION_KEY-*",
     "arn:${local.partition}:secretsmanager:${var.aws_region}:${local.account_id}:secret:${var.secret_prefix}/ID_TOKEN_ENCRYPTION_KEY-*",
@@ -296,7 +300,7 @@ data "aws_iam_policy_document" "data_observability" {
       "logs:TagResource",
       "logs:UntagResource",
     ]
-    resources = [local.log_group_arn]
+    resources = local.log_group_arns
   }
 
   statement {
