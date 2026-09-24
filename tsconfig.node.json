@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "outDir": "dist/node",
+    "rootDir": "src/node",
+    "moduleResolution": "node16",
+    "module": "node16",
+    "target": "ES2022"
+  },
+  "include": ["src/node"],
+  "exclude": ["node_modules", "dist", "test"]
+}

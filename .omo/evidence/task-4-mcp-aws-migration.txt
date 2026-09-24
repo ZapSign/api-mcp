@@ -1,0 +1,119 @@
+# task-4-mcp-aws-migration — Node server port evidence
+# CAO-320 / feat/CAO-320-aws-migration
+# Date: 2026-09-24
+
+## OAuth library choice + rationale
+
+**Choice: narrow façade with KvStore (src/node/oauth/)**
+
+oidc-provider was evaluated and REJECTED for these reasons:
+1. Cannot express Client ID Metadata Documents (CIMD) — MCP auth spec 2026-07-28
+   requires CIMD at the registration endpoint GET path; oidc-provider serves
+   a full OpenID Connect discovery document but has no concept of CIMD.
+2. Designed for full-stack AS with persistent sessions; MCP needs stateless
+   per-request dispatch.
+3. Would force a completely different middleware stack (Koa/Express), conflicting
+   with the node:http requirement.
+
+The narrow façade in src/node/oauth/ replicates exactly what workers-oauth-provider
+did for MCP: DCR (RFC 7591), PKCE S256, CIMD, resource metadata, token exchange.
+No jose JWT signing needed — tokens are opaque strings stored in DynamoDB via KvStore.
+
+## Files created
+
+src/node/
+  env.ts                        — NodeEnv type (mirrors Workers Env; OAUTH_KV: KvStore)
+  kv-namespace-adapter.ts       — Wraps KvStore to satisfy KVNamespace API for existing handlers
+  main.ts                       — node:http server, full routing, per-request dispatch
+  mcp-handler.ts                — Per-request StreamableHTTPServerTransport (CVE parity)
+  cf-shim.mjs                   — ESM loader hook entry (stubs cloudflare:* for Node)
+  cf-shim-hooks.mjs             — ESM resolve+load hooks (cloudflare:workers → data: stub)
+  oauth/
+    types.ts                    — NodeOAuthConfig, StoredClient, StoredGrant, StoredToken, OAuthHelpers
+    store.ts                    — OAuthStore: client/grant/token CRUD on KvStore
+    pkce.ts                     — S256 PKCE challenge verify (plain rejected)
+    registration.ts             — DCR POST + CIMD GET (/register/<clientId>)
+    token-endpoint.ts           — authorization_code + refresh_token grants
+    metadata.ts                 — /.well-known/oauth-protected-resource + oauth-authorization-server
+    provider.ts                 — NodeOAuthProvider orchestrator + createOAuthHelpers()
+
+test/unit/node/
+  oauth-store.test.ts           — OAuthStore unit tests (client TTL, grant consume-once, token expiry)
+  oauth-metadata-audience.test.ts — Metadata endpoints + root-audience detection
+
+tsconfig.node.json              — Node-only tsconfig (adds node types, excludes cloudflare)
+package.json                    — Added build:node script (tsup src/node/main.ts)
+tsconfig.json                   — Excludes src/node/ from Workers typecheck
+
+## Gate results
+
+npm run typecheck   exit 0  (Workers types; src/node/ excluded — node-typed separately)
+npm run lint        exit 0  (all 14 lint errors fixed in main.ts, provider.ts, registration.ts, token-endpoint.ts)
+npm test            exit 0  (45 test files, 454 tests passing)
+
+## Build
+
+npm run build:node
+  → dist/node/main.js  (252 KB)
+  → dist/node/main.js.map
+
+Boot command:
+  node --import ./src/node/cf-shim.mjs dist/node/main.js
+
+The cf-shim.mjs ESM hook stubs cloudflare:workers (imported by agents/mcp at module
+load time) with a data: URI shim. This is the canonical approach for Node servers
+that consume libraries also targeting Cloudflare Workers.
+
+## Verification — server boots and answers
+
+PORT=18083 node --import ./src/node/cf-shim.mjs dist/node/main.js
+→ {"event":"server_started","level":"info","port":18083,"version":"dev"}
+→ [mcp-server-zapsign] listening on http://localhost:18083
+
+### curl /healthz
+$ curl -s http://localhost:18083/healthz
+{"status":"ok","version":"dev","timestamp":"2026-09-24T13:53:06.233Z"}
+
+### curl /.well-known/oauth-protected-resource
+$ curl -s http://localhost:18083/.well-known/oauth-protected-resource
+{
+  "resource": "https://mcp.zapsign.com.br/mcp",
+  "authorization_servers": ["https://mcp.zapsign.com.br", "https://mcp.zapsign.co"],
+  "scopes_supported": ["documents:read","documents:write","signers:read","signers:write",
+    "templates:read","templates:write","webhooks:read","webhooks:write","partner:write"],
+  "bearer_methods_supported": ["header"],
+  "resource_signing_alg_values_supported": []
+}
+
+### curl /.well-known/oauth-authorization-server
+$ curl -s http://localhost:18083/.well-known/oauth-authorization-server
+{
+  "issuer": "https://mcp.zapsign.com.br",
+  "authorization_endpoint": "http://localhost:18083/authorize",
+  "token_endpoint": "http://localhost:18083/token",
+  "registration_endpoint": "http://localhost:18083/register",
+  "scopes_supported": ["documents:read","documents:write","signers:read","signers:write",
+    "templates:read","templates:write","webhooks:read","webhooks:write","partner:write"],
+  "response_types_supported": ["code"],
+  "grant_types_supported": ["authorization_code","refresh_token"],
+  "token_endpoint_auth_methods_supported": ["none"],
+  "code_challenge_methods_supported": ["S256"],
+  "require_pkce": true
+}
+
+### curl POST /mcp tools/list (no auth — expected 401)
+$ curl -s -X POST http://localhost:18083/mcp \
+    -H 'Content-Type: application/json' \
+    -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+{"error":"unauthorized"}
+HTTP 401 — correct; MCP API requires valid bearer token.
+
+### GET /.well-known/openai-apps-challenge
+HTTP 404 — correct; OPENAI_APPS_CHALLENGE_TOKEN env var not set.
+
+## Test count
+45 test files  /  454 tests  /  0 failures
+
+New tests added:
+  test/unit/node/oauth-store.test.ts          — 9 tests
+  test/unit/node/oauth-metadata-audience.test.ts — 7 tests
