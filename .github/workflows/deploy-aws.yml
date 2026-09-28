@@ -1,6 +1,14 @@
 name: Deploy to AWS (ECS Fargate)
 
-# Manual production deployment only. Route53 writes are always disabled here.
+# Manual production deployment only.
+#
+# manage_route53 is hardcoded to true below: the Phase 2 cutover (todo 7)
+# already delegated mcp.zapsign.com.br and mcp.zapsign.co to the Route53
+# child zones this stack owns, so Terraform state has those zones/records at
+# count = 1. Passing manage_route53=false here (Phase 1's value) reconciles
+# them to count = 0 and DESTROYS the live A records on every deploy — this
+# is exactly what took down both production domains on 2026-09-28. Do not
+# revert this to false while the child-zone delegation is live.
 #
 # One-time bootstrap prerequisite (never repeated by this workflow):
 #   1. Create the versioned state backend, account-wide GitHub OIDC provider,
@@ -388,7 +396,7 @@ jobs:
             -var="aws_region=${TF_VAR_AWS_REGION}" \
             -var="task_role_permissions_boundary_arn=${TF_VAR_TASK_ROLE_PERMISSIONS_BOUNDARY_ARN}" \
             -var="acm_certificate_arn=${TF_VAR_ACM_CERTIFICATE_ARN}" \
-            -var="manage_route53=false" \
+            -var="manage_route53=true" \
             -out=tfplan
 
       - name: Terraform apply
