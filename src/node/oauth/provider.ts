@@ -132,6 +132,57 @@ export function createOAuthHelpers(kv: KvStore): OAuthHelpers {
   };
 }
 
+const CORS_REQUIRED_EXPOSED_HEADERS = ['WWW-Authenticate', 'Retry-After'];
+
+/**
+ * Adds the same CORS contract @cloudflare/workers-oauth-provider applied to
+ * metadata/token/registration/api responses. Browser-based OAuth clients
+ * (Claude's DCR fetch to /register, in particular) send a preflight OPTIONS
+ * and require these headers on the real response too — without them the
+ * browser blocks the request before it ever reaches application code.
+ */
+function addCorsHeaders(response: Response, request: Request): Response {
+  const origin = request.headers.get('Origin');
+  if (!origin) {
+    return response;
+  }
+
+  const withCors = new Response(response.body, response);
+  withCors.headers.set('Access-Control-Allow-Origin', origin);
+  withCors.headers.set('Access-Control-Allow-Methods', '*');
+  withCors.headers.set('Access-Control-Allow-Headers', 'Authorization, *');
+
+  const exposedHeaders = (withCors.headers.get('Access-Control-Expose-Headers') ?? '')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean);
+  for (const required of CORS_REQUIRED_EXPOSED_HEADERS) {
+    if (!exposedHeaders.some((name) => name.toLowerCase() === required.toLowerCase())) {
+      exposedHeaders.push(required);
+    }
+  }
+  withCors.headers.set('Access-Control-Expose-Headers', exposedHeaders.join(', '));
+  withCors.headers.set('Access-Control-Max-Age', '86400');
+  return withCors;
+}
+
+function isCorsEligiblePath(pathname: string, config: NodeOAuthConfig): boolean {
+  if (pathname === config.apiRoute || pathname.startsWith(`${config.apiRoute}/`)) {
+    return true;
+  }
+  if (pathname === '/.well-known/oauth-authorization-server') {
+    return true;
+  }
+  if (pathname === '/.well-known/oauth-protected-resource') {
+    return true;
+  }
+  if (pathname === config.tokenEndpoint) {
+    return true;
+  }
+  return pathname === config.clientRegistrationEndpoint
+    || pathname.startsWith(`${config.clientRegistrationEndpoint}/`);
+}
+
 export interface NodeOAuthProviderOptions {
   readonly config: NodeOAuthConfig;
   readonly kv: KvStore;
@@ -165,24 +216,29 @@ export class NodeOAuthProvider {
     const { pathname } = url;
     const origin = url.origin;
 
+    if (request.method === 'OPTIONS' && isCorsEligiblePath(pathname, this.config)) {
+      return addCorsHeaders(new Response(null, { status: 204, headers: { 'Content-Length': '0' } }), request);
+    }
     if (pathname === '/.well-known/oauth-protected-resource') {
-      return handleProtectedResourceMetadata(this.config);
+      return addCorsHeaders(handleProtectedResourceMetadata(this.config), request);
     }
     if (pathname === '/.well-known/oauth-authorization-server') {
-      return handleAuthorizationServerMetadata(this.config, origin);
+      return addCorsHeaders(handleAuthorizationServerMetadata(this.config, origin), request);
     }
     if (this.isRegistrationPath(pathname)) {
-      return handleRegistration(request, this.kv, `${origin}${this.config.clientRegistrationEndpoint}`);
+      const response = await handleRegistration(request, this.kv, `${origin}${this.config.clientRegistrationEndpoint}`);
+      return addCorsHeaders(response, request);
     }
     if (pathname === this.config.tokenEndpoint) {
-      return handleTokenEndpoint(request, this.kv, this.config.refreshTokenTTL);
+      const response = await handleTokenEndpoint(request, this.kv, this.config.refreshTokenTTL);
+      return addCorsHeaders(response, request);
     }
     if (pathname === this.config.apiRoute || pathname.startsWith(`${this.config.apiRoute}/`)) {
       const authError = await this.validateBearer(request);
       if (authError) {
-        return authError;
+        return addCorsHeaders(authError, request);
       }
-      return this.apiHandlerFn(request, env);
+      return addCorsHeaders(await this.apiHandlerFn(request, env), request);
     }
     return this.authHandlerFn(request, env);
   }

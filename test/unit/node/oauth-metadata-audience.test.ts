@@ -98,10 +98,9 @@ describe('handleProtectedResourceMetadata', () => {
     expect(body['bearer_methods_supported']).toContain('header');
   });
 
-  it('should set CORS headers', async () => {
-    const res = handleProtectedResourceMetadata(BASE_CONFIG);
-    expect(res.headers.get('access-control-allow-origin')).toBe('*');
-  });
+  // CORS is applied centrally by NodeOAuthProvider.handle() (see
+  // test/unit/node/oauth-provider-cors.test.ts), not by this bare function —
+  // it has no Origin header to reflect when called directly.
 });
 
 // ── Authorization server metadata ─────────────────────────────────────────────
