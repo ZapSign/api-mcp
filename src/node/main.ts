@@ -537,10 +537,9 @@ export function createNodeServer(): http.Server {
   const dynamoKv = buildKvStore();
   configureToolCallTelemetryRecorder(new DynamoToolCallTelemetryRecorder(dynamoKv));
   const kvAdapter = new KvNamespaceAdapter(dynamoKv);
-  const kvAdapterAsKvStore = kvAdapter as unknown as KvStore;
 
   const oauthHelpers = createOAuthHelpers(dynamoKv);
-  const signingEnv = buildNodeEnvFromProcess(oauthHelpers, kvAdapterAsKvStore);
+  const signingEnv = buildNodeEnvFromProcess(oauthHelpers, kvAdapter);
 
   const idOauthHelpers = createOAuthHelpers(dynamoKv);
   const idEnv: NodeEnv = { ...signingEnv, OAUTH_PROVIDER: idOauthHelpers };

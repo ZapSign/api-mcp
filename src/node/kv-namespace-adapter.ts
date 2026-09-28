@@ -1,24 +1,23 @@
 /**
- * KvNamespaceAdapter — wraps KvStore with the Workers KVNamespace interface.
+ * KvNamespaceAdapter — wraps KvStore with the Workers KVNamespace interface,
+ * while still implementing KvStore itself so it can back an OAuthStore.
  *
- * This lets the existing id/token-store.ts, id/oauth-state.ts, and
- * id/token-service.ts (which all take `kv: KVNamespace`) work unchanged
- * when running on Node, by passing an adapter instance instead.
- *
- * Only the subset of KVNamespace used by those files is implemented:
- *   get(key), put(key, value, {expirationTtl}), delete(key)
+ * Two call shapes hit the same underlying store through this class:
+ *   - id/token-store.ts, id/oauth-state.ts, id/token-service.ts, and
+ *     auth/oauth-handler.ts (CSRF tokens) all take `kv: KVNamespace` and use
+ *     get(key, {type:'json'}) / put(key, value, {expirationTtl}) / delete(key).
+ *   - src/node/main.ts builds `new OAuthStore(env.OAUTH_KV)` per MCP request
+ *     to look up the bearer token's props, and OAuthStore needs the plain
+ *     KvStore shape: getJson(key) / putJson(key, value, {ttlSeconds}).
+ * Without getJson/putJson here, that second path throws at runtime the
+ * moment a real MCP request comes in after OAuth completes.
  */
-import type { KvStore } from '../store/kv-store.js';
+import type { KvStore, KvPutOptions as KvStorePutOptions } from '../store/kv-store.js';
 
 type KvGetOptions = { type: 'text' } | { type: 'json' };
 type KvPutOptions = { expirationTtl?: number };
 
-/**
- * Minimal KVNamespace-shaped adapter backed by KvStore.
- *
- * Cast to `KVNamespace` at call sites (safe — only the used subset is needed).
- */
-export class KvNamespaceAdapter {
+export class KvNamespaceAdapter implements KvStore {
   constructor(private readonly store: KvStore) {}
 
   async get(key: string): Promise<string | null>;
@@ -37,5 +36,13 @@ export class KvNamespaceAdapter {
 
   async delete(key: string): Promise<void> {
     await this.store.delete(key);
+  }
+
+  async getJson(key: string): Promise<unknown | null> {
+    return this.store.getJson(key);
+  }
+
+  async putJson(key: string, value: unknown, options?: KvStorePutOptions): Promise<void> {
+    await this.store.putJson(key, value, options);
   }
 }
