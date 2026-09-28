@@ -15,7 +15,7 @@ import type { KvStore } from '../store/kv-store.js';
 import { KvNamespaceAdapter } from './kv-namespace-adapter.js';
 import { NodeOAuthProvider, createOAuthHelpers } from './oauth/provider.js';
 import { buildNodeEnvFromProcess, type NodeEnv } from './env.js';
-import { handleMcpRequest, handleIdMcpRequest } from './mcp-handler.js';
+import { handleMcpWebRequest, handleIdMcpWebRequest } from './mcp-handler.js';
 import {
   OAUTH_ROUTE_PATHS,
   SUPPORTED_OAUTH_ORIGINS,
@@ -134,9 +134,7 @@ async function handleSigningMcpRequest(request: Request, env: NodeEnv): Promise<
   const props = storedToken.props as import('../auth/types.js').AuthProps;
   configureStdioAuth(props);
 
-  return requestToNodeBridge(request, (req, res) =>
-    handleMcpRequest(req, res, props as unknown as Record<string, unknown>),
-  );
+  return handleMcpWebRequest(request);
 }
 
 async function handleIdMcpApiRequest(request: Request, env: NodeEnv): Promise<Response> {
@@ -156,83 +154,17 @@ async function handleIdMcpApiRequest(request: Request, env: NodeEnv): Promise<Re
   const idProps = storedToken.props as import('../id/types.js').IdAuthProps;
   configureStdioIdAuth(idProps);
 
-  return requestToNodeBridge(request, (req, res) =>
-    handleIdMcpRequest(req, res, () => createIdServer(env as unknown as Env)),
-  );
+  return handleIdMcpWebRequest(request, () => createIdServer(env as unknown as Env));
 }
 
-// ── Web ↔ Node bridging ───────────────────────────────────────────────────
-
-interface FakeResState {
-  statusCode: number;
-  headersSent: boolean;
-  headers: Record<string, string | string[]>;
-  chunks: Uint8Array[];
-  resolved: boolean;
-  resolve: (r: Response) => void;
-}
-
-function buildFakeHeaders(state: FakeResState): Headers {
-  const headers = new Headers();
-  for (const [k, v] of Object.entries(state.headers)) {
-    if (Array.isArray(v)) {
-      appendHeaderArray(headers, k, v);
-    } else {
-      headers.set(k, v);
-    }
-  }
-  return headers;
-}
+// ── Web ↔ Node bridging (used for every route except /mcp — that route uses
+// the SDK's Fetch-native WebStandardStreamableHTTPServerTransport instead,
+// see mcp-handler.ts) ───────────────────────────────────────────────────
 
 function appendHeaderArray(headers: Headers, key: string, values: string[]): void {
   for (const val of values) {
     headers.append(key, val);
   }
-}
-
-function buildFakeRes(state: FakeResState): ServerResponse {
-  return Object.assign(Object.create(http.ServerResponse.prototype), {
-    statusCode: state.statusCode,
-    headersSent: state.headersSent,
-    writeHead(code: number, hdrs?: Record<string, string | string[]>) {
-      state.statusCode = code;
-      this.statusCode = code;
-      if (hdrs) {
-        Object.assign(state.headers, hdrs);
-      }
-      state.headersSent = true;
-      this.headersSent = true;
-      return this;
-    },
-    setHeader(name: string, value: string | string[]) {
-      state.headers[name.toLowerCase()] = value;
-      return this;
-    },
-    getHeader(name: string) {
-      return state.headers[name.toLowerCase()];
-    },
-    write(chunk: Buffer | string) {
-      const buf = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
-      state.chunks.push(new Uint8Array(buf));
-      return true;
-    },
-    end(chunk?: Buffer | string) {
-      if (chunk) {
-        const buf = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
-        state.chunks.push(new Uint8Array(buf));
-      }
-      if (!state.resolved) {
-        state.resolved = true;
-        const body = mergeChunks(state.chunks);
-        state.resolve(new Response(body.length > 0 ? body : null, {
-          status: state.statusCode,
-          headers: buildFakeHeaders(state),
-        }));
-      }
-    },
-    flushHeaders() {},
-    socket: { remoteAddress: '127.0.0.1' },
-  }) as unknown as ServerResponse;
 }
 
 function mergeChunks(chunks: Uint8Array[]): Uint8Array {
@@ -244,103 +176,6 @@ function mergeChunks(chunks: Uint8Array[]): Uint8Array {
     offset += chunk.length;
   }
   return result;
-}
-
-async function readableStreamToBuffer(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
-  const reader = stream.getReader();
-  const chunks: Uint8Array[] = [];
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    chunks.push(value);
-  }
-  return mergeChunks(chunks);
-}
-
-/**
- * Converts a Fetch API Request to Node IncomingMessage + ServerResponse,
- * calls the Node handler, and converts the response back to a Fetch Response.
- */
-async function requestToNodeBridge(
-  request: Request,
-  handler: (req: IncomingMessage, res: ServerResponse) => Promise<void>,
-): Promise<Response> {
-  const url = new URL(request.url);
-  const bodyBuf = request.body ? await readableStreamToBuffer(request.body) : new Uint8Array(0);
-
-  const dataHandlers: Array<(chunk: Uint8Array) => void> = [];
-  const endHandlers: Array<() => void> = [];
-
-  const req = buildFakeReq(url, request, dataHandlers, endHandlers);
-
-  return new Promise((resolve, reject) => {
-    const state: FakeResState = {
-      statusCode: 200,
-      headersSent: false,
-      headers: {},
-      chunks: [],
-      resolved: false,
-      resolve,
-    };
-    const res = buildFakeRes(state);
-
-    handler(req, res)
-      .then(() => {
-        fireBodyEvents(dataHandlers, endHandlers, bodyBuf);
-        if (!state.resolved) {
-          state.resolved = true;
-          resolve(new Response(null, { status: 204 }));
-        }
-      })
-      .catch(reject);
-  });
-}
-
-function buildFakeReq(
-  url: URL,
-  request: Request,
-  dataHandlers: Array<(chunk: Uint8Array) => void>,
-  endHandlers: Array<() => void>,
-): IncomingMessage {
-  const req = Object.assign(Object.create(http.IncomingMessage.prototype), {
-    method: request.method,
-    url: `${url.pathname}${url.search}`,
-    headers: Object.fromEntries(request.headers.entries()),
-    socket: { remoteAddress: '127.0.0.1' },
-  }) as IncomingMessage;
-
-  const origOn = req.on.bind(req);
-  (req as unknown as Record<string, unknown>).on = (
-    event: string,
-    handler: (...args: unknown[]) => void,
-  ) => {
-    if (event === 'data') {
-      dataHandlers.push(handler as (chunk: Uint8Array) => void);
-      return req;
-    }
-    if (event === 'end') {
-      endHandlers.push(handler as () => void);
-      return req;
-    }
-    return origOn(event, handler);
-  };
-
-  return req;
-}
-
-function fireBodyEvents(
-  dataHandlers: Array<(chunk: Uint8Array) => void>,
-  endHandlers: Array<() => void>,
-  bodyBuf: Uint8Array,
-): void {
-  for (const h of dataHandlers) {
-    h(bodyBuf);
-  }
-  for (const h of endHandlers) {
-    h();
-  }
 }
 
 // ── Root audience check (mirrors src/index.ts:62-105) ─────────────────────
