@@ -17,6 +17,7 @@ import {
   formatUnexpectedToolError,
 } from '../../utils/tool-response.js';
 import { GetSignerInputSchema } from './schemas.js';
+import { recordToolCallTelemetry } from '../../telemetry/tool-call-recorder.js';
 
 export function registerGetSignerTool(server: McpServer): void {
   server.registerTool(
@@ -35,6 +36,7 @@ export function registerGetSignerTool(server: McpServer): void {
       },
     },
     async (args) => {
+      const startedAt = Date.now();
       try {
         const props = getAuthProps();
         if (!props) {
@@ -51,11 +53,18 @@ export function registerGetSignerTool(server: McpServer): void {
         const result = await client.getSigner(parsed.signer_token);
         log('signer_retrieved');
 
+        await recordToolCallTelemetry({ tool: "get_signer", resultClass: "ok", durationMs: Date.now() - startedAt, rawToken: props.zapSignApiToken });
+
+
         return formatToolSuccess(
           JSON.stringify(filterSigner(result, OWNER_READ_OPTIONS)),
         );
       } catch (error) {
         const errorId = logToolError('get_signer', error);
+        const authProps = getAuthProps();
+        if (authProps) {
+          await recordToolCallTelemetry({ tool: "get_signer", resultClass: "error", durationMs: Date.now() - startedAt, rawToken: authProps.zapSignApiToken });
+        }
         if (error instanceof ZodError) {
           return formatToolError(ValidationError.fromZodError(error).message);
         }

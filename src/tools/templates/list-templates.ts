@@ -17,6 +17,7 @@ import {
   formatUnexpectedToolError,
 } from '../../utils/tool-response.js';
 import { ListTemplatesInputSchema } from './schemas.js';
+import { recordToolCallTelemetry } from '../../telemetry/tool-call-recorder.js';
 
 export function registerListTemplatesTool(server: McpServer): void {
   server.registerTool(
@@ -35,6 +36,7 @@ export function registerListTemplatesTool(server: McpServer): void {
       },
     },
     async (args) => {
+      const startedAt = Date.now();
       try {
         const props = getAuthProps();
         if (!props) {
@@ -47,11 +49,18 @@ export function registerListTemplatesTool(server: McpServer): void {
         const result = await client.listTemplates({ page: parsed.page });
         log('templates_listed', { page: parsed.page });
 
+        await recordToolCallTelemetry({ tool: "list_templates", resultClass: "ok", durationMs: Date.now() - startedAt, rawToken: props.zapSignApiToken });
+
+
         return formatToolSuccess(
           JSON.stringify(filterTemplateList(result, OWNER_READ_OPTIONS)),
         );
       } catch (error) {
         const errorId = logToolError('list_templates', error);
+        const authProps = getAuthProps();
+        if (authProps) {
+          await recordToolCallTelemetry({ tool: "list_templates", resultClass: "error", durationMs: Date.now() - startedAt, rawToken: authProps.zapSignApiToken });
+        }
         if (error instanceof ZodError) {
           return formatToolError(ValidationError.fromZodError(error).message);
         }
