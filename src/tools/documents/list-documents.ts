@@ -17,6 +17,7 @@ import {
   formatToolSuccess,
   formatUnexpectedToolError,
 } from '../../utils/tool-response.js';
+import { recordToolCallTelemetry } from '../../telemetry/tool-call-recorder.js';
 import { ListDocumentsInputSchema } from './schemas.js';
 
 export function registerListDocumentsTool(server: McpServer): void {
@@ -36,6 +37,7 @@ export function registerListDocumentsTool(server: McpServer): void {
       },
     },
     async (args) => {
+      const startedAt = Date.now();
       try {
         const props = getAuthProps();
         if (!props) {
@@ -48,11 +50,16 @@ export function registerListDocumentsTool(server: McpServer): void {
         const result = await client.listDocuments(parsed as unknown as ListDocumentsParams);
         log('documents_listed', { page: parsed.page });
 
+        await recordToolCallTelemetry({ tool: 'list_documents', resultClass: 'ok', durationMs: Date.now() - startedAt, rawToken: props.zapSignApiToken });
         return formatToolSuccess(
           JSON.stringify(filterDocumentList(result, OWNER_READ_OPTIONS)),
         );
       } catch (error) {
         const errorId = logToolError('list_documents', error);
+        const authProps = getAuthProps();
+        if (authProps) {
+          await recordToolCallTelemetry({ tool: 'list_documents', resultClass: 'error', errorCode: error instanceof ZapSignMcpError ? error.code : error instanceof ZodError ? 'ValidationError' : 'unknown_error', durationMs: Date.now() - startedAt, rawToken: authProps.zapSignApiToken });
+        }
         if (error instanceof ZodError) {
           return formatToolError(ValidationError.fromZodError(error).message);
         }

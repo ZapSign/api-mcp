@@ -17,6 +17,7 @@ import {
   formatUnexpectedToolError,
 } from '../../utils/tool-response.js';
 import { GetTemplateInputSchema } from './schemas.js';
+import { recordToolCallTelemetry } from '../../telemetry/tool-call-recorder.js';
 
 export function registerGetTemplateTool(server: McpServer): void {
   server.registerTool(
@@ -35,6 +36,7 @@ export function registerGetTemplateTool(server: McpServer): void {
       },
     },
     async (args) => {
+      const startedAt = Date.now();
       try {
         const props = getAuthProps();
         if (!props) {
@@ -47,11 +49,18 @@ export function registerGetTemplateTool(server: McpServer): void {
         const result = await client.getTemplate(parsed.template_token);
         log('template_retrieved');
 
+        await recordToolCallTelemetry({ tool: "get_template", resultClass: "ok", durationMs: Date.now() - startedAt, rawToken: props.zapSignApiToken });
+
+
         return formatToolSuccess(
           JSON.stringify(filterTemplate(result, OWNER_READ_OPTIONS)),
         );
       } catch (error) {
         const errorId = logToolError('get_template', error);
+        const authProps = getAuthProps();
+        if (authProps) {
+          await recordToolCallTelemetry({ tool: "get_template", resultClass: "error", durationMs: Date.now() - startedAt, rawToken: authProps.zapSignApiToken });
+        }
         if (error instanceof ZodError) {
           return formatToolError(ValidationError.fromZodError(error).message);
         }
