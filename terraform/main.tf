@@ -251,18 +251,15 @@ resource "aws_iam_role_policy" "task" {
 # ---------------------------------------------------------------------------
 
 resource "aws_security_group" "alb" {
-  name        = "${local.name}-alb"
+  name = "${local.name}-alb"
+  # Kept as-is although only 443 is open: changing a security group
+  # description forces replacement, and this group is attached to the ALB.
   description = "Allow 80/443 inbound from internet to ALB."
   vpc_id      = data.aws_vpc.selected.id
 
-  ingress {
-    description = "HTTP (redirect to HTTPS)"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
+  # No port 80: MCP clients and OAuth flows are HTTPS-only, and an HTTP
+  # listener only exposed the `Server: awselb/2.0` banner and redirected to
+  # the raw *.elb.amazonaws.com hostname when probed by IP (ZF-641).
   ingress {
     description = "HTTPS"
     from_port   = 443
@@ -358,22 +355,8 @@ resource "aws_lb_target_group" "this" {
   tags = local.common_tags
 }
 
-# HTTP → HTTPS redirect.
-resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.this.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type = "redirect"
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-}
-
+# HTTPS only — there is intentionally no port 80 listener (see the ALB
+# security group above).
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.this.arn
   port              = 443
